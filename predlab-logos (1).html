@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PredLab — Opções de Logo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap');
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 14px;
+    font-family: 'DM Mono', monospace;
+    color: #555570;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto 60px;
+  }
+
+  .option {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 16px;
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    transition: border-color 0.2s;
+  }
+
+  .option:hover { border-color: #2a2a3e; }
+
+  .option-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #555570;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .logo-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+
+  /* Versão avatar (quadrado) */
+  .avatar-preview {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .avatar {
+    border-radius: 22%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .avatar.lg { width: 80px; height: 80px; }
+  .avatar.md { width: 48px; height: 48px; }
+  .avatar.sm { width: 32px; height: 32px; }
+
+  /* Versão horizontal (navbar) */
+  .horizontal-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #0a0a0f;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid #1e1e2e;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .option-desc {
+    font-size: 13px;
+    color: #8888aa;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  /* Divider */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: #1e1e2e;
+    margin: 8px 0;
+  }
+
+  /* ===================== LOGO 1 — Curva de Probabilidade ===================== */
+  .logo1-icon {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1030 100%);
+  }
+
+  /* ===================== LOGO 2 — Diamante / Alvo ===================== */
+  .logo2-icon {
+    background: linear-gradient(135deg, #0a0f1a 0%, #0f1a2e 100%);
+  }
+
+  /* ===================== LOGO 3 — Átomo / Orbital ===================== */
+  .logo3-icon {
+    background: linear-gradient(135deg, #0f0a1a 0%, #1a0f30 100%);
+  }
+
+  .wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .wordmark .pred { color: #e8e8f0; }
+  .wordmark .lab1 { color: #7c6af7; }
+  .wordmark .lab2 { color: #a78bfa; }
+
+  /* Sizes */
+  .wordmark.xl { font-size: 28px; }
+  .wordmark.lg { font-size: 20px; }
+  .wordmark.md { font-size: 14px; }
+  .wordmark.sm { font-size: 10px; }
+
+  /* Tagline */
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #555570;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Dark/Light preview toggle */
+  .preview-toggle {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 8px;
+  }
+
+  .on-dark {
+    background: #0a0a0f;
+    padding: 16px 24px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #1e1e2e;
+  }
+
+  .on-light {
+    background: #f4f4f8;
+    padding: 16px 24px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .on-light .pred { color: #0a0a0f; }
+  .on-light .lab1 { color: #5b48e8; }
+
+  .context-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: #555570;
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<h1>PredLab · Opções de Logo</h1>
+
+<div class="grid">
+
+  <!-- ==================== OPÇÃO 1 — Curva Sigma ==================== -->
+  <div class="option">
+    <div class="option-label">Opção A · Curva de Probabilidade</div>
+    
+    <div class="logo-preview">
+      <!-- Avatar sizes -->
+      <div class="avatar-preview">
+        <div class="avatar lg logo1-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <defs>
+              <linearGradient id="g1a" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#a78bfa"/>
+                <stop offset="100%" stop-color="#7c6af7"/>
+              </linearGradient>
+              <linearGradient id="g1b" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.1"/>
+              </linearGradient>
+            </defs>
+            <!-- Background shape -->
+            <rect width="80" height="80" fill="#0f0f1a"/>
+            <!-- Grid lines subtle -->
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#2a2a3e" stroke-width="0.5"/>
+            <line x1="10" y1="45" x2="70" y2="45" stroke="#2a2a3e" stroke-width="0.5"/>
+            <line x1="10" y1="30" x2="70" y2="30" stroke="#2a2a3e" stroke-width="0.5"/>
+            <!-- Bell curve fill -->
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60 Z" 
+                  fill="url(#g1b)"/>
+            <!-- Bell curve line -->
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60" 
+                  stroke="url(#g1a)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Peak dot -->
+            <circle cx="52" cy="18" r="3" fill="#a78bfa"/>
+            <circle cx="52" cy="18" r="5" fill="#a78bfa" opacity="0.2"/>
+            <!-- Axis -->
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#3d3580" stroke-width="1"/>
+          </svg>
+        </div>
+        <div class="avatar md logo1-icon">
+          <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0f0f1a"/>
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#2a2a3e" stroke-width="0.5"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60 Z" fill="#7c6af720"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60" stroke="#7c6af7" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <circle cx="52" cy="18" r="4" fill="#a78bfa"/>
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#3d3580" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="avatar sm logo1-icon">
+          <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0f0f1a"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60 Z" fill="#7c6af720"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60" stroke="#a78bfa" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="52" cy="18" r="5" fill="#a78bfa"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Horizontal versions -->
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+        <div class="on-dark">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#0f0f1a"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60 Z" fill="#7c6af720"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60" stroke="#a78bfa" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="52" cy="18" r="5" fill="#a78bfa"/>
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#3d3580" stroke-width="1.5"/>
+          </svg>
+          <span class="wordmark lg"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / dark</div>
+
+        <div class="on-light">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#ededf5"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60 Z" fill="#5b48e820"/>
+            <path d="M10 60 Q20 60 28 58 Q34 56 40 38 Q46 20 52 18 Q58 16 62 20 Q66 24 70 60" stroke="#5b48e8" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <circle cx="52" cy="18" r="5" fill="#5b48e8"/>
+            <line x1="10" y1="60" x2="70" y2="60" stroke="#5b48e840" stroke-width="1.5"/>
+          </svg>
+          <span class="wordmark lg on-light"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / light</div>
+      </div>
+    </div>
+
+    <div class="option-desc">
+      Curva de distribuição de probabilidade — o símbolo matemático central do produto. Simples, reconhecível, único.
+    </div>
+  </div>
+
+  <!-- ==================== OPÇÃO 2 — Alvo / Diamond ==================== -->
+  <div class="option">
+    <div class="option-label">Opção B · Alvo de Previsão</div>
+    
+    <div class="logo-preview">
+      <div class="avatar-preview">
+        <div class="avatar lg logo2-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <defs>
+              <linearGradient id="g2a" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#38bdf8"/>
+                <stop offset="100%" stop-color="#7c6af7"/>
+              </linearGradient>
+            </defs>
+            <rect width="80" height="80" fill="#0a0f1a"/>
+            <!-- Outer ring -->
+            <circle cx="40" cy="40" r="28" stroke="#1e3a5f" stroke-width="1" fill="none"/>
+            <!-- Middle ring -->
+            <circle cx="40" cy="40" r="18" stroke="#2a4a7f" stroke-width="1" fill="none"/>
+            <!-- Inner ring -->
+            <circle cx="40" cy="40" r="9" stroke="url(#g2a)" stroke-width="1.5" fill="#0f1a2e"/>
+            <!-- Cross lines -->
+            <line x1="40" y1="8" x2="40" y2="20" stroke="#2a4a7f" stroke-width="1"/>
+            <line x1="40" y1="60" x2="40" y2="72" stroke="#2a4a7f" stroke-width="1"/>
+            <line x1="8" y1="40" x2="20" y2="40" stroke="#2a4a7f" stroke-width="1"/>
+            <line x1="60" y1="40" x2="72" y2="40" stroke="#2a4a7f" stroke-width="1"/>
+            <!-- Center dot -->
+            <circle cx="40" cy="40" r="4" fill="url(#g2a)"/>
+            <!-- Prediction arrow -->
+            <path d="M58 22 L44 38" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="58" cy="22" r="3" fill="#38bdf8" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="avatar md logo2-icon">
+          <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0a0f1a"/>
+            <circle cx="40" cy="40" r="28" stroke="#1e3a5f" stroke-width="1.5" fill="none"/>
+            <circle cx="40" cy="40" r="18" stroke="#2a4a7f" stroke-width="1.5" fill="none"/>
+            <circle cx="40" cy="40" r="9" stroke="#7c6af7" stroke-width="2" fill="#0f1a2e"/>
+            <line x1="40" y1="8" x2="40" y2="20" stroke="#2a4a7f" stroke-width="1.5"/>
+            <line x1="40" y1="60" x2="40" y2="72" stroke="#2a4a7f" stroke-width="1.5"/>
+            <line x1="8" y1="40" x2="20" y2="40" stroke="#2a4a7f" stroke-width="1.5"/>
+            <line x1="60" y1="40" x2="72" y2="40" stroke="#2a4a7f" stroke-width="1.5"/>
+            <circle cx="40" cy="40" r="4" fill="#7c6af7"/>
+            <path d="M58 22 L44 38" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="58" cy="22" r="3.5" fill="#38bdf8" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="avatar sm logo2-icon">
+          <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0a0f1a"/>
+            <circle cx="40" cy="40" r="28" stroke="#1e3a5f" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="16" stroke="#2a4a7f" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="5" fill="#7c6af7"/>
+            <path d="M58 22 L46 36" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="58" cy="22" r="4" fill="#38bdf8"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+        <div class="on-dark">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#0a0f1a"/>
+            <circle cx="40" cy="40" r="26" stroke="#1e3a5f" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="16" stroke="#2a4a7f" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="5" fill="#7c6af7"/>
+            <path d="M57 23 L45 37" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="57" cy="23" r="4" fill="#38bdf8" opacity="0.8"/>
+          </svg>
+          <span class="wordmark lg"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / dark</div>
+
+        <div class="on-light">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#e8f0f8"/>
+            <circle cx="40" cy="40" r="26" stroke="#bdd4e8" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="16" stroke="#9ab8d4" stroke-width="2" fill="none"/>
+            <circle cx="40" cy="40" r="5" fill="#5b48e8"/>
+            <path d="M57 23 L45 37" stroke="#0284c7" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="57" cy="23" r="4" fill="#0284c7" opacity="0.8"/>
+          </svg>
+          <span class="wordmark lg on-light"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / light</div>
+      </div>
+    </div>
+
+    <div class="option-desc">
+      Alvo com seta de previsão — a metáfora visual de acertar em cheio. Transmite precisão, análise e foco.
+    </div>
+  </div>
+
+  <!-- ==================== OPÇÃO 3 — Hexágono + Dados ==================== -->
+  <div class="option">
+    <div class="option-label">Opção C · Hexágono Lab</div>
+    
+    <div class="logo-preview">
+      <div class="avatar-preview">
+        <div class="avatar lg logo3-icon">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <defs>
+              <linearGradient id="g3a" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#c084fc"/>
+                <stop offset="100%" stop-color="#7c6af7"/>
+              </linearGradient>
+              <linearGradient id="g3b" x1="0" y1="80" x2="80" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.15"/>
+                <stop offset="100%" stop-color="#c084fc" stop-opacity="0.05"/>
+              </linearGradient>
+            </defs>
+            <rect width="80" height="80" fill="#0f0a1a"/>
+            <!-- Hexagon -->
+            <path d="M40 12 L62 25 L62 55 L40 68 L18 55 L18 25 Z" 
+                  fill="url(#g3b)" stroke="url(#g3a)" stroke-width="2"/>
+            <!-- Inner hex -->
+            <path d="M40 24 L52 31 L52 49 L40 56 L28 49 L28 31 Z" 
+                  fill="none" stroke="#3d3580" stroke-width="1"/>
+            <!-- Data bars inside -->
+            <rect x="32" y="44" width="4" height="8" rx="1" fill="#7c6af7" opacity="0.6"/>
+            <rect x="38" y="38" width="4" height="14" rx="1" fill="#a78bfa" opacity="0.8"/>
+            <rect x="44" y="41" width="4" height="11" rx="1" fill="#7c6af7" opacity="0.6"/>
+            <!-- Top glow dot -->
+            <circle cx="40" cy="12" r="3" fill="#c084fc"/>
+            <circle cx="40" cy="12" r="6" fill="#c084fc" opacity="0.15"/>
+          </svg>
+        </div>
+        <div class="avatar md logo3-icon">
+          <svg width="48" height="48" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0f0a1a"/>
+            <path d="M40 12 L62 25 L62 55 L40 68 L18 55 L18 25 Z" fill="#7c6af715" stroke="#7c6af7" stroke-width="2.5"/>
+            <rect x="32" y="44" width="5" height="9" rx="1" fill="#7c6af7" opacity="0.7"/>
+            <rect x="38" y="37" width="5" height="16" rx="1" fill="#a78bfa"/>
+            <rect x="44" y="41" width="5" height="12" rx="1" fill="#7c6af7" opacity="0.7"/>
+            <circle cx="40" cy="12" r="4" fill="#c084fc"/>
+          </svg>
+        </div>
+        <div class="avatar sm logo3-icon">
+          <svg width="32" height="32" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" fill="#0f0a1a"/>
+            <path d="M40 12 L62 25 L62 55 L40 68 L18 55 L18 25 Z" fill="#7c6af715" stroke="#a78bfa" stroke-width="3"/>
+            <rect x="34" y="42" width="6" height="12" rx="1" fill="#a78bfa"/>
+            <rect x="40" y="36" width="6" height="18" rx="1" fill="#c084fc"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+        <div class="on-dark">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#0f0a1a"/>
+            <path d="M40 12 L62 25 L62 55 L40 68 L18 55 L18 25 Z" fill="#7c6af715" stroke="#a78bfa" stroke-width="2.5"/>
+            <rect x="33" y="43" width="5" height="10" rx="1" fill="#7c6af7" opacity="0.8"/>
+            <rect x="39" y="37" width="5" height="16" rx="1" fill="#c084fc"/>
+            <rect x="45" y="40" width="5" height="13" rx="1" fill="#7c6af7" opacity="0.8"/>
+            <circle cx="40" cy="12" r="3.5" fill="#c084fc"/>
+          </svg>
+          <span class="wordmark lg"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / dark</div>
+
+        <div class="on-light">
+          <svg width="28" height="28" viewBox="0 0 80 80" fill="none">
+            <rect width="80" height="80" rx="16" fill="#f0ebfa"/>
+            <path d="M40 12 L62 25 L62 55 L40 68 L18 55 L18 25 Z" fill="#5b48e815" stroke="#5b48e8" stroke-width="2.5"/>
+            <rect x="33" y="43" width="5" height="10" rx="1" fill="#5b48e8" opacity="0.7"/>
+            <rect x="39" y="37" width="5" height="16" rx="1" fill="#7c3aed"/>
+            <rect x="45" y="40" width="5" height="13" rx="1" fill="#5b48e8" opacity="0.7"/>
+            <circle cx="40" cy="12" r="3.5" fill="#7c3aed"/>
+          </svg>
+          <span class="wordmark lg on-light"><span class="pred">pred</span><span class="lab1">lab</span></span>
+        </div>
+        <div class="context-label">navbar / light</div>
+      </div>
+    </div>
+
+    <div class="option-desc">
+      Hexágono com barras de dados — estrutura de "lab" com análise dentro. Transmite ciência, dados e rigor analítico.
+    </div>
+  </div>
+
+</div>
+
+<!-- Wordmark standalone -->
+<div style="max-width:1100px;margin:0 auto 40px;">
+  <div style="background:#111118;border:1px solid #1e1e2e;border-radius:16px;padding:32px;text-align:center;">
+    <div style="font-family:'DM Mono',monospace;font-size:11px;color:#555570;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:24px;">Wordmark — todas as variações</div>
+    <div style="display:flex;flex-wrap:wrap;gap:32px;justify-content:center;align-items:center;">
+      <span class="wordmark xl"><span class="pred">pred</span><span class="lab1">lab</span></span>
+      <span class="wordmark xl" style="background:linear-gradient(135deg,#e8e8f0,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">predlab</span>
+      <span class="wordmark xl"><span class="pred">PRED</span><span class="lab1">LAB</span></span>
+      <span class="wordmark xl"><span class="pred">pred</span><span style="color:#34d399">lab</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- Nota -->
+<div style="text-align:center;font-family:'DM Mono',monospace;font-size:11px;color:#555570;max-width:600px;margin:0 auto;line-height:1.8;">
+  Todos os logos são SVG — escaláveis para qualquer tamanho sem perda de qualidade.<br>
+  Para exportar como PNG (avatar de redes sociais), abrir no browser, inspecionar o SVG e exportar com screenshot ou ferramenta de design.
+</div>
+
+</body>
+</html>

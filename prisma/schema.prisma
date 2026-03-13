@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  username      String?   @unique
+  bio           String?
+  isPublic      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Gamification
+  predictionCoins  Int       @default(500)
+  totalCoinsEarned Int       @default(0)
+  totalCoinsLost   Int       @default(0)
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastActivityAt   DateTime?
+  level            Int       @default(1)
+  xp               Int       @default(0)
+
+  // Location (for geo rankings)
+  city    String?
+  state   String?
+  country String? @default("BR")
+
+  accounts         Account[]
+  sessions         Session[]
+  predictions      Prediction[]
+  badges           UserBadge[]
+  coinTransactions CoinTransaction[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Prediction {
+  id          String      @id @default(cuid())
+  userId      String
+  title       String
+  description String?     @db.Text
+  probability Int
+  category    Category
+  expiresAt   DateTime
+  resolvedAt  DateTime?
+  resolution  Resolution?
+  isPublic    Boolean     @default(false)
+  shareToken  String?     @unique @default(cuid())
+  evidence    String?     @db.Text
+  tags        String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Resolution metadata
+  resolutionType ResolutionType?
+
+  // Coins allocated to this prediction
+  coinsAllocated Int?
+  coinsResult    Int?
+
+  // Market matching
+  polymarketSlug        String?
+  polymarketQuestion    String?
+  polymarketProbability Float?
+  polymarketUrl         String?
+  polymarketUpdatedAt   DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("predictions")
+}
+
+enum Category {
+  TECHNOLOGY
+  ECONOMY
+  MARKETS
+  STARTUPS
+  GEOPOLITICS
+  SCIENCE
+  SPORTS
+  CULTURE
+  OTHER
+}
+
+enum Resolution {
+  CORRECT
+  INCORRECT
+  PARTIAL
+  CANCELLED
+}
+
+enum ResolutionType {
+  MANUAL
+  AUTOMATIC
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeKey String
+  earnedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@map("user_badges")
+}
+
+model CoinTransaction {
+  id           String   @id @default(cuid())
+  userId       String
+  amount       Int
+  reason       String
+  predictionId String?
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("coin_transactions")
+}
+
+model RankingSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  rankType  String
+  period    String
+  score     Float
+  rank      Int
+  updatedAt DateTime @default(now())
+
+  @@unique([userId, rankType, period])
+  @@map("ranking_snapshots")
+}
