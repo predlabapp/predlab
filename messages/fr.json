@@ -14,8 +14,8 @@
     "back": "Retour au tableau de bord"
   },
   "Nav": {
-    "signIn": "Se connecter",
-    "signUp": "Créer un compte →",
+    "signIn": "Connexion",
+    "signUp": "S'inscrire →",
     "home": "Accueil",
     "stats": "Statistiques",
     "rankings": "Classements",
@@ -24,8 +24,8 @@
     "language": "Langue"
   },
   "Landing": {
-    "navSignIn": "Se connecter",
-    "navSignUp": "Créer un compte →",
+    "navSignIn": "Connexion",
+    "navSignUp": "S'inscrire →",
     "heroBadge": "En direct · {count} prédictions aujourd'hui",
     "heroBadgeLoading": "En direct · Chargement...",
     "heroHeadline1": "Tout le monde prédit.",

@@ -15,7 +15,7 @@
   },
   "Nav": {
     "signIn": "Entrar",
-    "signUp": "Criar conta →",
+    "signUp": "Registar →",
     "home": "Início",
     "stats": "Estatísticas",
     "rankings": "Rankings",
@@ -25,7 +25,7 @@
   },
   "Landing": {
     "navSignIn": "Entrar",
-    "navSignUp": "Criar conta →",
+    "navSignUp": "Registar →",
     "heroBadge": "Ao vivo · {count} previsões hoje",
     "heroBadgeLoading": "Ao vivo · A carregar...",
     "heroHeadline1": "Toda a gente palpita.",

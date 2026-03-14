@@ -14,8 +14,8 @@
     "back": "Back to dashboard"
   },
   "Nav": {
-    "signIn": "Sign in",
-    "signUp": "Create account →",
+    "signIn": "Log In",
+    "signUp": "Sign Up →",
     "home": "Home",
     "stats": "Statistics",
     "rankings": "Rankings",
@@ -24,8 +24,8 @@
     "language": "Language"
   },
   "Landing": {
-    "navSignIn": "Sign in",
-    "navSignUp": "Create account →",
+    "navSignIn": "Log In",
+    "navSignUp": "Sign Up →",
     "heroBadge": "Live · {count} predictions today",
     "heroBadgeLoading": "Live · Loading...",
     "heroHeadline1": "Everyone guesses.",
