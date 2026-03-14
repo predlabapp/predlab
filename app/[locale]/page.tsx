@@ -23,24 +23,26 @@ export default async function HomePage({
     <main className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)]">
 
       {/* Navbar */}
-      <nav
-        className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto"
+      <div
+        className="sticky top-0 z-40 w-full border-b border-[var(--border)]"
         style={{ backdropFilter: "blur(12px)", background: "rgba(10,10,15,0.85)" }}
       >
-        <Link href="/" className="font-display text-lg font-bold gradient-text flex items-center gap-2">
-          🔮 PredLab
-        </Link>
-        <div className="flex items-center gap-3">
-          <HowItWorksModal />
-          <LocaleSwitcher />
-          <Link href="/auth/signin" className="btn-ghost text-sm px-3 py-1.5">
-            {t("navSignIn")}
+        <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+          <Link href="/" className="font-display text-lg font-bold gradient-text flex items-center gap-2">
+            🔮 PredLab
           </Link>
-          <Link href="/auth/signup" className="btn-primary text-sm px-3 py-1.5">
-            {t("navSignUp")}
-          </Link>
-        </div>
-      </nav>
+          <div className="flex items-center gap-3">
+            <HowItWorksModal />
+            <LocaleSwitcher />
+            <Link href="/auth/signin" className="btn-ghost text-sm px-3 py-1.5">
+              {t("navSignIn")}
+            </Link>
+            <Link href="/auth/signup" className="btn-primary text-sm px-3 py-1.5">
+              {t("navSignUp")}
+            </Link>
+          </div>
+        </nav>
+      </div>
 
       {/* Hero with gradient background */}
       <div
