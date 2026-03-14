@@ -1,19 +1,25 @@
+"use client"
+
+import { useTranslations } from "next-intl"
+
 export function Differentials() {
+  const t = useTranslations("Landing")
+
   const items = [
     {
       icon: "🔒",
-      title: "Imutável",
-      desc: "Sem edições. Sem exclusões. A reputação é real.",
+      title: t("diff1Title"),
+      desc: t("diff1Desc"),
     },
     {
       icon: "⚡",
-      title: "Verificado",
-      desc: "Polymarket resolve automaticamente. Sem batota possível.",
+      title: t("diff2Title"),
+      desc: t("diff2Desc"),
     },
     {
       icon: "🏆",
-      title: "Rankings",
-      desc: "Compete por categoria, cidade e país. Score verificado apenas.",
+      title: t("diff3Title"),
+      desc: t("diff3Desc"),
     },
   ]
 

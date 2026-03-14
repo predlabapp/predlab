@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { TrendingUp, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import type { MarketResult } from "@/app/api/markets/route"
 import { CATEGORIES } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 interface Props {
   onMarketSelect: (market: MarketResult) => void
@@ -26,6 +27,8 @@ export function HotMarketsBar({ onMarketSelect }: Props) {
   const [markets, setMarkets] = useState<MarketResult[]>([])
   const [loading, setLoading] = useState(true)
   const [collapsed, setCollapsed] = useState(false)
+  const t = useTranslations("HotMarketsBar")
+  const tCat = useTranslations("Categories")
 
   useEffect(() => {
     fetch("/api/markets?limit=10")
@@ -47,7 +50,7 @@ export function HotMarketsBar({ onMarketSelect }: Props) {
         <div className="flex items-center gap-2">
           <TrendingUp size={14} className="text-[var(--accent)]" />
           <span className="text-xs font-mono text-[var(--text-muted)] uppercase tracking-wider">
-            Mercados em alta · Polymarket
+            {t("title")}
           </span>
           {!loading && (
             <span className="text-xs text-[var(--text-muted)]">
@@ -66,11 +69,11 @@ export function HotMarketsBar({ onMarketSelect }: Props) {
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-6 text-[var(--text-muted)]">
               <Loader2 size={14} className="animate-spin" />
-              <span className="text-xs">A carregar mercados...</span>
+              <span className="text-xs">{t("loading")}</span>
             </div>
           ) : markets.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)] text-center py-6">
-              Não foi possível carregar mercados.
+              {t("noMarkets")}
             </p>
           ) : (
             /* Horizontal scroll */
@@ -88,7 +91,7 @@ export function HotMarketsBar({ onMarketSelect }: Props) {
                     {/* Category + volume */}
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-[var(--text-muted)]">
-                        {cat.emoji} {cat.label}
+                        {cat.emoji} {tCat(market.suggestedCategory as any)}
                       </span>
                       <span className="text-xs text-[var(--text-muted)] font-mono">
                         {formatVolume(market.volume)}
@@ -118,7 +121,7 @@ export function HotMarketsBar({ onMarketSelect }: Props) {
                       onClick={() => onMarketSelect(market)}
                       className="w-full text-xs py-2 rounded-md border border-[var(--accent-dim)] text-[var(--accent)] hover:bg-[var(--accent-glow)] transition-colors touch-manipulation"
                     >
-                      Prever
+                      {t("predict")}
                     </button>
                   </div>
                 )

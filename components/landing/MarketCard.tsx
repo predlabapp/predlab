@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { Lock } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface HotMarket {
   slug: string
@@ -36,6 +37,7 @@ function formatDate(dateStr: string): string {
 
 export function MarketCard({ market, onPredict }: Props) {
   const [pulse, setPulse] = useState(false)
+  const t = useTranslations("Landing")
 
   function handleSliderInteraction() {
     setPulse(true)
@@ -43,9 +45,9 @@ export function MarketCard({ market, onPredict }: Props) {
   }
 
   const badge = market.isHot
-    ? { label: "🔥 Alto volume", color: "var(--orange)" }
+    ? { label: t("marketHighVolume"), color: "var(--orange)" }
     : market.isTrending
-    ? { label: "⚡ Em alta", color: "var(--yellow)" }
+    ? { label: t("marketTrending"), color: "var(--yellow)" }
     : null
 
   return (
@@ -78,7 +80,7 @@ export function MarketCard({ market, onPredict }: Props) {
       {/* Probability bar */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-xs text-[var(--text-muted)]">Probabilidade</span>
+          <span className="text-xs text-[var(--text-muted)]">{t("marketProbability")}</span>
           <span className="font-mono text-sm font-bold text-[var(--accent)]">
             {market.probability}%
           </span>
@@ -96,8 +98,8 @@ export function MarketCard({ market, onPredict }: Props) {
 
       {/* Meta */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 text-xs text-[var(--text-muted)] font-mono">
-        <span>Vol: {formatVolume(market.volume)}</span>
-        <span>Expira: {formatDate(market.expiresAt)}</span>
+        <span>{t("marketVol")} {formatVolume(market.volume)}</span>
+        <span>{t("marketExpires")} {formatDate(market.expiresAt)}</span>
       </div>
 
       {/* Locked slider */}
@@ -126,7 +128,7 @@ export function MarketCard({ market, onPredict }: Props) {
         onClick={() => onPredict(market)}
         className="btn-primary w-full text-sm py-2.5 touch-manipulation"
       >
-        Prever neste mercado
+        {t("marketPredict")}
       </button>
     </div>
   )

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Prediction, Resolution } from "@/types"
 import {
   CATEGORIES,
@@ -9,7 +8,6 @@ import {
   formatDate,
   formatRelative,
   getProbabilityColor,
-  getProbabilityLabel,
   isExpired,
 } from "@/lib/utils"
 import {
@@ -27,52 +25,17 @@ import {
   Pencil,
   Share2,
 } from "lucide-react"
-import Link from "next/link"
+import { Link } from "@/navigation"
+import { useRouter } from "@/navigation"
 import { useToast } from "@/components/ui/Toast"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { EditPredictionModal } from "@/components/predictions/EditPredictionModal"
 import { ShareModal } from "@/components/predictions/ShareModal"
+import { useTranslations, useLocale } from "next-intl"
 
 interface Props {
   prediction: Prediction
 }
-
-const RESOLUTION_OPTIONS: {
-  value: Resolution
-  label: string
-  icon: React.ElementType
-  color: string
-  bg: string
-}[] = [
-  {
-    value: "CORRECT",
-    label: "Correto",
-    icon: CheckCircle2,
-    color: "var(--green)",
-    bg: "rgba(52,211,153,0.1)",
-  },
-  {
-    value: "INCORRECT",
-    label: "Incorreto",
-    icon: XCircle,
-    color: "var(--red)",
-    bg: "rgba(248,113,113,0.1)",
-  },
-  {
-    value: "PARTIAL",
-    label: "Parcialmente correto",
-    icon: MinusCircle,
-    color: "var(--yellow)",
-    bg: "rgba(251,191,36,0.1)",
-  },
-  {
-    value: "CANCELLED",
-    label: "Cancelado",
-    icon: Ban,
-    color: "var(--text-muted)",
-    bg: "rgba(85,85,112,0.15)",
-  },
-]
 
 const DELETE_WINDOW_MS = 10 * 60 * 1000
 
@@ -101,6 +64,11 @@ function useDeleteCountdown(createdAt: Date | string) {
 export function PredictionDetail({ prediction: initial }: Props) {
   const router = useRouter()
   const { toast } = useToast()
+  const t = useTranslations("PredictionDetail")
+  const tCat = useTranslations("Categories")
+  const tRes = useTranslations("Resolution")
+  const tProb = useTranslations("ProbabilityLabel")
+  const locale = useLocale()
   const [prediction, setPrediction] = useState<Prediction>(initial)
   const [resolving, setResolving] = useState(false)
   const [showResolvePanel, setShowResolvePanel] = useState(false)
@@ -114,6 +82,43 @@ export function PredictionDetail({ prediction: initial }: Props) {
   const probColor = getProbabilityColor(prediction.probability)
   const expired = isExpired(prediction.expiresAt) && !prediction.resolution
 
+  const RESOLUTION_OPTIONS: {
+    value: Resolution
+    label: string
+    icon: React.ElementType
+    color: string
+    bg: string
+  }[] = [
+    {
+      value: "CORRECT",
+      label: t("resolutionCorrect"),
+      icon: CheckCircle2,
+      color: "var(--green)",
+      bg: "rgba(52,211,153,0.1)",
+    },
+    {
+      value: "INCORRECT",
+      label: t("resolutionIncorrect"),
+      icon: XCircle,
+      color: "var(--red)",
+      bg: "rgba(248,113,113,0.1)",
+    },
+    {
+      value: "PARTIAL",
+      label: t("resolutionPartial"),
+      icon: MinusCircle,
+      color: "var(--yellow)",
+      bg: "rgba(251,191,36,0.1)",
+    },
+    {
+      value: "CANCELLED",
+      label: t("resolutionCancelled"),
+      icon: Ban,
+      color: "var(--text-muted)",
+      bg: "rgba(85,85,112,0.15)",
+    },
+  ]
+
   async function handleResolve(resolution: Resolution) {
     setResolving(true)
     const res = await fetch(`/api/predictions/${prediction.id}`, {
@@ -125,9 +130,10 @@ export function PredictionDetail({ prediction: initial }: Props) {
       const updated = await res.json()
       setPrediction(updated)
       setShowResolvePanel(false)
-      toast(`Previsão marcada como ${RESOLUTION_CONFIG[resolution].label.toLowerCase()}.`, "success")
+      const resLabel = RESOLUTION_OPTIONS.find((o) => o.value === resolution)?.label ?? resolution
+      toast(t("resolutionSuccess", { label: resLabel.toLowerCase() }), "success")
     } else {
-      toast("Erro ao resolver previsão.", "error")
+      toast(t("resolutionError"), "error")
     }
     setResolving(false)
   }
@@ -138,10 +144,10 @@ export function PredictionDetail({ prediction: initial }: Props) {
       method: "DELETE",
     })
     if (res.ok) {
-      toast("Previsão apagada.", "success")
+      toast(t("deleted"), "success")
       router.push("/dashboard")
     } else {
-      toast("Erro ao apagar previsão.", "error")
+      toast(t("deleteError"), "error")
       setDeleting(false)
     }
   }
@@ -155,7 +161,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
           className="inline-flex items-center gap-2 text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-6"
         >
           <ArrowLeft size={14} />
-          Voltar ao dashboard
+          {t("backToDashboard")}
         </Link>
 
         {/* Main card */}
@@ -163,7 +169,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap mb-4">
             <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text-secondary)]">
-              {cat.emoji} {cat.label}
+              {cat.emoji} {tCat(prediction.category as any)}
             </span>
             {prediction.resolution ? (
               <span
@@ -173,16 +179,16 @@ export function PredictionDetail({ prediction: initial }: Props) {
                   background: RESOLUTION_CONFIG[prediction.resolution].bg,
                 }}
               >
-                {RESOLUTION_CONFIG[prediction.resolution].label}
-                {prediction.resolutionType === "AUTOMATIC" ? " · verificado automaticamente ⚡" : " · resolvido pelo autor"}
+                {tRes(prediction.resolution as any)}
+                {prediction.resolutionType === "AUTOMATIC" ? t("autoVerified") : t("manualResolved")}
               </span>
             ) : expired ? (
               <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(251,191,36,0.1)] text-[var(--yellow)]">
-                Expirada
+                {t("expired")}
               </span>
             ) : (
               <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(124,106,247,0.1)] text-[var(--accent)]">
-                Pendente
+                {t("pending")}
               </span>
             )}
           </div>
@@ -201,7 +207,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
               >
                 {prediction.probability}%
               </p>
-              <p className="text-xs text-[var(--text-muted)] mt-1">probabilidade</p>
+              <p className="text-xs text-[var(--text-muted)] mt-1">{t("probability")}</p>
             </div>
             <div className="flex-1">
               <div className="h-2 rounded-full bg-[var(--border-bright)] overflow-hidden">
@@ -214,7 +220,11 @@ export function PredictionDetail({ prediction: initial }: Props) {
                 />
               </div>
               <p className="text-xs text-[var(--text-secondary)] mt-1.5">
-                {getProbabilityLabel(prediction.probability)}
+                {prediction.probability >= 80 ? tProb("veryLikely")
+                : prediction.probability >= 60 ? tProb("likely")
+                : prediction.probability >= 40 ? tProb("uncertain")
+                : prediction.probability >= 20 ? tProb("unlikely")
+                : tProb("veryUnlikely")}
               </p>
             </div>
           </div>
@@ -225,7 +235,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
               <div className="flex items-center gap-2 mb-2">
                 <BookOpen size={13} className="text-[var(--text-muted)]" />
                 <h3 className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
-                  Argumento
+                  {t("argumentTitle")}
                 </h3>
               </div>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
@@ -240,7 +250,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
               <div className="flex items-center gap-2 mb-2">
                 <Link2 size={13} className="text-[var(--text-muted)]" />
                 <h3 className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
-                  Evidências
+                  {t("evidenceTitle")}
                 </h3>
               </div>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">
@@ -255,7 +265,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
               <div className="flex items-center gap-2 mb-2">
                 <Tag size={13} className="text-[var(--text-muted)]" />
                 <h3 className="text-xs text-[var(--text-muted)] uppercase tracking-wider">
-                  Tags
+                  {t("tagsTitle")}
                 </h3>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -275,16 +285,16 @@ export function PredictionDetail({ prediction: initial }: Props) {
           <div className="flex flex-wrap gap-4 pt-4 border-t border-[var(--border)]">
             <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
               <Clock size={12} />
-              <span>Criada {formatRelative(prediction.createdAt)}</span>
+              <span>{t("created", { relative: formatRelative(prediction.createdAt, locale) })}</span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
               <Calendar size={12} />
-              <span>Expira em {formatDate(prediction.expiresAt)}</span>
+              <span>{t("expires", { date: formatDate(prediction.expiresAt, locale) })}</span>
             </div>
             {prediction.resolvedAt && (
               <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
                 <CheckCircle2 size={12} />
-                <span>Resolvida em {formatDate(prediction.resolvedAt)}</span>
+                <span>{t("resolvedOn", { date: formatDate(prediction.resolvedAt, locale) })}</span>
               </div>
             )}
           </div>
@@ -298,7 +308,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
               className="btn-primary flex items-center gap-2"
             >
               <CheckCircle2 size={15} />
-              Resolver
+              {t("resolve")}
             </button>
           )}
 
@@ -307,7 +317,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
             className="btn-ghost flex items-center gap-2"
           >
             <Pencil size={15} />
-            Editar
+            {t("edit")}
           </button>
 
           <button
@@ -315,7 +325,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
             className="btn-ghost flex items-center gap-2"
           >
             <Share2 size={15} />
-            Partilhar
+            {t("share")}
           </button>
 
           {canDelete && (
@@ -323,10 +333,10 @@ export function PredictionDetail({ prediction: initial }: Props) {
               onClick={() => setShowDeleteConfirm(true)}
               disabled={deleting}
               className="btn-danger flex items-center gap-2 ml-auto"
-              title={`Pode apagar ainda por ${countdownLabel}`}
+              title={`${t("deleteWithTime", { time: countdownLabel ?? "" })}`}
             >
               <Trash2 size={15} />
-              {deleting ? "A apagar..." : `Apagar · ${countdownLabel}`}
+              {deleting ? t("deleting") : t("deleteWithTime", { time: countdownLabel ?? "" })}
             </button>
           )}
         </div>
@@ -335,7 +345,7 @@ export function PredictionDetail({ prediction: initial }: Props) {
         {showResolvePanel && (
           <div className="mt-4 card animate-fade-in">
             <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
-              Como correu esta previsão?
+              {t("resolveTitle")}
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {RESOLUTION_OPTIONS.map((opt) => (
@@ -368,9 +378,9 @@ export function PredictionDetail({ prediction: initial }: Props) {
 
       <ConfirmDialog
         open={showDeleteConfirm}
-        title="Apagar previsão"
-        description="Tens a certeza? Esta ação não pode ser revertida."
-        confirmLabel="Apagar"
+        title={t("confirmDeleteTitle")}
+        description={t("confirmDeleteDescription")}
+        confirmLabel={t("deleteLabel")}
         danger
         onConfirm={() => {
           setShowDeleteConfirm(false)

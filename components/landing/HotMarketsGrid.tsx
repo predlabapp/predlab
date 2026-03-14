@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { MarketCard } from "./MarketCard"
 import { ConversionModal } from "./ConversionModal"
+import { useTranslations } from "next-intl"
 
 interface HotMarket {
   slug: string
@@ -17,21 +18,23 @@ interface HotMarket {
   isTrending: boolean
 }
 
-const TABS = [
-  { id: "TRENDING", label: "Trending", emoji: "🔥" },
-  { id: "POLITICS", label: "Política", emoji: "🗳️" },
-  { id: "CRYPTO", label: "Crypto", emoji: "₿" },
-  { id: "GEOPOLITICS", label: "Geopolítica", emoji: "🌍" },
-  { id: "SPORTS", label: "Esportes", emoji: "⚽" },
-  { id: "ECONOMY", label: "Economia", emoji: "📈" },
-  { id: "TECH", label: "Tech", emoji: "💻" },
-]
-
 interface Props {
   initialMarkets?: HotMarket[]
 }
 
 export function HotMarketsGrid({ initialMarkets = [] }: Props) {
+  const t = useTranslations("Landing")
+
+  const TABS = [
+    { id: "TRENDING", label: t("tabTrending"), emoji: "🔥" },
+    { id: "POLITICS", label: t("tabPolitics"), emoji: "🗳️" },
+    { id: "CRYPTO", label: t("tabCrypto"), emoji: "₿" },
+    { id: "GEOPOLITICS", label: t("tabGeopolitics"), emoji: "🌍" },
+    { id: "SPORTS", label: t("tabSports"), emoji: "⚽" },
+    { id: "ECONOMY", label: t("tabEconomy"), emoji: "📈" },
+    { id: "TECH", label: t("tabTech"), emoji: "💻" },
+  ]
+
   const [activeTab, setActiveTab] = useState("TRENDING")
   const [markets, setMarkets] = useState<HotMarket[]>(initialMarkets)
   const [loading, setLoading] = useState(false)
@@ -60,7 +63,7 @@ export function HotMarketsGrid({ initialMarkets = [] }: Props) {
       {/* Section header */}
       <div className="mb-8">
         <h2 className="font-display text-2xl font-bold text-[var(--text-primary)] mb-1">
-          🔥 Mercados em Alta
+          {t("hotMarketsTitle")}
         </h2>
         <div
           className="w-full h-px mb-5"
@@ -100,7 +103,7 @@ export function HotMarketsGrid({ initialMarkets = [] }: Props) {
         </div>
       ) : markets.length === 0 ? (
         <div className="text-center py-16 text-[var(--text-muted)] text-sm">
-          Sem mercados disponíveis nesta categoria agora.
+          {t("hotMarketsNoMarkets")}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -7,6 +7,7 @@ import { Category } from "@prisma/client"
 import { Prediction } from "@/types"
 import { useToast } from "@/components/ui/Toast"
 import type { MarketResult } from "@/app/api/markets/route"
+import { useTranslations } from "next-intl"
 
 interface Props {
   onClose: () => void
@@ -16,6 +17,8 @@ interface Props {
 
 export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
   const { toast } = useToast()
+  const t = useTranslations("CreatePredictionModal")
+  const tCat = useTranslations("Categories")
 
   // When linked to a market, title and date are locked
   const [title, setTitle] = useState(market?.question ?? "")
@@ -45,7 +48,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!expiresAt) {
-      setError("Escolhe uma data de expiração.")
+      setError(t("noExpiresError"))
       return
     }
     setLoading(true)
@@ -58,7 +61,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
       category,
       expiresAt: new Date(expiresAt).toISOString(),
       evidence: evidence || undefined,
-      tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+      tags: tags ? tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [],
       isPublic,
     }
 
@@ -78,14 +81,22 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
 
     if (!res.ok) {
       const data = await res.json()
-      setError(data.error ?? "Erro ao criar previsão.")
+      setError(data.error ?? t("createError"))
       setLoading(false)
       return
     }
 
     const prediction = await res.json()
-    toast("Previsão criada com sucesso!", "success")
+    toast(t("created"), "success")
     onCreated(prediction)
+  }
+
+  function getDivergenceLabel(): string {
+    if (divergence === null) return ""
+    if (divergence < 10) return t("agreesWithMarket")
+    if (divergence < 25) return t("moderateDivergence", { diff: divergence })
+    if (divergence < 40) return t("boldBet", { diff: divergence })
+    return t("againstMarket", { diff: divergence })
   }
 
   return (
@@ -94,10 +105,10 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
           <div>
-            <h2 className="font-display text-lg font-semibold">Nova Previsão</h2>
+            <h2 className="font-display text-lg font-semibold">{t("title")}</h2>
             {isMarketLinked && (
               <p className="text-xs text-[var(--accent)] mt-0.5">
-                📡 Linkada ao Polymarket
+                {t("linkedToPolymarket")}
               </p>
             )}
           </div>
@@ -119,7 +130,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
             >
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs font-mono text-[var(--accent)]">
-                  Polymarket · {CATEGORIES[market.suggestedCategory].emoji} {CATEGORIES[market.suggestedCategory].label}
+                  Polymarket · {CATEGORIES[market.suggestedCategory].emoji} {tCat(market.suggestedCategory as any)}
                 </span>
                 <a
                   href={market.url}
@@ -134,20 +145,14 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
                 {market.question}
               </p>
               <div className="flex items-center gap-2 text-xs font-mono flex-wrap">
-                <span className="text-[var(--text-muted)]">Mercado:</span>
+                <span className="text-[var(--text-muted)]">{t("marketLabel")}</span>
                 <span style={{ color: "var(--accent)" }}>{market.probability}%</span>
                 <span className="text-[var(--text-muted)]">·</span>
-                <span className="text-[var(--text-muted)]">Tu:</span>
+                <span className="text-[var(--text-muted)]">{t("youLabel")}</span>
                 <span style={{ color: probColor }}>{probability}%</span>
                 {divergence !== null && (
                   <span style={{ color: divergence >= 40 ? "var(--red)" : divergence >= 25 ? "var(--orange)" : divergence >= 10 ? "var(--yellow)" : "var(--text-muted)" }}>
-                    {divergence < 10
-                      ? "· Concordas com o mercado"
-                      : divergence < 25
-                      ? `· ⚡ Divergência moderada (${divergence}%)`
-                      : divergence < 40
-                      ? `· 🔥 Aposta ousada (${divergence}%)`
-                      : `· 💥 Contra o mercado (${divergence}%)`}
+                    {getDivergenceLabel()}
                   </span>
                 )}
               </div>
@@ -157,7 +162,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
           {/* Title — locked if market-linked */}
           <div>
             <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-1">
-              Previsão <span className="text-[var(--red)]">*</span>
+              {t("predictionLabel")} <span className="text-[var(--red)]">*</span>
               {isMarketLinked && <Lock size={10} className="text-[var(--text-muted)]" />}
             </label>
             {isMarketLinked ? (
@@ -169,7 +174,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="input-base resize-none h-20"
-                placeholder="Ex: A OpenAI vai lançar GPT-5 antes de Julho de 2025"
+                placeholder={t("predictionPlaceholder")}
                 required
               />
             )}
@@ -178,7 +183,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
           {/* Probability */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs text-[var(--text-muted)]">A tua probabilidade</label>
+              <label className="text-xs text-[var(--text-muted)]">{t("yourProbability")}</label>
               <span className="font-mono text-lg font-bold" style={{ color: probColor }}>
                 {probability}%
               </span>
@@ -193,8 +198,8 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
               style={{ WebkitTapHighlightColor: "transparent" }}
             />
             <div className="flex justify-between text-xs text-[var(--text-muted)] mt-1">
-              <span>Muito improvável</span>
-              <span>Muito provável</span>
+              <span>{t("veryUnlikely")}</span>
+              <span>{t("veryLikely")}</span>
             </div>
           </div>
 
@@ -202,7 +207,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-1">
-                Categoria <span className="text-[var(--red)]">*</span>
+                {t("categoryLabel")} <span className="text-[var(--red)]">*</span>
               </label>
               <select
                 value={category}
@@ -211,14 +216,14 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
               >
                 {Object.entries(CATEGORIES).map(([key, val]) => (
                   <option key={key} value={key}>
-                    {val.emoji} {val.label}
+                    {val.emoji} {tCat(key as any)}
                   </option>
                 ))}
               </select>
             </div>
             <div>
               <label className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-1">
-                Expira em <span className="text-[var(--red)]">*</span>
+                {t("expiresLabel")} <span className="text-[var(--red)]">*</span>
                 {isMarketLinked && market?.endDate && <Lock size={10} className="text-[var(--text-muted)]" />}
               </label>
               <input
@@ -235,44 +240,40 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
           {/* Description */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Argumento / Raciocínio
+              {t("argumentLabel")}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input-base resize-none h-20"
-              placeholder={
-                isMarketLinked
-                  ? "Porque achas que vai acontecer? O que vês que o mercado não vê?"
-                  : "Porque acreditas nisto?"
-              }
+              placeholder={isMarketLinked ? t("argumentPlaceholderMarket") : t("argumentPlaceholder")}
             />
           </div>
 
           {/* Evidence */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Evidências / Fontes
+              {t("evidenceLabel")}
             </label>
             <textarea
               value={evidence}
               onChange={(e) => setEvidence(e.target.value)}
               className="input-base resize-none h-16"
-              placeholder="Links, dados, fontes..."
+              placeholder={t("evidencePlaceholder")}
             />
           </div>
 
           {/* Tags */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Tags <span className="text-[var(--text-muted)]">(separadas por vírgula)</span>
+              {t("tagsLabel")} <span className="text-[var(--text-muted)]">{t("tagsHint")}</span>
             </label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               className="input-base"
-              placeholder="ia, openai, llm"
+              placeholder={t("tagsPlaceholder")}
             />
           </div>
 
@@ -291,7 +292,7 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
                 }`}
               />
             </button>
-            <span className="text-sm text-[var(--text-secondary)]">Tornar pública</span>
+            <span className="text-sm text-[var(--text-secondary)]">{t("makePublic")}</span>
           </div>
 
           {error && (
@@ -302,10 +303,10 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
 
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="btn-ghost flex-1">
-              Cancelar
+              {t("cancel")}
             </button>
             <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? "A criar..." : "Criar previsão"}
+              {loading ? t("creating") : t("create")}
             </button>
           </div>
         </form>

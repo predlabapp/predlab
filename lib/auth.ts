@@ -10,6 +10,7 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
+    // next-intl middleware will prepend the locale prefix automatically
   },
   providers: [
     GoogleProvider({

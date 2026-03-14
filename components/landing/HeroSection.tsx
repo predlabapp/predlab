@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
+import { Link } from "@/navigation"
+import { useTranslations } from "next-intl"
 
 interface PublicStats {
   totalPredictions: number
@@ -12,6 +13,7 @@ interface PublicStats {
 
 export function HeroSection() {
   const [stats, setStats] = useState<PublicStats | null>(null)
+  const t = useTranslations("Landing")
 
   useEffect(() => {
     fetch("/api/stats/public")
@@ -42,10 +44,9 @@ export function HeroSection() {
               style={{ background: "var(--accent)" }}
             />
           </span>
-          Ao vivo ·{" "}
           {stats
-            ? `${stats.predictionsToday} previsões hoje`
-            : "A carregar..."}
+            ? t("heroBadge", { count: stats.predictionsToday })
+            : t("heroBadgeLoading")}
         </div>
       </div>
 
@@ -54,16 +55,16 @@ export function HeroSection() {
         className="font-display font-bold leading-tight mb-5 animate-fade-in"
         style={{ fontSize: "clamp(2.25rem, 6vw, 4.5rem)" }}
       >
-        Toda a gente palpita.
+        {t("heroHeadline1")}
         <br />
-        <span className="gradient-text">Poucos têm coragem de registar.</span>
+        <span className="gradient-text">{t("heroHeadline2")}</span>
       </h1>
 
       {/* Subheadline */}
       <p className="text-[var(--text-secondary)] text-lg max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in">
-        Regista as tuas previsões com probabilidade real.
-        <br />
-        Compara com o mercado. Constrói reputação verificável.
+        {t("heroSubheadline").split("\n").map((line, i) => (
+          <span key={i}>{line}{i === 0 && <br />}</span>
+        ))}
       </p>
 
       {/* CTAs */}
@@ -72,14 +73,14 @@ export function HeroSection() {
           href="#mercados"
           className="btn-primary text-base px-8 py-3 inline-flex items-center gap-2"
         >
-          🌍 Ver mercados em alta →
+          {t("heroCta")}
         </a>
       </div>
 
       <p className="mt-4 text-xs text-[var(--text-muted)] animate-fade-in">
-        já tens conta?{" "}
+        {t("heroSignInPrompt")}{" "}
         <Link href="/auth/signin" className="text-[var(--accent)] hover:underline">
-          entrar
+          {t("heroSignIn")}
         </Link>
       </p>
 
@@ -87,9 +88,9 @@ export function HeroSection() {
       {stats && (
         <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mt-8 sm:mt-12 animate-fade-in">
           {[
-            { label: "Previsões registadas", value: stats.totalPredictions.toLocaleString() },
-            { label: "Utilizadores", value: stats.totalUsers.toLocaleString() },
-            { label: "Acurácia média", value: `${stats.avgAccuracy}%` },
+            { label: t("statsPredictions"), value: stats.totalPredictions.toLocaleString() },
+            { label: t("statsUsers"), value: stats.totalUsers.toLocaleString() },
+            { label: t("statsAccuracy"), value: `${stats.avgAccuracy}%` },
           ].map(({ label, value }) => (
             <div key={label} className="text-center">
               <p className="font-mono text-2xl font-bold text-[var(--text-primary)]">{value}</p>

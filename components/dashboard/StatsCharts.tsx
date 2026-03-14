@@ -12,6 +12,7 @@ import {
   Pie,
   Legend,
 } from "recharts"
+import { useTranslations } from "next-intl"
 
 interface CategoryData {
   name: string
@@ -29,13 +30,13 @@ interface Props {
   resolutionData: ResolutionData[]
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label, tooltipLabel }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg px-3 py-2 text-xs shadow-xl">
         <p className="text-[var(--text-secondary)]">{label ?? payload[0].name}</p>
         <p className="font-mono font-bold text-[var(--text-primary)] mt-0.5">
-          {payload[0].value} previsões
+          {payload[0].value} {tooltipLabel}
         </p>
       </div>
     )
@@ -44,13 +45,15 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 }
 
 export function StatsCharts({ categoryData, resolutionData }: Props) {
+  const t = useTranslations("StatsCharts")
+
   return (
     <div className="space-y-6">
       {/* Resolution pie */}
       {resolutionData.length > 0 && (
         <div className="card">
           <h2 className="text-sm font-medium text-[var(--text-secondary)] mb-4">
-            Distribuição por resultado
+            {t("distributionByResult")}
           </h2>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -68,7 +71,7 @@ export function StatsCharts({ categoryData, resolutionData }: Props) {
                   <Cell key={i} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip tooltipLabel={t("predictionsCount", { count: "" }).replace(" ", "")} />} />
               <Legend
                 formatter={(value) => (
                   <span style={{ color: "var(--text-secondary)", fontSize: 12 }}>
@@ -85,7 +88,7 @@ export function StatsCharts({ categoryData, resolutionData }: Props) {
       {categoryData.length > 0 && (
         <div className="card">
           <h2 className="text-sm font-medium text-[var(--text-secondary)] mb-4">
-            Previsões por categoria
+            {t("predictionsByCategory")}
           </h2>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart
@@ -104,7 +107,7 @@ export function StatsCharts({ categoryData, resolutionData }: Props) {
                 tickLine={false}
                 allowDecimals={false}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--accent-glow)" }} />
+              <Tooltip content={<CustomTooltip tooltipLabel={t("predictionsCount", { count: "" }).replace(" ", "")} />} cursor={{ fill: "var(--accent-glow)" }} />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {categoryData.map((_, i) => (
                   <Cell key={i} fill="var(--accent)" fillOpacity={0.8} />

@@ -1,19 +1,35 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { format, formatDistanceToNow, isPast } from "date-fns"
-import { ptBR } from "date-fns/locale"
+import { formatDistanceToNow, isPast } from "date-fns"
+import type { Locale } from "date-fns"
+import { enUS, ptBR, es, fr } from "date-fns/locale"
 import { Category, Resolution } from "@prisma/client"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: Date | string): string {
-  return format(new Date(date), "dd MMM yyyy", { locale: ptBR })
+const DATE_FNS_LOCALES: Record<string, Locale> = {
+  en: enUS,
+  pt: ptBR,
+  es,
+  fr,
 }
 
-export function formatRelative(date: Date | string): string {
-  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: ptBR })
+function getDateFnsLocale(locale?: string) {
+  return locale ? (DATE_FNS_LOCALES[locale] ?? enUS) : enUS
+}
+
+export function formatDate(date: Date | string, locale?: string): string {
+  return new Date(date).toLocaleDateString(locale ?? "en", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+}
+
+export function formatRelative(date: Date | string, locale?: string): string {
+  return formatDistanceToNow(new Date(date), { addSuffix: true, locale: getDateFnsLocale(locale) })
 }
 
 export function isExpired(date: Date | string): boolean {

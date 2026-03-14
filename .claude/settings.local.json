@@ -9,7 +9,17 @@
       "Bash(npx next:*)",
       "Bash(npm run:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git remote:*)",
+      "Bash(find /c/Users/bmteo/predlab -name \"*i18n*\" -o -name \"*locale*\" -o -name \"*translation*\" 2>/dev/null | grep -v node_modules | head -20)",
+      "Bash(grep -r \"i18n\\\\|intl\\\\|locale\\\\|translation\" /c/Users/bmteo/predlab --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.json\" 2>/dev/null | grep -v node_modules | head -20)",
+      "Bash(grep -r \"ptBR\\\\|portuguese\\\\|pt-BR\" /c/Users/bmteo/predlab --include=\"*.ts\" --include=\"*.tsx\" 2>/dev/null | grep -v node_modules | head -20)",
+      "Bash(ls /c/Users/bmteo/predlab/next.config* && cat /c/Users/bmteo/predlab/package.json | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('dependencies',{}\\).get\\('next','N/A'\\)\\); print\\(d.get\\('dependencies',{}\\).get\\('next-intl','not installed'\\)\\)\")",
+      "Bash(node -e \"const pkg = require\\('/c/Users/bmteo/predlab/node_modules/next-intl/package.json'\\); console.log\\(pkg.version\\);\" && node -e \"const pkg = require\\('/c/Users/bmteo/predlab/node_modules/next-intl/navigation'\\); console.log\\(Object.keys\\(pkg\\).join\\('\\\\n'\\)\\)\" 2>&1 | head -30)",
+      "Bash(node -e \"const pkg = require\\('./node_modules/next-intl/package.json'\\); console.log\\(pkg.version\\);\")",
+      "Bash(node -e \"const nav = require\\('./node_modules/next-intl/navigation'\\); console.log\\(Object.keys\\(nav\\).join\\('\\\\n'\\)\\)\" 2>&1 | head -20)"
     ]
   }
 }

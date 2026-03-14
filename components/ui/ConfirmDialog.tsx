@@ -1,6 +1,7 @@
 "use client"
 
 import { AlertTriangle } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface Props {
   open: boolean
@@ -16,11 +17,14 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = "Confirmar",
+  confirmLabel,
   danger = false,
   onConfirm,
   onCancel,
 }: Props) {
+  const t = useTranslations("Common")
+  const resolvedConfirmLabel = confirmLabel ?? t("confirm")
+
   if (!open) return null
 
   return (
@@ -39,13 +43,13 @@ export function ConfirmDialog({
         </div>
         <div className="flex gap-3">
           <button onClick={onCancel} className="btn-ghost flex-1">
-            Cancelar
+            {t("cancel")}
           </button>
           <button
             onClick={onConfirm}
             className={danger ? "btn-danger flex-1" : "btn-primary flex-1"}
           >
-            {confirmLabel}
+            {resolvedConfirmLabel}
           </button>
         </div>
       </div>

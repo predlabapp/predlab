@@ -12,6 +12,7 @@ import { HotMarketsBar } from "@/components/dashboard/HotMarketsBar"
 import { CATEGORIES } from "@/lib/utils"
 import { Plus, Search, Tag, X, Globe } from "lucide-react"
 import { Category } from "@prisma/client"
+import { useTranslations } from "next-intl"
 
 interface Props {
   initialPredictions: Prediction[]
@@ -19,6 +20,8 @@ interface Props {
 }
 
 export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props) {
+  const t = useTranslations("Dashboard")
+  const tCat = useTranslations("Categories")
   const [predictions, setPredictions] = useState<Prediction[]>(initialPredictions)
   const [showModal, setShowModal] = useState(false)
   const [showBrowseMarkets, setShowBrowseMarkets] = useState(false)
@@ -52,7 +55,7 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
   // Collect all unique tags
   const allTags = useMemo(() => {
     const set = new Set<string>()
-    predictions.forEach((p) => p.tags.forEach((t) => set.add(t)))
+    predictions.forEach((p) => p.tags.forEach((tag) => set.add(tag)))
     return Array.from(set).sort()
   }, [predictions])
 
@@ -144,7 +147,7 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           />
           <input
             type="text"
-            placeholder="Pesquisar previsões..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input-base pl-8"
@@ -156,10 +159,10 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           onChange={(e) => setFilterCategory(e.target.value as Category | "ALL")}
           className="input-base sm:w-44"
         >
-          <option value="ALL">Todas as categorias</option>
+          <option value="ALL">{t("allCategories")}</option>
           {Object.entries(CATEGORIES).map(([key, val]) => (
             <option key={key} value={key}>
-              {val.emoji} {val.label}
+              {val.emoji} {tCat(key as any)}
             </option>
           ))}
         </select>
@@ -169,9 +172,9 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           onChange={(e) => setFilterStatus(e.target.value as any)}
           className="input-base sm:w-36"
         >
-          <option value="all">Todas</option>
-          <option value="pending">Pendentes</option>
-          <option value="resolved">Resolvidas</option>
+          <option value="all">{t("allStatuses")}</option>
+          <option value="pending">{t("pending")}</option>
+          <option value="resolved">{t("resolved")}</option>
         </select>
 
         <button
@@ -180,7 +183,7 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           title="Explorar mercados Polymarket"
         >
           <Globe size={16} />
-          <span className="hidden sm:inline">Mercados</span>
+          <span className="hidden sm:inline">{t("markets")}</span>
         </button>
 
         <button
@@ -188,7 +191,7 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           className="btn-primary flex items-center gap-2 shrink-0"
         >
           <Plus size={16} />
-          Nova previsão
+          {t("newPrediction")}
         </button>
       </div>
 
@@ -224,14 +227,14 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
       {hasFilters && (
         <div className="flex items-center justify-between mb-4">
           <p className="text-xs text-[var(--text-muted)]">
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+            {filtered.length !== 1 ? t("resultsPlural", { count: filtered.length }) : t("results", { count: filtered.length })}
           </p>
           <button
             onClick={clearFilters}
             className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
           >
             <X size={12} />
-            Limpar filtros
+            {t("clearFilters")}
           </button>
         </div>
       )}
@@ -246,7 +249,7 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
       {/* Grid */}
       {predictions.length > 0 && filtered.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-[var(--text-muted)] text-sm">Nenhuma previsão encontrada.</p>
+          <p className="text-[var(--text-muted)] text-sm">{t("noResults")}</p>
         </div>
       ) : predictions.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

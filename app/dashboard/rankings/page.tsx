@@ -1,7 +1,5 @@
-import { RankingsClient } from "@/components/rankings/RankingsClient"
+import { redirect } from 'next/navigation'
 
-export const metadata = { title: "Rankings" }
-
-export default function RankingsPage() {
-  return <RankingsClient />
+export default function RankingsFallback() {
+  redirect('/en/dashboard/rankings')
 }

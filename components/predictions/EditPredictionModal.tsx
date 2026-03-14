@@ -4,8 +4,8 @@ import { useState } from "react"
 import { X, Lock } from "lucide-react"
 import { CATEGORIES, getProbabilityColor } from "@/lib/utils"
 import { Prediction } from "@/types"
-// Note: title, probability, category are immutable after creation
 import { useToast } from "@/components/ui/Toast"
+import { useTranslations } from "next-intl"
 
 interface Props {
   prediction: Prediction
@@ -15,6 +15,8 @@ interface Props {
 
 export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
   const { toast } = useToast()
+  const t = useTranslations("EditPredictionModal")
+  const tCat = useTranslations("Categories")
   const [description, setDescription] = useState(prediction.description ?? "")
   const [evidence, setEvidence] = useState(prediction.evidence ?? "")
   const [tags, setTags] = useState(prediction.tags.join(", "))
@@ -31,7 +33,7 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
       body: JSON.stringify({
         description: description || undefined,
         evidence: evidence || undefined,
-        tags: tags ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+        tags: tags ? tags.split(",").map((tag) => tag.trim()).filter(Boolean) : [],
         isPublic,
       }),
     })
@@ -39,9 +41,9 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
     if (res.ok) {
       const updated = await res.json()
       onSaved(updated)
-      toast("Previsão atualizada.", "success")
+      toast(t("updated"), "success")
     } else {
-      toast("Erro ao atualizar previsão.", "error")
+      toast(t("updateError"), "error")
     }
     setLoading(false)
   }
@@ -50,7 +52,7 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg bg-[var(--bg-card)] rounded-xl border border-[var(--border)] shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-          <h2 className="font-display text-lg font-semibold">Editar Previsão</h2>
+          <h2 className="font-display text-lg font-semibold">{t("title")}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg)] transition-colors"
@@ -64,24 +66,24 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
           <div className="rounded-lg bg-[var(--bg)] border border-[var(--border)] overflow-hidden">
             <div className="flex items-center gap-2 px-3 py-2 border-b border-[var(--border)]">
               <Lock size={12} className="text-[var(--text-muted)]" />
-              <span className="text-xs text-[var(--text-muted)]">Campos imutáveis — alterar invalidaria a previsão</span>
+              <span className="text-xs text-[var(--text-muted)]">{t("immutableFields")}</span>
             </div>
             <div className="p-3 space-y-2">
               <div>
-                <p className="text-xs text-[var(--text-muted)] mb-1">Previsão</p>
+                <p className="text-xs text-[var(--text-muted)] mb-1">{t("predictionLabel")}</p>
                 <p className="text-sm text-[var(--text-secondary)] leading-snug">{prediction.title}</p>
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-[var(--text-muted)] mb-1">Probabilidade</p>
+                  <p className="text-xs text-[var(--text-muted)] mb-1">{t("probabilityLabel")}</p>
                   <span className="font-mono text-lg font-bold" style={{ color: getProbabilityColor(prediction.probability) }}>
                     {prediction.probability}%
                   </span>
                 </div>
                 <div>
-                  <p className="text-xs text-[var(--text-muted)] mb-1">Categoria</p>
+                  <p className="text-xs text-[var(--text-muted)] mb-1">{t("categoryLabel")}</p>
                   <span className="text-sm text-[var(--text-secondary)]">
-                    {CATEGORIES[prediction.category].emoji} {CATEGORIES[prediction.category].label}
+                    {CATEGORIES[prediction.category].emoji} {tCat(prediction.category as any)}
                   </span>
                 </div>
               </div>
@@ -91,41 +93,41 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
           {/* Description */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Argumento / Raciocínio
+              {t("argumentLabel")}
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input-base resize-none h-20"
-              placeholder="Porque acreditas nisto?"
+              placeholder={t("argumentPlaceholder")}
             />
           </div>
 
           {/* Evidence */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Evidências / Fontes
+              {t("evidenceLabel")}
             </label>
             <textarea
               value={evidence}
               onChange={(e) => setEvidence(e.target.value)}
               className="input-base resize-none h-16"
-              placeholder="Links, dados, fontes..."
+              placeholder={t("evidencePlaceholder")}
             />
           </div>
 
           {/* Tags */}
           <div>
             <label className="block text-xs text-[var(--text-muted)] mb-1">
-              Tags{" "}
-              <span className="text-[var(--text-muted)]">(separadas por vírgula)</span>
+              {t("tagsLabel")}{" "}
+              <span className="text-[var(--text-muted)]">{t("tagsHint")}</span>
             </label>
             <input
               type="text"
               value={tags}
               onChange={(e) => setTags(e.target.value)}
               className="input-base"
-              placeholder="ia, openai, llm"
+              placeholder={t("tagsPlaceholder")}
             />
           </div>
 
@@ -144,15 +146,15 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
                 }`}
               />
             </button>
-            <span className="text-sm text-[var(--text-secondary)]">Pública</span>
+            <span className="text-sm text-[var(--text-secondary)]">{t("publicLabel")}</span>
           </div>
 
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={onClose} className="btn-ghost flex-1">
-              Cancelar
+              {t("cancel")}
             </button>
             <button type="submit" disabled={loading} className="btn-primary flex-1">
-              {loading ? "A guardar..." : "Guardar alterações"}
+              {loading ? t("saving") : t("save")}
             </button>
           </div>
         </form>

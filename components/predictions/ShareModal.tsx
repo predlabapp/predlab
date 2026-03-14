@@ -3,8 +3,9 @@
 import { useState } from "react"
 import { X, Copy, Check, ExternalLink } from "lucide-react"
 import { Prediction } from "@/types"
-import { CATEGORIES, RESOLUTION_CONFIG } from "@/lib/utils"
+import { CATEGORIES } from "@/lib/utils"
 import { useToast } from "@/components/ui/Toast"
+import { useTranslations } from "next-intl"
 
 interface Props {
   prediction: Prediction
@@ -19,41 +20,41 @@ const BASE_URL =
 
 export function ShareModal({ prediction, username, onClose }: Props) {
   const { toast } = useToast()
+  const t = useTranslations("ShareModal")
   const [copied, setCopied] = useState(false)
 
   const shareUrl = `${BASE_URL}/share/${prediction.shareToken}`
   const ogImageUrl = `${BASE_URL}/api/og/prediction/${prediction.shareToken}`
 
+  const tRes = useTranslations("Resolution")
   const cat = CATEGORIES[prediction.category]
+
   const resolutionLine = prediction.resolution
-    ? `\nResultado: ${RESOLUTION_CONFIG[prediction.resolution].label.toUpperCase()}`
+    ? t("resolutionLine", { resolution: tRes(prediction.resolution as any).toUpperCase() })
     : ""
+
   const marketLine =
     prediction.polymarketProbability !== null &&
     prediction.polymarketProbability !== undefined
-      ? `\nPolymarket: ${prediction.polymarketProbability}% · Divergência: ${Math.abs(
-          prediction.probability - prediction.polymarketProbability
-        )}%`
+      ? t("polymarketLine", {
+          polyProb: prediction.polymarketProbability,
+          diff: Math.abs(prediction.probability - prediction.polymarketProbability),
+        })
       : ""
 
-  const textForX = `🔮 "${prediction.title}"
+  const textForX = t("shareTextX", {
+    title: prediction.title,
+    prob: prediction.probability,
+    market: marketLine,
+    resolution: resolutionLine,
+  })
 
-A minha probabilidade: ${prediction.probability}%${marketLine}${resolutionLine}
-
-Regista as tuas previsões em predlab.app`
-
-  const textForLinkedIn = `Em [data] registei publicamente esta previsão com ${prediction.probability}% de probabilidade.
-
-"${prediction.title}"${marketLine}${resolutionLine}
-
-Forecast Score acumulado disponível em PredLab (predlab.app) — sem edições, sem exclusões. A reputação que se constrói ali é real.`
-
-  const textForWhatsApp = `🔮 Fiz esta previsão no PredLab:
-"${prediction.title}"
-
-Probabilidade: ${prediction.probability}%${resolutionLine}
-
-${shareUrl}`
+  const textForWhatsApp = t("shareTextWhatsApp", {
+    title: prediction.title,
+    prob: prediction.probability,
+    resolution: resolutionLine,
+    url: shareUrl,
+  })
 
   function openX() {
     const url = `https://x.com/intent/tweet?text=${encodeURIComponent(textForX)}&url=${encodeURIComponent(shareUrl)}`
@@ -73,7 +74,7 @@ ${shareUrl}`
   async function copyLink() {
     await navigator.clipboard.writeText(shareUrl)
     setCopied(true)
-    toast("Link copiado!", "success")
+    toast(t("linkCopied"), "success")
     setTimeout(() => setCopied(false), 2000)
   }
 
@@ -82,7 +83,7 @@ ${shareUrl}`
       <div className="w-full max-w-lg bg-[var(--bg-card)] rounded-xl border border-[var(--border)] shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-          <h2 className="font-display text-lg font-semibold">Partilhar Previsão</h2>
+          <h2 className="font-display text-lg font-semibold">{t("title")}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg)] transition-colors"
@@ -97,7 +98,7 @@ ${shareUrl}`
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={ogImageUrl}
-              alt="Card de partilha"
+              alt={t("shareCardAlt")}
               className="w-full"
               style={{ aspectRatio: "1200/630" }}
             />
@@ -110,7 +111,7 @@ ${shareUrl}`
               className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--border-bright)] transition-colors"
             >
               <span className="text-lg">𝕏</span>
-              <span className="text-xs text-[var(--text-muted)]">X / Twitter</span>
+              <span className="text-xs text-[var(--text-muted)]">{t("xTwitter")}</span>
             </button>
             <button
               onClick={openLinkedIn}
@@ -124,7 +125,7 @@ ${shareUrl}`
               className="flex flex-col items-center gap-1.5 p-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--border-bright)] transition-colors"
             >
               <span className="text-lg">💬</span>
-              <span className="text-xs text-[var(--text-muted)]">WhatsApp</span>
+              <span className="text-xs text-[var(--text-muted)]">{t("whatsapp")}</span>
             </button>
           </div>
 
@@ -140,14 +141,14 @@ ${shareUrl}`
               className="btn-ghost flex items-center gap-1.5 shrink-0"
             >
               {copied ? <Check size={14} className="text-[var(--green)]" /> : <Copy size={14} />}
-              {copied ? "Copiado" : "Copiar"}
+              {copied ? t("copied") : t("copy")}
             </button>
           </div>
 
           {/* Text preview */}
           <details className="group">
             <summary className="text-xs text-[var(--text-muted)] cursor-pointer select-none hover:text-[var(--text-secondary)] transition-colors">
-              Ver texto para X/Twitter ▾
+              {t("showTextForX")}
             </summary>
             <textarea
               readOnly

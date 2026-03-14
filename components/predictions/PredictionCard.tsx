@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { Prediction } from "@/types"
 import {
   CATEGORIES,
@@ -13,6 +12,8 @@ import { Calendar, Trash2, RefreshCw } from "lucide-react"
 import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/Toast"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { Link } from "@/navigation"
+import { useTranslations, useLocale } from "next-intl"
 
 const DELETE_WINDOW_MS = 10 * 60 * 1000
 
@@ -58,6 +59,10 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
   const [matchLoading, setMatchLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const { toast } = useToast()
+  const t = useTranslations("PredictionCard")
+  const tCat = useTranslations("Categories")
+  const tRes = useTranslations("Resolution")
+  const locale = useLocale()
   const { canDelete, label: countdownLabel } = useDeleteCountdown(prediction.createdAt)
 
   const cat = CATEGORIES[prediction.category]
@@ -81,9 +86,9 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
     })
     if (res.ok) {
       onDelete(prediction.id)
-      toast("Previsão apagada.", "success")
+      toast(t("deleted"), "success")
     } else {
-      toast("Erro ao apagar.", "error")
+      toast(t("deleteError"), "error")
       setDeleting(false)
     }
   }
@@ -103,9 +108,9 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
         polymarketProbability: data.market.probability,
         polymarketUrl: data.market.url,
       })
-      toast("Mercado encontrado no Polymarket!", "success")
+      toast(t("marketFound"), "success")
     } else {
-      toast("Nenhum mercado equivalente encontrado.", "info")
+      toast(t("noMarketFound"), "info")
     }
     setMatchLoading(false)
   }
@@ -124,9 +129,9 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
         prev ? { ...prev, probability: data.probability } : prev
       )
       onMarketUpdate?.(prediction.id, { polymarketProbability: data.probability })
-      toast("Probabilidade atualizada.", "success")
+      toast(t("probabilityUpdated"), "success")
     } else {
-      toast("Erro ao atualizar.", "error")
+      toast(t("updateError"), "error")
     }
     setRefreshing(false)
   }
@@ -139,7 +144,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text-secondary)]">
-                {cat.emoji} {cat.label}
+                {cat.emoji} {tCat(prediction.category as any)}
               </span>
               {prediction.resolution ? (
                 <span
@@ -149,11 +154,11 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                     background: RESOLUTION_CONFIG[prediction.resolution].bg,
                   }}
                 >
-                  {RESOLUTION_CONFIG[prediction.resolution].label}
+                  {tRes(prediction.resolution as any)}
                 </span>
               ) : expired ? (
                 <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(251,191,36,0.1)] text-[var(--yellow)]">
-                  Expirada
+                  {t("expired")}
                 </span>
               ) : null}
             </div>
@@ -167,7 +172,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                 }}
                 disabled={deleting}
                 className="opacity-0 group-hover:opacity-100 flex items-center gap-1 p-1.5 rounded text-[var(--text-muted)] hover:text-[var(--red)] hover:bg-[rgba(248,113,113,0.1)] transition-all shrink-0"
-                title={`Apagar (ainda por ${countdownLabel})`}
+                title={t("deleteTitle", { time: countdownLabel ?? "" })}
               >
                 <Trash2 size={14} />
                 <span className="text-xs font-mono">{countdownLabel}</span>
@@ -189,7 +194,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-mono" style={{ color: "var(--text-muted)" }}>
-                  vs Polymarket
+                  {t("vsPolymarket")}
                 </span>
                 <a
                   href={marketData.url}
@@ -199,14 +204,14 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                   className="text-xs underline"
                   style={{ color: "var(--accent)" }}
                 >
-                  ver ↗
+                  {t("view")}
                 </a>
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-xs w-12 text-right font-mono" style={{ color: "var(--text-muted)" }}>
-                    Tu
+                    {t("you")}
                   </span>
                   <div className="flex-1 h-1.5 rounded-full" style={{ background: "var(--border)" }}>
                     <div
@@ -224,7 +229,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
 
                 <div className="flex items-center gap-2">
                   <span className="text-xs w-12 text-right font-mono" style={{ color: "var(--text-muted)" }}>
-                    Mercado
+                    {t("market")}
                   </span>
                   <div className="flex-1 h-1.5 rounded-full" style={{ background: "var(--border)" }}>
                     <div
@@ -243,7 +248,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                   className="mt-2 text-xs font-mono px-2 py-1 rounded"
                   style={{ background: "rgba(124,106,247,0.1)", color: "var(--accent)" }}
                 >
-                  ⚡ Divergência de {Math.abs(prediction.probability - (marketData.probability ?? 0))}%
+                  {t("divergence", { diff: Math.abs(prediction.probability - (marketData.probability ?? 0)) })}
                 </div>
               )}
 
@@ -254,7 +259,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                 style={{ color: "var(--text-muted)" }}
               >
                 <RefreshCw size={10} className={refreshing ? "animate-spin" : ""} />
-                {refreshing ? "A atualizar..." : "Atualizar"}
+                {refreshing ? t("updating") : t("update")}
               </button>
             </div>
           ) : !prediction.resolution ? (
@@ -268,7 +273,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
                 color: "var(--text-muted)",
               }}
             >
-              {matchLoading ? "🔍 A procurar no Polymarket..." : "🔗 Comparar com Polymarket"}
+              {matchLoading ? t("searchingPolymarket") : t("comparePolymarket")}
             </button>
           ) : null}
 
@@ -276,7 +281,7 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
           <div className="flex items-center justify-between pt-1 border-t border-[var(--border)]">
             <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
               <Calendar size={12} />
-              <span>{formatDate(prediction.expiresAt)}</span>
+              <span>{formatDate(prediction.expiresAt, locale)}</span>
             </div>
             <div className="font-mono text-lg font-bold" style={{ color: probColor }}>
               {prediction.probability}%
@@ -287,9 +292,9 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
 
       <ConfirmDialog
         open={confirmOpen}
-        title="Apagar previsão"
-        description="Tens a certeza? Esta ação não pode ser revertida."
-        confirmLabel="Apagar"
+        title={t("confirmDeleteTitle")}
+        description={t("confirmDeleteDescription")}
+        confirmLabel={t("deleteLabel")}
         danger
         onConfirm={() => {
           setConfirmOpen(false)

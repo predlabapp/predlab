@@ -10,6 +10,7 @@ import {
 } from "@/lib/utils"
 import { LEVELS, BADGES } from "@/lib/gamification"
 import { Calendar, Flame, Trophy } from "lucide-react"
+import { useTranslations, useLocale } from "next-intl"
 
 interface Badge {
   badgeKey: string
@@ -38,6 +39,10 @@ function getLevelInfo(level: number) {
 }
 
 export function PublicProfile({ user }: Props) {
+  const t = useTranslations("PublicProfile")
+  const tCat = useTranslations("Categories")
+  const tRes = useTranslations("Resolution")
+  const locale = useLocale()
   const levelInfo = getLevelInfo(user.level)
   const publicPredictions = user.predictions.filter((p) => p.isPublic)
   const scoreGeneral = calculateAccuracyScore(user.predictions)
@@ -46,10 +51,6 @@ export function PublicProfile({ user }: Props) {
   )
   const scoreVerified = calculateAccuracyScore(verifiedPredictions)
   const verifiedCount = verifiedPredictions.filter((p) => p.resolution).length
-  const resolved = user.predictions.filter(
-    (p) => p.resolution && p.resolution !== "CANCELLED"
-  ).length
-  const correct = user.predictions.filter((p) => p.resolution === "CORRECT").length
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
@@ -69,7 +70,7 @@ export function PublicProfile({ user }: Props) {
               </p>
             )}
             <p className="text-xs text-[var(--accent)] mt-1">
-              {levelInfo.emoji} {levelInfo.label} · Nível {user.level}
+              {levelInfo.emoji} {levelInfo.label} · {t("level", { level: user.level })}
             </p>
             {user.bio && (
               <p className="text-sm text-[var(--text-secondary)] mt-2 leading-relaxed">
@@ -81,23 +82,23 @@ export function PublicProfile({ user }: Props) {
 
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-4 border-t border-[var(--border)]">
-          {/* Score Verificado */}
+          {/* Verified Score */}
           <div className="text-center">
             {verifiedCount >= 10 ? (
               <p className="font-mono text-lg font-bold" style={{ color: "var(--accent)" }}>
                 {scoreVerified}%
               </p>
             ) : (
-              <p className="text-xs font-mono font-bold text-[var(--yellow)]">Em qualificação</p>
+              <p className="text-xs font-mono font-bold text-[var(--yellow)]">{t("qualifying")}</p>
             )}
-            <p className="text-xs text-[var(--text-muted)]">⚡ Verificado</p>
+            <p className="text-xs text-[var(--text-muted)]">{t("verifiedScore")}</p>
           </div>
-          {/* Score Geral */}
+          {/* General Score */}
           <div className="text-center">
             <p className="font-mono text-lg font-bold text-[var(--text-secondary)]">
               {scoreGeneral > 0 ? `${scoreGeneral}%` : "—"}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">✍️ Geral</p>
+            <p className="text-xs text-[var(--text-muted)]">{t("generalScore")}</p>
           </div>
           {/* Streak */}
           <div className="text-center">
@@ -105,14 +106,14 @@ export function PublicProfile({ user }: Props) {
               <Flame size={16} />
               {user.currentStreak}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Streak</p>
+            <p className="text-xs text-[var(--text-muted)]">{t("streak")}</p>
           </div>
           {/* Coins */}
           <div className="text-center">
             <p className="font-mono text-lg font-bold text-[var(--text-primary)]">
               {user.predictionCoins.toLocaleString()}
             </p>
-            <p className="text-xs text-[var(--text-muted)]">Coins</p>
+            <p className="text-xs text-[var(--text-muted)]">{t("coins")}</p>
           </div>
         </div>
       </div>
@@ -122,7 +123,7 @@ export function PublicProfile({ user }: Props) {
         <div className="card mb-5">
           <h2 className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-3 flex items-center gap-2">
             <Trophy size={13} />
-            Conquistas ({user.badges.length})
+            {t("achievementsTitle", { count: user.badges.length })}
           </h2>
           <div className="flex flex-wrap gap-2">
             {user.badges.map((b) => {
@@ -146,12 +147,12 @@ export function PublicProfile({ user }: Props) {
       {/* Public predictions */}
       <div>
         <h2 className="text-xs text-[var(--text-muted)] uppercase tracking-wider mb-3">
-          Previsões públicas ({publicPredictions.length})
+          {t("publicPredictions", { count: publicPredictions.length })}
         </h2>
 
         {publicPredictions.length === 0 ? (
           <div className="text-center py-12 text-[var(--text-muted)] text-sm">
-            Ainda não há previsões públicas.
+            {t("noPredictions")}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -163,7 +164,7 @@ export function PublicProfile({ user }: Props) {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex flex-wrap gap-1.5">
                       <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--bg)] border border-[var(--border)] text-[var(--text-secondary)]">
-                        {cat.emoji} {cat.label}
+                        {cat.emoji} {tCat(p.category as any)}
                       </span>
                       {p.resolution && (
                         <span
@@ -173,7 +174,7 @@ export function PublicProfile({ user }: Props) {
                             background: RESOLUTION_CONFIG[p.resolution].bg,
                           }}
                         >
-                          {RESOLUTION_CONFIG[p.resolution].label}
+                          {tRes(p.resolution as any)}
                         </span>
                       )}
                     </div>
@@ -193,13 +194,13 @@ export function PublicProfile({ user }: Props) {
                   {p.polymarketProbability !== null &&
                     p.polymarketProbability !== undefined && (
                       <div className="flex items-center gap-3 text-xs font-mono mb-2">
-                        <span className="text-[var(--text-muted)]">vs Polymarket:</span>
+                        <span className="text-[var(--text-muted)]">{t("vsPolymarket")}</span>
                         <span style={{ color: "var(--accent)" }}>
                           {p.polymarketProbability}%
                         </span>
                         {Math.abs(p.probability - p.polymarketProbability) >= 15 && (
                           <span className="text-[var(--accent)]">
-                            ⚡ {Math.abs(p.probability - p.polymarketProbability)}% divergência
+                            {t("divergence", { diff: Math.abs(p.probability - p.polymarketProbability) })}
                           </span>
                         )}
                       </div>
@@ -207,7 +208,7 @@ export function PublicProfile({ user }: Props) {
 
                   <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">
                     <Calendar size={11} />
-                    <span>Expira em {formatDate(p.expiresAt)}</span>
+                    <span>{t("expiresOn", { date: formatDate(p.expiresAt, locale) })}</span>
                   </div>
                 </div>
               )
@@ -218,7 +219,7 @@ export function PublicProfile({ user }: Props) {
 
       {/* Footer */}
       <p className="text-center text-xs text-[var(--text-muted)] mt-8">
-        PredLab · predlab.app
+        {t("footer")}
       </p>
     </div>
   )

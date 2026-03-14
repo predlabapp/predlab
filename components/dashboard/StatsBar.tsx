@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Clock, CheckCircle, Target } from "lucide-react"
+import { Clock, Target } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface Stats {
   total: number
@@ -15,6 +16,7 @@ interface Stats {
 
 export function StatsBar() {
   const [stats, setStats] = useState<Stats | null>(null)
+  const t = useTranslations("StatsBar")
 
   useEffect(() => {
     fetch("/api/user/stats")
@@ -39,20 +41,20 @@ export function StatsBar() {
         <Target size={18} style={{ color: "var(--accent)" }} />
         <div>
           <p className="text-lg font-bold font-mono">{stats.total}</p>
-          <p className="text-xs text-[var(--text-muted)]">Previsões</p>
+          <p className="text-xs text-[var(--text-muted)]">{t("predictions")}</p>
         </div>
       </div>
 
-      {/* Pendentes */}
+      {/* Pending */}
       <div className="card flex items-center gap-3">
         <Clock size={18} style={{ color: "var(--yellow)" }} />
         <div>
           <p className="text-lg font-bold font-mono">{stats.pending}</p>
-          <p className="text-xs text-[var(--text-muted)]">Pendentes</p>
+          <p className="text-xs text-[var(--text-muted)]">{t("pending")}</p>
         </div>
       </div>
 
-      {/* Score Verificado */}
+      {/* Verified Score */}
       <div className="card flex items-center gap-3">
         <span className="text-base shrink-0">⚡</span>
         <div>
@@ -61,27 +63,27 @@ export function StatsBar() {
               <p className="text-lg font-bold font-mono" style={{ color: "var(--accent)" }}>
                 {stats.scoreVerified}%
               </p>
-              <p className="text-xs text-[var(--text-muted)]">Score Verificado</p>
+              <p className="text-xs text-[var(--text-muted)]">{t("verifiedScore")}</p>
             </>
           ) : (
             <>
-              <p className="text-xs font-mono font-bold text-[var(--yellow)]">Em qualificação</p>
+              <p className="text-xs font-mono font-bold text-[var(--yellow)]">{t("qualifying")}</p>
               <p className="text-xs text-[var(--text-muted)]">
-                {stats.verifiedCount}/10 verificadas
+                {t("verifiedCount", { count: stats.verifiedCount })}
               </p>
             </>
           )}
         </div>
       </div>
 
-      {/* Score Geral */}
+      {/* General Score */}
       <div className="card flex items-center gap-3">
         <span className="text-base shrink-0">✍️</span>
         <div>
           <p className="text-lg font-bold font-mono" style={{ color: "var(--text-secondary)" }}>
             {stats.scoreGeneral > 0 ? `${stats.scoreGeneral}%` : "—"}
           </p>
-          <p className="text-xs text-[var(--text-muted)]">Score Geral</p>
+          <p className="text-xs text-[var(--text-muted)]">{t("generalScore")}</p>
         </div>
       </div>
     </div>

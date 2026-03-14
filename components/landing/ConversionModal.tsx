@@ -1,8 +1,8 @@
 "use client"
 
 import { signIn } from "next-auth/react"
-import { useRouter } from "next/navigation"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 interface HotMarket {
   slug: string
@@ -26,6 +26,8 @@ const GoogleIcon = () => (
 )
 
 export function ConversionModal({ market, onClose }: Props) {
+  const t = useTranslations("Landing")
+
   if (!market) return null
 
   const callbackUrl = `/dashboard?market=${encodeURIComponent(market.slug)}`
@@ -47,7 +49,7 @@ export function ConversionModal({ market, onClose }: Props) {
         {/* Close */}
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-display text-lg font-bold text-[var(--text-primary)]">
-            🔮 Qual é a tua previsão?
+            {t("conversionTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -63,7 +65,7 @@ export function ConversionModal({ market, onClose }: Props) {
             {market.question}
           </p>
           <p className="text-xs font-mono text-[var(--accent)]">
-            Mercado actual: {market.probability}%
+            {t("conversionCurrentMarket", { prob: market.probability })}
           </p>
         </div>
 
@@ -71,13 +73,13 @@ export function ConversionModal({ market, onClose }: Props) {
         <div className="border-t border-[var(--border)] mb-5" />
 
         <p className="text-sm text-[var(--text-secondary)] mb-1 text-center">
-          Para registar a tua previsão
+          {t("conversionCta1")}
         </p>
         <p className="text-sm font-semibold text-[var(--text-primary)] mb-1 text-center">
-          cria uma conta grátis.
+          {t("conversionCta2")}
         </p>
         <p className="text-xs text-[var(--text-muted)] text-center mb-5">
-          É gratuito e demora 30 segundos.
+          {t("conversionCtaFine")}
         </p>
 
         {/* Google */}
@@ -86,7 +88,7 @@ export function ConversionModal({ market, onClose }: Props) {
           className="btn-ghost w-full flex items-center justify-center gap-2 mb-3"
         >
           <GoogleIcon />
-          Continuar com Google
+          {t("conversionGoogle")}
         </button>
 
         <div className="flex items-center gap-3 mb-3">
@@ -100,17 +102,17 @@ export function ConversionModal({ market, onClose }: Props) {
           href={`/auth/signup?market=${encodeURIComponent(market.slug)}`}
           className="btn-primary w-full flex items-center justify-center text-center mb-4"
         >
-          Criar conta com email
+          {t("conversionEmail")}
         </a>
 
         {/* Login link */}
         <p className="text-xs text-[var(--text-muted)] text-center">
-          Já tens conta?{" "}
+          {t("conversionHaveAccount")}{" "}
           <a
             href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`}
             className="text-[var(--accent)] hover:underline"
           >
-            Entrar
+            {t("conversionSignIn")}
           </a>
         </p>
       </div>

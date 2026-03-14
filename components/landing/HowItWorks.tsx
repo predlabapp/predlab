@@ -1,25 +1,31 @@
+"use client"
+
+import { useTranslations } from "next-intl"
+
 export function HowItWorks() {
+  const t = useTranslations("Landing")
+
   const steps = [
     {
       number: "①",
       emoji: "🌍",
-      title: "Escolhe um mercado",
-      desc: "do Polymarket ou cria a tua previsão",
-      detail: "Mercados sobre política, crypto, economia, esportes e mais",
+      title: t("step1Title"),
+      desc: t("step1Desc"),
+      detail: t("step1Detail"),
     },
     {
       number: "②",
       emoji: "📊",
-      title: "Define a tua probabilidade",
-      desc: "e o teu argumento",
-      detail: "De 1% a 99% — sem respostas de sim/não",
+      title: t("step2Title"),
+      desc: t("step2Desc"),
+      detail: t("step2Detail"),
     },
     {
       number: "③",
       emoji: "🔥",
-      title: "Acompanha, resolve",
-      desc: "e partilha os acertos",
-      detail: "Forecast Score verificado automaticamente pelo Polymarket",
+      title: t("step3Title"),
+      desc: t("step3Desc"),
+      detail: t("step3Detail"),
     },
   ]
 
@@ -27,10 +33,10 @@ export function HowItWorks() {
     <section className="border-t border-[var(--border)] py-16 px-6">
       <div className="max-w-4xl mx-auto">
         <p className="text-center text-xs text-[var(--text-muted)] uppercase tracking-widest font-mono mb-3">
-          Como funciona
+          {t("howItWorksLabel")}
         </p>
         <h2 className="font-display text-2xl font-bold text-center text-[var(--text-primary)] mb-12">
-          Três passos. Uma reputação.
+          {t("howItWorksTitle")}
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8">
