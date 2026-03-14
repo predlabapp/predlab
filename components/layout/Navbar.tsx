@@ -6,6 +6,7 @@ import { LogOut, BarChart2, ChevronDown, Trophy } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
+import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 
 export function Navbar() {
   const { data: session } = useSession()
@@ -39,6 +40,7 @@ export function Navbar() {
             <Trophy size={17} />
           </Link>
 
+          <HowItWorksModal />
           <LocaleSwitcher />
 
           <div className="relative">

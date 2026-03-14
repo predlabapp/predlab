@@ -355,5 +355,22 @@
     "uncertain": "Uncertain",
     "unlikely": "Unlikely",
     "veryUnlikely": "Very unlikely"
+  },
+  "HowItWorks": {
+    "buttonTitle": "How it works",
+    "label": "How it works",
+    "title": "Four steps. One reputation.",
+    "step1Title": "Choose a market",
+    "step1Desc": "from Polymarket or create your prediction",
+    "step1Detail": "Markets on politics, crypto, economics, sports and more",
+    "step2Title": "Set your probability",
+    "step2Desc": "and your argument",
+    "step2Detail": "From 1% to 99% — no yes/no answers",
+    "step3Title": "Track, resolve",
+    "step3Desc": "and share the wins",
+    "step3Detail": "Forecast Score verified automatically by Polymarket",
+    "step4Title": "Build your reputation",
+    "step4Desc": "in the community",
+    "step4Detail": "Public profile with verified Forecast Score and rankings"
   }
 }

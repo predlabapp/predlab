@@ -4,9 +4,9 @@ import { redirect } from "next/navigation"
 import { Link } from "@/navigation"
 import { HeroSection } from "@/components/landing/HeroSection"
 import { HotMarketsGrid } from "@/components/landing/HotMarketsGrid"
-import { HowItWorks } from "@/components/landing/HowItWorks"
 import { Differentials } from "@/components/landing/Differentials"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
+import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { getTranslations } from "next-intl/server"
 
 export default async function HomePage({
@@ -31,6 +31,7 @@ export default async function HomePage({
           🔮 PredLab
         </Link>
         <div className="flex items-center gap-3">
+          <HowItWorksModal />
           <LocaleSwitcher />
           <Link href="/auth/signin" className="btn-ghost text-sm px-3 py-1.5">
             {t("navSignIn")}
@@ -52,9 +53,6 @@ export default async function HomePage({
 
       {/* Hot markets — core of landing */}
       <HotMarketsGrid />
-
-      {/* How it works */}
-      <HowItWorks />
 
       {/* Differentials */}
       <Differentials />

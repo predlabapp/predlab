@@ -355,5 +355,22 @@
     "uncertain": "Incerto",
     "unlikely": "Improvável",
     "veryUnlikely": "Muito improvável"
+  },
+  "HowItWorks": {
+    "buttonTitle": "Como funciona",
+    "label": "Como funciona",
+    "title": "Quatro passos. Uma reputação.",
+    "step1Title": "Escolhe um mercado",
+    "step1Desc": "do Polymarket ou cria a tua previsão",
+    "step1Detail": "Mercados sobre política, crypto, economia, desporto e mais",
+    "step2Title": "Define a tua probabilidade",
+    "step2Desc": "e o teu argumento",
+    "step2Detail": "De 1% a 99% — sem respostas de sim/não",
+    "step3Title": "Acompanha, resolve",
+    "step3Desc": "e partilha os acertos",
+    "step3Detail": "Forecast Score verificado automaticamente pelo Polymarket",
+    "step4Title": "Constrói a tua reputação",
+    "step4Desc": "na comunidade",
+    "step4Detail": "Perfil público com Forecast Score verificado e rankings"
   }
 }
