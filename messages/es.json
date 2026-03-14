@@ -16,8 +16,10 @@
   "Nav": {
     "signIn": "Entrar",
     "signUp": "Crear cuenta →",
+    "home": "Inicio",
     "stats": "Estadísticas",
     "rankings": "Rankings",
+    "more": "Más",
     "signOut": "Salir",
     "language": "Idioma"
   },
@@ -44,6 +46,7 @@
     "tabSports": "Deportes",
     "tabEconomy": "Economía",
     "tabTech": "Tech",
+    "howItWorksBar": "¿Cómo funciona?",
     "howItWorksLabel": "Cómo funciona",
     "howItWorksTitle": "Tres pasos. Una reputación.",
     "step1Title": "Elige un mercado",

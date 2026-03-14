@@ -7,6 +7,7 @@ import { HotMarketsGrid } from "@/components/landing/HotMarketsGrid"
 import { Differentials } from "@/components/landing/Differentials"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
+import { MobileHowItWorksBar } from "@/components/landing/MobileHowItWorksBar"
 import { getTranslations } from "next-intl/server"
 
 export default async function HomePage({
@@ -32,8 +33,8 @@ export default async function HomePage({
             🔮 PredLab
           </Link>
           <div className="flex items-center gap-3">
-            <HowItWorksModal />
-            <LocaleSwitcher />
+            <div className="hidden sm:flex"><HowItWorksModal /></div>
+            <div className="hidden sm:flex"><LocaleSwitcher /></div>
             <Link href="/auth/signin" className="btn-ghost text-sm px-3 py-1.5">
               {t("navSignIn")}
             </Link>
@@ -93,6 +94,9 @@ export default async function HomePage({
           </Link>
         </div>
       </footer>
+
+      {/* Mobile-only floating "How it works" bar */}
+      <MobileHowItWorksBar />
 
     </main>
   )

@@ -26,7 +26,7 @@ export function Navbar() {
         <div className="flex items-center gap-1 sm:gap-2">
           <Link
             href="/dashboard/stats"
-            className="p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="hidden sm:flex p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             title={t("stats")}
           >
             <BarChart2 size={17} />
@@ -34,14 +34,14 @@ export function Navbar() {
 
           <Link
             href="/dashboard/rankings"
-            className="p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="hidden sm:flex p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             title={t("rankings")}
           >
             <Trophy size={17} />
           </Link>
 
-          <HowItWorksModal />
-          <LocaleSwitcher />
+          <div className="hidden sm:flex"><HowItWorksModal /></div>
+          <div className="hidden sm:flex"><LocaleSwitcher /></div>
 
           <div className="relative">
             <button
