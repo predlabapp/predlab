@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
-import { notFound, redirect } from "next/navigation"
+import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import SharedPredictionPage from "@/components/predictions/SharedPredictionPage"
 
 interface Props {
   params: { shareToken: string; locale: string }
@@ -40,15 +41,46 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SharePage({ params }: Props) {
   const prediction = await prisma.prediction.findUnique({
     where: { shareToken: params.shareToken },
-    include: { user: { select: { username: true } } },
+    include: {
+      user: {
+        select: {
+          name: true,
+          username: true,
+          level: true,
+          predictions: {
+            select: {
+              probability: true,
+              resolution: true,
+            },
+          },
+        },
+      },
+    },
   })
 
   if (!prediction) notFound()
 
-  // Redirect to the user's public profile
-  if (prediction.user.username) {
-    redirect(`/p/${prediction.user.username}`)
+  // Serialize dates to strings for client component
+  const serialized = {
+    id: prediction.id,
+    title: prediction.title,
+    description: prediction.description,
+    probability: prediction.probability,
+    category: prediction.category,
+    expiresAt: prediction.expiresAt.toISOString(),
+    resolvedAt: prediction.resolvedAt ? prediction.resolvedAt.toISOString() : null,
+    resolution: prediction.resolution,
+    polymarketProbability: prediction.polymarketProbability,
+    polymarketUrl: prediction.polymarketUrl,
+    evidence: prediction.evidence,
+    tags: prediction.tags,
+    user: {
+      name: prediction.user.name,
+      username: prediction.user.username,
+      level: prediction.user.level,
+      predictions: prediction.user.predictions,
+    },
   }
 
-  redirect("/")
+  return <SharedPredictionPage prediction={serialized} locale={params.locale} />
 }

@@ -19,7 +19,8 @@
       "Bash(ls /c/Users/bmteo/predlab/next.config* && cat /c/Users/bmteo/predlab/package.json | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('dependencies',{}\\).get\\('next','N/A'\\)\\); print\\(d.get\\('dependencies',{}\\).get\\('next-intl','not installed'\\)\\)\")",
       "Bash(node -e \"const pkg = require\\('/c/Users/bmteo/predlab/node_modules/next-intl/package.json'\\); console.log\\(pkg.version\\);\" && node -e \"const pkg = require\\('/c/Users/bmteo/predlab/node_modules/next-intl/navigation'\\); console.log\\(Object.keys\\(pkg\\).join\\('\\\\n'\\)\\)\" 2>&1 | head -30)",
       "Bash(node -e \"const pkg = require\\('./node_modules/next-intl/package.json'\\); console.log\\(pkg.version\\);\")",
-      "Bash(node -e \"const nav = require\\('./node_modules/next-intl/navigation'\\); console.log\\(Object.keys\\(nav\\).join\\('\\\\n'\\)\\)\" 2>&1 | head -20)"
+      "Bash(node -e \"const nav = require\\('./node_modules/next-intl/navigation'\\); console.log\\(Object.keys\\(nav\\).join\\('\\\\n'\\)\\)\" 2>&1 | head -20)",
+      "Bash(wc -l /c/Users/bmteo/predlab/app/\\\\[locale\\\\]/dashboard/\\\\[id\\\\]/page.tsx /c/Users/bmteo/predlab/app/\\\\[locale\\\\]/dashboard/stats/page.tsx /c/Users/bmteo/predlab/app/\\\\[locale\\\\]/p/\\\\[username\\\\]/page.tsx /c/Users/bmteo/predlab/app/\\\\[locale\\\\]/share/\\\\[shareToken\\\\]/page.tsx)"
     ]
   }
 }

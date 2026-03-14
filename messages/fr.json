@@ -356,6 +356,20 @@
     "unlikely": "Improbable",
     "veryUnlikely": "Très improbable"
   },
+  "SharePage": {
+    "navCta": "Créer un compte",
+    "yourProbability": "Votre probabilité",
+    "vsPolymarket": "vs Polymarket",
+    "divergence": "⚡ {diff}% de divergence",
+    "forecasterTitle": "Forecaster",
+    "forecastScore": "Forecast Score",
+    "viewProfile": "Voir le profil complet →",
+    "ctaTitle": "Enregistrez vos propres prédictions",
+    "ctaButton": "Créer un compte gratuit →",
+    "ctaFine": "Gratuit · Sans carte requise",
+    "expires": "Expire le {date}",
+    "resolved": "Résolue"
+  },
   "HowItWorks": {
     "buttonTitle": "Comment ça marche",
     "label": "Comment ça marche",
