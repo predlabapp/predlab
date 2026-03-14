@@ -119,11 +119,15 @@ export function HowItWorksModal() {
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[9999]">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
-
-          <div className="absolute w-[calc(100%-2rem)] max-w-sm bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-2xl"
-            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl"
+            style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+            onClick={(e) => e.stopPropagation()}
           >
 
             {/* Close */}
