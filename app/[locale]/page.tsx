@@ -24,7 +24,7 @@ export default async function HomePage({
 
       {/* Navbar */}
       <div
-        className="sticky top-0 z-40 w-full border-b border-[var(--border)]"
+        className="fixed top-0 left-0 right-0 z-40 border-b border-[var(--border)]"
         style={{ backdropFilter: "blur(12px)", background: "rgba(10,10,15,0.85)" }}
       >
         <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
@@ -43,6 +43,9 @@ export default async function HomePage({
           </div>
         </nav>
       </div>
+
+      {/* Spacer for fixed navbar */}
+      <div className="h-[73px]" />
 
       {/* Hero with gradient background */}
       <div
