@@ -119,6 +119,7 @@
     "results": "{count} result",
     "resultsPlural": "{count} results",
     "clearFilters": "Clear filters",
+    "exportCSV": "Export CSV",
     "noResults": "No predictions found.",
     "backToDashboard": "Back to dashboard",
     "expiringSoonTitle": "{count, plural, one {1 prediction expiring soon} other {# predictions expiring soon}}",

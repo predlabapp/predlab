@@ -119,6 +119,7 @@
     "results": "{count} resultado",
     "resultsPlural": "{count} resultados",
     "clearFilters": "Limpar filtros",
+    "exportCSV": "Exportar CSV",
     "noResults": "Nenhuma previsão encontrada.",
     "backToDashboard": "Voltar ao dashboard",
     "expiringSoonTitle": "{count, plural, one {1 previsão a expirar em breve} other {# previsões a expirar em breve}}",

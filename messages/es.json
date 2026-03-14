@@ -119,6 +119,7 @@
     "results": "{count} resultado",
     "resultsPlural": "{count} resultados",
     "clearFilters": "Limpiar filtros",
+    "exportCSV": "Exportar CSV",
     "noResults": "No se encontraron predicciones.",
     "backToDashboard": "Volver al dashboard",
     "expiringSoonTitle": "{count, plural, one {1 predicción por vencer} other {# predicciones por vencer}}",

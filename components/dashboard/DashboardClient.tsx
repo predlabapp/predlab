@@ -10,7 +10,7 @@ import { StatsBar } from "@/components/dashboard/StatsBar"
 import { OnboardingState } from "@/components/dashboard/OnboardingState"
 import { HotMarketsBar } from "@/components/dashboard/HotMarketsBar"
 import { CATEGORIES } from "@/lib/utils"
-import { Plus, Search, Tag, X, Globe, Bell } from "lucide-react"
+import { Plus, Search, Tag, X, Globe, Bell, Download } from "lucide-react"
 import { Category } from "@prisma/client"
 import { useTranslations } from "next-intl"
 
@@ -125,6 +125,32 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
   const hasFilters =
     search || filterCategory !== "ALL" || filterStatus !== "all" || filterTag
 
+  function exportCSV() {
+    const headers = ["title", "probability", "category", "resolution", "createdAt", "expiresAt", "resolvedAt", "description", "evidence", "tags", "polymarketProbability", "isPublic"]
+    const rows = predictions.map((p) => [
+      `"${p.title.replace(/"/g, '""')}"`,
+      p.probability,
+      p.category,
+      p.resolution ?? "",
+      new Date(p.createdAt).toISOString(),
+      new Date(p.expiresAt).toISOString(),
+      p.resolvedAt ? new Date(p.resolvedAt).toISOString() : "",
+      `"${(p.description ?? "").replace(/"/g, '""')}"`,
+      `"${(p.evidence ?? "").replace(/"/g, '""')}"`,
+      `"${p.tags.join(", ")}"`,
+      p.polymarketProbability ?? "",
+      p.isPublic,
+    ])
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `predlab-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   function clearFilters() {
     setSearch("")
     setFilterCategory("ALL")
@@ -207,6 +233,16 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           <option value="pending">{t("pending")}</option>
           <option value="resolved">{t("resolved")}</option>
         </select>
+
+        <button
+          onClick={exportCSV}
+          className="btn-ghost flex items-center gap-2 shrink-0"
+          title={t("exportCSV")}
+          disabled={predictions.length === 0}
+        >
+          <Download size={16} />
+          <span className="hidden sm:inline">{t("exportCSV")}</span>
+        </button>
 
         <button
           onClick={() => setShowBrowseMarkets(true)}
