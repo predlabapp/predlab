@@ -6,6 +6,7 @@ import { HeroSection } from "@/components/landing/HeroSection"
 import { HotMarketsGrid } from "@/components/landing/HotMarketsGrid"
 import { HowItWorks } from "@/components/landing/HowItWorks"
 import { Differentials } from "@/components/landing/Differentials"
+import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 import { getTranslations } from "next-intl/server"
 
 export default async function HomePage({
@@ -30,6 +31,7 @@ export default async function HomePage({
           🔮 PredLab
         </Link>
         <div className="flex items-center gap-3">
+          <LocaleSwitcher />
           <Link href="/auth/signin" className="btn-ghost text-sm px-3 py-1.5">
             {t("navSignIn")}
           </Link>
