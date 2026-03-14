@@ -371,6 +371,9 @@
     "step3Detail": "Forecast Score verificado automáticamente por Polymarket",
     "step4Title": "Construye tu reputación",
     "step4Desc": "en la comunidad",
-    "step4Detail": "Perfil público con Forecast Score verificado y rankings"
+    "step4Detail": "Perfil público con Forecast Score verificado y rankings",
+    "next": "Siguiente",
+    "back": "Volver",
+    "close": "¡Entendido!"
   }
 }
