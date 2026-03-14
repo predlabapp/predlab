@@ -15,7 +15,7 @@
   },
   "Nav": {
     "signIn": "Entrar",
-    "signUp": "Registrarse →",
+    "signUp": "Registrarse",
     "home": "Inicio",
     "stats": "Estadísticas",
     "rankings": "Rankings",
@@ -25,7 +25,7 @@
   },
   "Landing": {
     "navSignIn": "Entrar",
-    "navSignUp": "Registrarse →",
+    "navSignUp": "Registrarse",
     "heroBadge": "En vivo · {count} predicciones hoy",
     "heroBadgeLoading": "En vivo · Cargando...",
     "heroHeadline1": "Todo el mundo predice.",
