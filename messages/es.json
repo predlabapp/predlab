@@ -120,7 +120,10 @@
     "resultsPlural": "{count} resultados",
     "clearFilters": "Limpiar filtros",
     "noResults": "No se encontraron predicciones.",
-    "backToDashboard": "Volver al dashboard"
+    "backToDashboard": "Volver al dashboard",
+    "expiringSoonTitle": "{count, plural, one {1 predicción por vencer} other {# predicciones por vencer}}",
+    "expiresTomorrow": "vence mañana",
+    "expiresInDays": "vence en {days} días"
   },
   "OnboardingState": {
     "title": "Elige un mercado arriba o crea tu primera predicción",
@@ -161,6 +164,8 @@
   },
   "PredictionCard": {
     "expired": "Expirada",
+    "expiresTomorrow": "Vence mañana",
+    "expiresInDays": "Vence en {days} días",
     "deleteTitle": "Eliminar (aún por {time})",
     "vsPolymarket": "vs Polymarket",
     "view": "ver ↗",

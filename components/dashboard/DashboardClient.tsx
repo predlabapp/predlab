@@ -10,7 +10,7 @@ import { StatsBar } from "@/components/dashboard/StatsBar"
 import { OnboardingState } from "@/components/dashboard/OnboardingState"
 import { HotMarketsBar } from "@/components/dashboard/HotMarketsBar"
 import { CATEGORIES } from "@/lib/utils"
-import { Plus, Search, Tag, X, Globe } from "lucide-react"
+import { Plus, Search, Tag, X, Globe, Bell } from "lucide-react"
 import { Category } from "@prisma/client"
 import { useTranslations } from "next-intl"
 
@@ -132,9 +132,40 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
     setFilterTag(null)
   }
 
+  const expiringSoon = predictions.filter((p) => {
+    if (p.resolution) return false
+    const days = Math.ceil((new Date(p.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    return days >= 1 && days <= 7
+  })
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <StatsBar />
+
+      {/* Expiring soon banner */}
+      {expiringSoon.length > 0 && (
+        <div className="mb-4 rounded-xl border border-[rgba(251,191,36,0.25)] bg-[rgba(251,191,36,0.05)] px-4 py-3 flex items-start gap-3">
+          <Bell size={15} className="text-[var(--yellow)] shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-[var(--yellow)] mb-1">
+              {t("expiringSoonTitle", { count: expiringSoon.length })}
+            </p>
+            <div className="flex flex-col gap-1">
+              {expiringSoon.map((p) => {
+                const days = Math.ceil((new Date(p.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                return (
+                  <p key={p.id} className="text-xs text-[var(--text-muted)] truncate">
+                    · {p.title} —{" "}
+                    <span className="text-[var(--yellow)]">
+                      {days === 1 ? t("expiresTomorrow") : t("expiresInDays", { days })}
+                    </span>
+                  </p>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <HotMarketsBar onMarketSelect={handleMarketSelected} />
 

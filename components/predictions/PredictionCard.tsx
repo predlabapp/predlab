@@ -68,6 +68,10 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
   const cat = CATEGORIES[prediction.category]
   const probColor = getProbabilityColor(prediction.probability)
   const expired = isExpired(prediction.expiresAt) && !prediction.resolution
+  const daysLeft = (!prediction.resolution && !expired)
+    ? Math.ceil((new Date(prediction.expiresAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null
+  const expiringSoon = daysLeft !== null && daysLeft >= 1 && daysLeft <= 7
 
   const [marketData, setMarketData] = useState<MarketData | null>(
     prediction.polymarketSlug
@@ -159,6 +163,10 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
               ) : expired ? (
                 <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(251,191,36,0.1)] text-[var(--yellow)]">
                   {t("expired")}
+                </span>
+              ) : expiringSoon ? (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-[rgba(251,191,36,0.08)] text-[var(--yellow)] border border-[rgba(251,191,36,0.2)]">
+                  ⚠️ {daysLeft === 1 ? t("expiresTomorrow") : t("expiresInDays", { days: daysLeft })}
                 </span>
               ) : null}
             </div>

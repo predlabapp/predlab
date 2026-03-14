@@ -120,7 +120,10 @@
     "resultsPlural": "{count} results",
     "clearFilters": "Clear filters",
     "noResults": "No predictions found.",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "expiringSoonTitle": "{count, plural, one {1 prediction expiring soon} other {# predictions expiring soon}}",
+    "expiresTomorrow": "expires tomorrow",
+    "expiresInDays": "expires in {days} days"
   },
   "OnboardingState": {
     "title": "Choose a market above or create your first prediction",
@@ -161,6 +164,8 @@
   },
   "PredictionCard": {
     "expired": "Expired",
+    "expiresTomorrow": "Expires tomorrow",
+    "expiresInDays": "Expires in {days} days",
     "deleteTitle": "Delete (still for {time})",
     "vsPolymarket": "vs Polymarket",
     "view": "view ↗",
