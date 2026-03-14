@@ -231,7 +231,8 @@
     "saving": "Guardando...",
     "save": "Guardar cambios",
     "updated": "Predicción actualizada.",
-    "updateError": "Error al actualizar predicción."
+    "updateError": "Error al actualizar predicción.",
+    "resolvedLocked": "Esta predicción ya fue resuelta y no puede ser editada."
   },
   "PredictionDetail": {
     "backToDashboard": "Volver al dashboard",

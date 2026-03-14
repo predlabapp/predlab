@@ -231,7 +231,8 @@
     "saving": "Enregistrement...",
     "save": "Enregistrer les modifications",
     "updated": "Prédiction mise à jour.",
-    "updateError": "Erreur lors de la mise à jour de la prédiction."
+    "updateError": "Erreur lors de la mise à jour de la prédiction.",
+    "resolvedLocked": "Cette prédiction a été résolue et ne peut plus être modifiée."
   },
   "PredictionDetail": {
     "backToDashboard": "Retour au tableau de bord",

@@ -62,8 +62,8 @@ export async function PATCH(
 
     if (!prediction) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
-    // Prevent re-resolving an already resolved prediction
-    if (data.resolution && prediction.resolution) {
+    // Block all edits after resolution
+    if (prediction.resolution) {
       return NextResponse.json(
         { error: "Esta previsão já foi resolvida e não pode ser alterada." },
         { status: 403 }

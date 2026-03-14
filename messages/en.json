@@ -231,7 +231,8 @@
     "saving": "Saving...",
     "save": "Save changes",
     "updated": "Prediction updated.",
-    "updateError": "Error updating prediction."
+    "updateError": "Error updating prediction.",
+    "resolvedLocked": "This prediction has been resolved and can no longer be edited."
   },
   "PredictionDetail": {
     "backToDashboard": "Back to dashboard",

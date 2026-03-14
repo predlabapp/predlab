@@ -231,7 +231,8 @@
     "saving": "A guardar...",
     "save": "Guardar alterações",
     "updated": "Previsão atualizada.",
-    "updateError": "Erro ao atualizar previsão."
+    "updateError": "Erro ao atualizar previsão.",
+    "resolvedLocked": "Esta previsão já foi resolvida e não pode ser editada."
   },
   "PredictionDetail": {
     "backToDashboard": "Voltar ao dashboard",

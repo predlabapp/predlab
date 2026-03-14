@@ -61,6 +61,13 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
           </button>
         </div>
 
+        {prediction.resolution && (
+          <div className="mx-5 mt-4 mb-2 px-3 py-2.5 rounded-lg bg-[var(--bg)] border border-[var(--border)] flex items-center gap-2">
+            <Lock size={13} className="text-[var(--text-muted)] shrink-0" />
+            <p className="text-xs text-[var(--text-muted)]">{t("resolvedLocked")}</p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Locked fields info */}
           <div className="rounded-lg bg-[var(--bg)] border border-[var(--border)] overflow-hidden">
@@ -100,6 +107,7 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               className="input-base resize-none h-20"
               placeholder={t("argumentPlaceholder")}
+              disabled={!!prediction.resolution}
             />
           </div>
 
@@ -113,6 +121,7 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
               onChange={(e) => setEvidence(e.target.value)}
               className="input-base resize-none h-16"
               placeholder={t("evidencePlaceholder")}
+              disabled={!!prediction.resolution}
             />
           </div>
 
@@ -128,6 +137,7 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
               onChange={(e) => setTags(e.target.value)}
               className="input-base"
               placeholder={t("tagsPlaceholder")}
+              disabled={!!prediction.resolution}
             />
           </div>
 
@@ -135,7 +145,8 @@ export function EditPredictionModal({ prediction, onClose, onSaved }: Props) {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setIsPublic(!isPublic)}
+              onClick={() => !prediction.resolution && setIsPublic(!isPublic)}
+              disabled={!!prediction.resolution}
               className={`w-9 h-5 rounded-full transition-colors relative ${
                 isPublic ? "bg-[var(--accent)]" : "bg-[var(--border-bright)]"
               }`}
