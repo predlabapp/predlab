@@ -19,17 +19,17 @@ export function HowItWorksModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center justify-center w-8 h-8 rounded-md hover:bg-[var(--bg-card)] border border-[var(--border)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
-        title={t("buttonTitle")}
+        className="flex items-center gap-1.5 px-2.5 py-2 rounded-md hover:bg-[var(--bg-card)] border border-[var(--border)] transition-colors text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
       >
-        <Info size={14} />
+        <Info size={13} />
+        <span className="text-xs font-mono">{t("buttonTitle")}</span>
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
-          <div className="relative w-full max-w-2xl bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-2xl animate-fade-in">
+          <div className="relative w-full sm:max-w-2xl bg-[var(--bg-card)] border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl animate-fade-in">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
               <div>
@@ -48,23 +48,28 @@ export function HowItWorksModal() {
               </button>
             </div>
 
-            {/* Cards */}
-            <div className="grid grid-cols-2 gap-3 p-6">
+            {/* Carousel */}
+            <div className="flex gap-3 overflow-x-auto px-6 py-6 snap-x snap-mandatory scrollbar-hide">
               {steps.map((s) => (
                 <div
                   key={s.number}
-                  className="bg-[var(--bg)] border border-[var(--border)] rounded-xl p-4 hover:border-[var(--border-bright)] transition-colors"
+                  className="flex-none w-52 snap-start bg-[var(--bg)] border border-[var(--border)] rounded-xl p-5 hover:border-[var(--border-bright)] transition-colors"
                 >
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">{s.emoji}</span>
-                    <span className="font-mono text-xs text-[var(--accent)]">{s.number}</span>
-                  </div>
-                  <p className="font-display text-sm font-bold text-[var(--text-primary)] mb-1">
+                  <div className="text-3xl mb-3">{s.emoji}</div>
+                  <p className="font-mono text-xs text-[var(--accent)] mb-2">{s.number}</p>
+                  <p className="font-display text-sm font-bold text-[var(--text-primary)] mb-2 leading-snug">
                     {s.title}
                   </p>
-                  <p className="text-xs text-[var(--text-secondary)] mb-2">{s.desc}</p>
-                  <p className="text-xs text-[var(--text-muted)] italic">{s.detail}</p>
+                  <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">{s.desc}</p>
+                  <p className="text-xs text-[var(--text-muted)] italic leading-relaxed">{s.detail}</p>
                 </div>
+              ))}
+            </div>
+
+            {/* Dots indicator */}
+            <div className="flex justify-center gap-1.5 pb-5">
+              {steps.map((_, i) => (
+                <div key={i} className="w-1.5 h-1.5 rounded-full bg-[var(--border-bright)]" />
               ))}
             </div>
           </div>
