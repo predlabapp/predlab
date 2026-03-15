@@ -13,273 +13,228 @@ export async function GET(
   _req: Request,
   { params }: { params: { id: string } }
 ) {
-  const post = await prisma.socialPost.findUnique({ where: { id: params.id } })
-  if (!post) return new Response("Not found", { status: 404 })
+  try {
+    const post = await prisma.socialPost.findUnique({ where: { id: params.id } })
+    if (!post) return new Response("Not found", { status: 404 })
 
-  // Pre-fetch Unsplash image as base64 so satori doesn't need to make external requests
-  let bgDataUrl: string | null = null
-  if (post.unsplashUrl) {
-    try {
-      const imgRes = await fetch(post.unsplashUrl)
-      if (imgRes.ok) {
-        const buf = Buffer.from(await imgRes.arrayBuffer())
-        bgDataUrl = `data:image/jpeg;base64,${buf.toString("base64")}`
-      }
-    } catch {}
-  }
+    const isLandscape = post.imageFormat === "landscape"
+    const W = isLandscape ? 1200 : 1080
+    const H = isLandscape ? 675 : 1080
+    const pColor = probColor(post.probability)
 
-  const isLandscape = post.imageFormat === "landscape"
-  const W = isLandscape ? 1200 : 1080
-  const H = isLandscape ? 675 : 1080
-  const pColor = probColor(post.probability)
+    const maxLen = isLandscape ? 80 : 90
+    const title = post.marketTitle.length > maxLen
+      ? post.marketTitle.slice(0, maxLen) + "…"
+      : post.marketTitle
+    const titleSize = isLandscape
+      ? (title.length > 70 ? 30 : title.length > 50 ? 34 : 40)
+      : (title.length > 80 ? 40 : title.length > 60 ? 46 : 54)
+    const probSize = isLandscape ? 84 : 112
 
-  const maxTitleLen = isLandscape ? 80 : 90
-  const title = post.marketTitle.length > maxTitleLen
-    ? post.marketTitle.slice(0, maxTitleLen) + "…"
-    : post.marketTitle
-  const titleFontSize = isLandscape
-    ? (title.length > 70 ? 32 : title.length > 50 ? 36 : 42)
-    : (title.length > 80 ? 42 : title.length > 60 ? 48 : 56)
-
-  const probFontSize = isLandscape ? 88 : 116
-  const padding = isLandscape ? "48px 64px" : "70px 80px"
-
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          width: `${W}px`,
-          height: `${H}px`,
-          backgroundColor: "#0a0a0f",
-          position: "relative",
-          fontFamily: "system-ui, sans-serif",
-        }}
-      >
-        {/* Background photo — embedded as base64 to avoid external fetch during render */}
-        {bgDataUrl && (
-          <img
-            src={bgDataUrl}
-            style={{
-              position: "absolute",
-              top: 0, left: 0,
-              width: "100%", height: "100%",
-              objectFit: "cover",
-              opacity: 0.28,
-            }}
-          />
-        )}
-
-        {/* Gradient overlay */}
+    return new ImageResponse(
+      (
         <div
           style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0, bottom: 0,
-            background: isLandscape
-              ? "linear-gradient(to right, rgba(10,10,15,0.97) 35%, rgba(10,10,15,0.5) 70%, rgba(10,10,15,0.3) 100%)"
-              : "linear-gradient(to bottom, rgba(10,10,15,0.35) 0%, rgba(10,10,15,0.65) 45%, rgba(10,10,15,0.97) 100%)",
             display: "flex",
-          }}
-        />
-
-        {/* Top accent line */}
-        <div
-          style={{
-            position: "absolute",
-            top: 0, left: 0, right: 0,
-            height: 5,
-            background: "linear-gradient(90deg, #7c6af7, #a78bfa)",
-            display: "flex",
-          }}
-        />
-
-        {/* WATERMARK — top left, always visible, Polymarket style */}
-        <div
-          style={{
-            position: "absolute",
-            top: isLandscape ? 24 : 32,
-            left: isLandscape ? 32 : 40,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
+            width: `${W}px`,
+            height: `${H}px`,
+            position: "relative",
+            fontFamily: "system-ui, sans-serif",
+            background: "linear-gradient(135deg, #0a0a0f 0%, #12101e 40%, #0d0a1a 100%)",
           }}
         >
-          <span style={{ fontSize: 16, lineHeight: 1 }}>🔮</span>
-          <span
+          {/* Decorative orb */}
+          <div
             style={{
-              fontSize: isLandscape ? 20 : 22,
-              fontWeight: 800,
-              color: "#ffffff",
-              letterSpacing: 0.5,
+              position: "absolute",
+              top: isLandscape ? -80 : -120,
+              right: isLandscape ? -80 : -120,
+              width: isLandscape ? 400 : 600,
+              height: isLandscape ? 400 : 600,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(124,106,247,0.25) 0%, rgba(124,106,247,0) 70%)",
+              display: "flex",
             }}
-          >
-            PredLab
-          </span>
-        </div>
+          />
 
-        {/* Content */}
-        {isLandscape ? (
-          /* LANDSCAPE layout — left-aligned content */
+          {/* Top accent line */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0,
+              height: 5,
+              background: "linear-gradient(90deg, #7c6af7, #a78bfa, #7c6af7)",
+              display: "flex",
+            }}
+          />
+
+          {/* Subtle grid pattern */}
           <div
             style={{
               position: "absolute",
               inset: 0,
+              backgroundImage: "linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px)",
+              backgroundSize: isLandscape ? "60px 60px" : "80px 80px",
               display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              padding,
-              paddingTop: "80px",
-              maxWidth: "720px",
+            }}
+          />
+
+          {/* Watermark — top left */}
+          <div
+            style={{
+              position: "absolute",
+              top: isLandscape ? 28 : 36,
+              left: isLandscape ? 40 : 48,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
             }}
           >
-            {/* TRENDING badge */}
             <div
               style={{
+                fontSize: isLandscape ? 20 : 22,
+                fontWeight: 800,
+                color: "#ffffff",
+                letterSpacing: 0.5,
                 display: "flex",
                 alignItems: "center",
-                marginBottom: 28,
+                gap: 6,
               }}
             >
-              <div
-                style={{
-                  background: "rgba(124,106,247,0.18)",
-                  border: "1.5px solid rgba(124,106,247,0.45)",
-                  borderRadius: 8,
-                  padding: "6px 18px",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#a78bfa",
-                  letterSpacing: 2,
-                }}
-              >
-                🔥 TRENDING
-              </div>
+              🔮 PredLab
             </div>
+          </div>
 
-            {/* Title */}
+          {/* Main content */}
+          {isLandscape ? (
             <div
               style={{
-                fontSize: titleFontSize,
-                fontWeight: 700,
-                color: "#e8e8f0",
-                lineHeight: 1.3,
-                marginBottom: 32,
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                padding: "64px 72px",
+                paddingTop: "88px",
               }}
             >
-              {title}
-            </div>
-
-            {/* Probability */}
-            <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
-              <div
-                style={{
-                  fontSize: probFontSize,
-                  fontWeight: 900,
-                  color: pColor,
-                  lineHeight: 1,
-                  fontFamily: "monospace",
-                }}
-              >
-                {post.probability}%
-              </div>
+              {/* Badge */}
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                  paddingBottom: 10,
+                  marginBottom: 28,
                 }}
               >
-                <div style={{ fontSize: 18, color: "#8888aa" }}>market probability</div>
-                <div style={{ fontSize: 15, color: "#555570" }}>via Polymarket</div>
+                <div
+                  style={{
+                    background: "rgba(124,106,247,0.2)",
+                    border: "1.5px solid rgba(124,106,247,0.5)",
+                    borderRadius: 8,
+                    padding: "6px 18px",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: "#a78bfa",
+                    letterSpacing: 2,
+                  }}
+                >
+                  🔥 TRENDING
+                </div>
               </div>
-            </div>
 
-            {/* CTA */}
-            <div style={{ marginTop: 24, fontSize: 18, color: "#7c6af7", fontWeight: 600 }}>
-              Record your prediction → predlab.app
-            </div>
-          </div>
-        ) : (
-          /* SQUARE layout — stacked content */
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              padding,
-              justifyContent: "space-between",
-            }}
-          >
-            {/* Top spacer (watermark already positioned absolutely) */}
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              {/* Title */}
               <div
                 style={{
-                  background: "rgba(124,106,247,0.18)",
-                  border: "1.5px solid rgba(124,106,247,0.45)",
-                  borderRadius: 10,
-                  padding: "8px 22px",
-                  fontSize: 18,
-                  fontWeight: 700,
-                  color: "#a78bfa",
-                  letterSpacing: 2,
-                }}
-              >
-                🔥 TRENDING
-              </div>
-            </div>
-
-            {/* Bottom section */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-              <div
-                style={{
-                  fontSize: titleFontSize,
+                  fontSize: titleSize,
                   fontWeight: 700,
                   color: "#e8e8f0",
-                  lineHeight: 1.25,
-                  maxWidth: "960px",
+                  lineHeight: 1.3,
+                  marginBottom: 36,
+                  maxWidth: "900px",
                 }}
               >
                 {title}
               </div>
 
-              <div style={{ display: "flex", alignItems: "flex-end", gap: 20 }}>
-                <div
-                  style={{
-                    fontSize: probFontSize,
-                    fontWeight: 900,
-                    color: pColor,
-                    lineHeight: 1,
-                    fontFamily: "monospace",
-                  }}
-                >
+              {/* Probability */}
+              <div style={{ display: "flex", alignItems: "flex-end", gap: 18 }}>
+                <div style={{ fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
                   {post.probability}%
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                    paddingBottom: 14,
-                  }}
-                >
-                  <div style={{ fontSize: 26, color: "#8888aa", fontWeight: 500 }}>
-                    market probability
-                  </div>
-                  <div style={{ fontSize: 20, color: "#555570" }}>via Polymarket</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingBottom: 10 }}>
+                  <div style={{ fontSize: 18, color: "#8888aa" }}>market probability</div>
+                  <div style={{ fontSize: 14, color: "#555570" }}>via Polymarket</div>
                 </div>
               </div>
 
-              <div style={{ fontSize: 24, color: "#7c6af7", fontWeight: 600 }}>
+              {/* CTA */}
+              <div style={{ marginTop: 28, fontSize: 17, color: "#7c6af7", fontWeight: 600 }}>
                 Record your prediction → predlab.app
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    ),
-    { width: W, height: H }
-  )
+          ) : (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                padding: "80px",
+                justifyContent: "space-between",
+              }}
+            >
+              {/* Top: badge */}
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <div
+                  style={{
+                    background: "rgba(124,106,247,0.2)",
+                    border: "1.5px solid rgba(124,106,247,0.5)",
+                    borderRadius: 10,
+                    padding: "8px 22px",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: "#a78bfa",
+                    letterSpacing: 2,
+                  }}
+                >
+                  🔥 TRENDING
+                </div>
+              </div>
+
+              {/* Bottom */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+                <div
+                  style={{
+                    fontSize: titleSize,
+                    fontWeight: 700,
+                    color: "#e8e8f0",
+                    lineHeight: 1.25,
+                  }}
+                >
+                  {title}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "flex-end", gap: 20 }}>
+                  <div style={{ fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
+                    {post.probability}%
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14 }}>
+                    <div style={{ fontSize: 24, color: "#8888aa", fontWeight: 500 }}>market probability</div>
+                    <div style={{ fontSize: 18, color: "#555570" }}>via Polymarket</div>
+                  </div>
+                </div>
+
+                <div style={{ fontSize: 22, color: "#7c6af7", fontWeight: 600 }}>
+                  Record your prediction → predlab.app
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ),
+      { width: W, height: H }
+    )
+  } catch (err) {
+    console.error("[og/social] Error:", err)
+    return new Response(`Error generating image: ${String(err)}`, { status: 500 })
+  }
 }
