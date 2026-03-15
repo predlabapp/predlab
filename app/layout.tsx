@@ -18,6 +18,13 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://predlab.app"),
   icons: { icon: "/favicon.svg" },
+  openGraph: {
+    images: [{ url: "/og-default.svg", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: ["/og-default.svg"],
+  },
 }
 
 export default function RootLayout({

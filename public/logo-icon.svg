@@ -1,30 +1,36 @@
-<svg width="80" height="80" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="400" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <radialGradient id="b" cx="42%" cy="38%" r="70%">
       <stop offset="0%" stop-color="#2d1b55"/>
       <stop offset="45%" stop-color="#130a28"/>
       <stop offset="100%" stop-color="#06030f"/>
     </radialGradient>
-    <radialGradient id="l" cx="25%" cy="20%" r="55%">
+    <radialGradient id="light" cx="25%" cy="20%" r="55%">
       <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.35"/>
       <stop offset="40%" stop-color="#a78bfa" stop-opacity="0.12"/>
       <stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="r" cx="75%" cy="78%" r="45%">
+    <radialGradient id="rim" cx="75%" cy="78%" r="45%">
       <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.4"/>
       <stop offset="100%" stop-color="#4c1d95" stop-opacity="0"/>
     </radialGradient>
   </defs>
+  <!-- Background -->
   <rect width="100" height="100" rx="22" fill="#0a0a0f"/>
+  <!-- Stand -->
   <ellipse cx="50" cy="84" rx="19" ry="4" fill="#2a1560" opacity="0.5"/>
   <rect x="37" y="77" width="26" height="8" rx="4" fill="#130a28"/>
+  <!-- Orb -->
   <circle cx="50" cy="44" r="33" fill="url(#b)"/>
-  <circle cx="50" cy="44" r="33" fill="url(#l)"/>
-  <circle cx="50" cy="44" r="33" fill="url(#r)"/>
+  <circle cx="50" cy="44" r="33" fill="url(#light)"/>
+  <circle cx="50" cy="44" r="33" fill="url(#rim)"/>
+  <!-- Star 1 — large, centre-left -->
   <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#d97706"/>
   <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 2 — medium, top-right -->
   <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#d97706"/>
   <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 3 — small, bottom-right -->
   <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#d97706"/>
   <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#fbbf24" opacity="0.55"/>
 </svg>
