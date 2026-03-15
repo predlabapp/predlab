@@ -1,0 +1,66 @@
+<svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bb1" cx="42%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#2d1b55"/>
+      <stop offset="45%" stop-color="#130a28"/>
+      <stop offset="100%" stop-color="#06030f"/>
+    </radialGradient>
+    <radialGradient id="blight1" cx="28%" cy="22%" r="55%">
+      <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.38"/>
+      <stop offset="40%" stop-color="#a78bfa" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="brim1" cx="75%" cy="78%" r="45%">
+      <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#4c1d95" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ib1" cx="42%" cy="38%" r="70%">
+      <stop offset="0%" stop-color="#2d1b55"/>
+      <stop offset="45%" stop-color="#130a28"/>
+      <stop offset="100%" stop-color="#06030f"/>
+    </radialGradient>
+    <radialGradient id="il1" cx="25%" cy="20%" r="55%">
+      <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1500" height="500" fill="#0a0a0f"/>
+  <line x1="0" y1="125" x2="1500" y2="125" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="0" y1="250" x2="1500" y2="250" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="0" y1="375" x2="1500" y2="375" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="375" y1="0" x2="375" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="750" y1="0" x2="750" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="1125" y1="0" x2="1125" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+  <!-- Large orb right -->
+  <ellipse cx="1220" cy="415" rx="200" ry="14" fill="#2a1560" opacity="0.5"/>
+  <rect x="1150" y="385" width="140" height="28" rx="14" fill="#130a28"/>
+  <circle cx="1220" cy="222" r="195" fill="url(#bb1)"/>
+  <circle cx="1220" cy="222" r="195" fill="url(#blight1)"/>
+  <circle cx="1220" cy="222" r="195" fill="url(#brim1)"/>
+  <!-- Star 1 — large, centre-left -->
+  <path d="M1184,171 L1197,214 L1240,228 L1197,242 L1184,285 L1171,242 L1128,228 L1171,214 Z" fill="#d97706"/>
+  <path d="M1184,171 L1197,214 L1240,228 L1197,242 L1184,285 L1171,242 L1128,228 L1171,214 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 2 — medium, top-right -->
+  <path d="M1297,108 L1306,136 L1334,145 L1306,154 L1297,182 L1288,154 L1260,145 L1288,136 Z" fill="#d97706"/>
+  <path d="M1297,108 L1306,136 L1334,145 L1306,154 L1297,182 L1288,154 L1260,145 L1288,136 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 3 — small, bottom-right -->
+  <path d="M1297,292 L1303,310 L1321,316 L1303,322 L1297,340 L1291,322 L1273,316 L1291,310 Z" fill="#d97706"/>
+  <path d="M1297,292 L1303,310 L1321,316 L1303,322 L1297,340 L1291,322 L1273,316 L1291,310 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Small icon left -->
+  <rect x="100" y="158" width="112" height="112" rx="25" fill="#111118" stroke="#1e1e2e" stroke-width="1"/>
+  <ellipse cx="156" cy="252" rx="18" ry="4" fill="#2a1560" opacity="0.5"/>
+  <rect x="138" y="246" width="36" height="9" rx="4.5" fill="#130a28"/>
+  <circle cx="156" cy="200" r="34" fill="url(#ib1)"/>
+  <circle cx="156" cy="200" r="34" fill="url(#il1)"/>
+  <path d="M150,188 L152.2,195.2 L159.5,197.5 L152.2,199.8 L150,207 L147.8,199.8 L140.5,197.5 L147.8,195.2 Z" fill="#d97706"/>
+  <path d="M150,188 L152.2,195.2 L159.5,197.5 L152.2,199.8 L150,207 L147.8,199.8 L140.5,197.5 L147.8,195.2 Z" fill="#fbbf24" opacity="0.55"/>
+  <path d="M169,178 L170.5,182.8 L175.3,184.3 L170.5,185.8 L169,190.6 L167.5,185.8 L162.7,184.3 L167.5,182.8 Z" fill="#d97706"/>
+  <path d="M169,178 L170.5,182.8 L175.3,184.3 L170.5,185.8 L169,190.6 L167.5,185.8 L162.7,184.3 L167.5,182.8 Z" fill="#fbbf24" opacity="0.55"/>
+  <path d="M169,207 L170,210 L173,211 L170,212 L169,215 L168,212 L165,211 L168,210 Z" fill="#d97706"/>
+  <path d="M169,207 L170,210 L173,211 L170,212 L169,215 L168,212 L165,211 L168,210 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Wordmark -->
+  <text x="238" y="237" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="92" letter-spacing="-2" fill="#e8e8f0">pred</text>
+  <text x="530" y="237" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="92" letter-spacing="-2" fill="#7c6af7">lab</text>
+  <text x="240" y="290" font-family="'DM Mono','Courier New',monospace" font-size="18" letter-spacing="3" fill="#555570">TRACK · COMPARE · RANK</text>
+  <text x="240" y="334" font-family="'DM Mono','Courier New',monospace" font-size="16" letter-spacing="1" fill="#3d3580">predlab.app</text>
+</svg>

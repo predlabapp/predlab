@@ -16,11 +16,8 @@ export function Navbar() {
   return (
     <nav className="border-b border-[var(--border)] px-4 py-3 sticky top-0 z-40 bg-[var(--bg)]/90 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <Link
-          href="/dashboard"
-          className="font-display text-base sm:text-lg font-bold gradient-text"
-        >
-          🔮 PredLab
+        <Link href="/dashboard" className="flex items-center">
+          <img src="/logo-horizontal.svg" alt="PredLab" height={28} style={{ height: 28 }} />
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">

@@ -17,6 +17,7 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://predlab.app"),
+  icons: { icon: "/favicon.svg" },
 }
 
 export default function RootLayout({
