@@ -5,7 +5,7 @@ import { usePathname } from "@/navigation"
 import { Link } from "@/navigation"
 import { signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Home, BarChart2, Trophy, MoreHorizontal, X, LogOut } from "lucide-react"
+import { Home, BarChart2, Trophy, Users, MoreHorizontal, X, LogOut } from "lucide-react"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 
@@ -61,6 +61,12 @@ export function MobileBottomNav() {
           <Link href="/dashboard/rankings" className={tabClass("/dashboard/rankings")} style={tabColor("/dashboard/rankings")}>
             <Trophy size={20} />
             <span style={{ fontSize: 10 }}>{t("rankings")}</span>
+          </Link>
+
+          {/* Bolões */}
+          <Link href="/dashboard/bolaos" className={tabClass("/dashboard/bolaos")} style={tabColor("/dashboard/bolaos")}>
+            <Users size={20} />
+            <span style={{ fontSize: 10 }}>Bolões</span>
           </Link>
 
           {/* More */}

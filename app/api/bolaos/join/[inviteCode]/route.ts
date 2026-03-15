@@ -58,6 +58,8 @@ export async function GET(
   _req: Request,
   { params }: { params: { inviteCode: string } }
 ) {
+  const session = await getServerSession(authOptions)
+
   const bolao = await prisma.bolao.findUnique({
     where: { inviteCode: params.inviteCode },
     include: { _count: { select: { members: true } } },
@@ -65,6 +67,14 @@ export async function GET(
 
   if (!bolao) {
     return NextResponse.json({ error: "Bolão não encontrado." }, { status: 404 })
+  }
+
+  let isAlreadyMember = false
+  if (session?.user?.id) {
+    const membership = await prisma.bolaoMember.findUnique({
+      where: { bolaoId_userId: { bolaoId: bolao.id, userId: session.user.id } },
+    })
+    isAlreadyMember = !!membership
   }
 
   return NextResponse.json({
@@ -77,5 +87,6 @@ export async function GET(
     endsAt: bolao.endsAt,
     isExpired: bolao.endsAt ? bolao.endsAt < new Date() : false,
     isFull: bolao.maxMembers ? bolao._count.members >= bolao.maxMembers : false,
+    isAlreadyMember,
   })
 }

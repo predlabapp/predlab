@@ -124,7 +124,13 @@ export async function GET(req: Request) {
       const c = preds.filter((p) => p.prediction.resolution === "CORRECT").length
       return { name: m.user.name ?? "—", score: preds.length > 0 ? Math.round((c / preds.length) * 100) : 0 }
     })
-    const top = memberScores.sort((a, b) => b.score - a.score)[0] ?? null
+    const sortedScores = [...memberScores].sort((a, b) => b.score - a.score)
+    const top = sortedScores[0] ?? null
+    const myPositionIdx = sortedScores.findIndex((s) => {
+      const m = bolao.members.find((bm) => bm.user.name === s.name)
+      return m?.userId === session.user.id
+    })
+    const myPosition = myPositionIdx >= 0 ? myPositionIdx + 1 : null
 
     // Recent activity (last 24h)
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
@@ -140,6 +146,7 @@ export async function GET(req: Request) {
       memberCount: bolao._count.members,
       myRole: role,
       myScore,
+      myPosition,
       topForecaster: top,
       recentActivity,
       endsAt: bolao.endsAt,

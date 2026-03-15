@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
-import { LogOut, BarChart2, ChevronDown, Trophy } from "lucide-react"
+import { LogOut, BarChart2, ChevronDown, Trophy, Users } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
@@ -35,6 +35,14 @@ export function Navbar() {
             title={t("rankings")}
           >
             <Trophy size={17} />
+          </Link>
+
+          <Link
+            href="/dashboard/bolaos"
+            className="hidden sm:flex p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            title="Bolões"
+          >
+            <Users size={17} />
           </Link>
 
           <div className="hidden sm:flex"><HowItWorksModal /></div>
