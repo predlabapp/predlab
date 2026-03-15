@@ -68,16 +68,6 @@ export async function GET(
             }}
           />
 
-          {/* Subtle grid pattern */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundImage: "linear-gradient(rgba(124,106,247,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(124,106,247,0.03) 1px, transparent 1px)",
-              backgroundSize: isLandscape ? "60px 60px" : "80px 80px",
-              display: "flex",
-            }}
-          />
 
           {/* Watermark — top left */}
           <div
