@@ -197,7 +197,7 @@ function oauthHeader(
   const signingKey = `${pct(apiSecret)}&${pct(accessTokenSecret)}`
   const signature = crypto.createHmac("sha1", signingKey).update(baseStr).digest("base64")
 
-  const headerParams = { ...oauthBase, oauth_signature: signature }
+  const headerParams: Record<string, string> = { ...oauthBase, oauth_signature: signature }
   return (
     "OAuth " +
     Object.keys(headerParams)
@@ -214,7 +214,7 @@ async function uploadMediaToTwitter(imageBuffer: Buffer): Promise<string> {
   const auth = oauthHeader("POST", url)
 
   const form = new FormData()
-  form.append("media", new Blob([imageBuffer], { type: "image/png" }), "card.png")
+  form.append("media", new Blob([imageBuffer.buffer as ArrayBuffer], { type: "image/png" }), "card.png")
 
   const res = await fetch(url, {
     method: "POST",
