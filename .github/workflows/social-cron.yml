@@ -1,0 +1,69 @@
+name: Social Automation
+
+on:
+  schedule:
+    - cron: "0 11 * * *"   # Twitter slot 1 — 08:00 Brasilia
+    - cron: "0 15 * * *"   # Instagram slot 1 + Twitter slot 2 — 12:00 Brasilia
+    - cron: "0 20 * * *"   # Twitter slot 3 — 17:00 Brasilia
+    - cron: "0 22 * * *"   # Instagram slot 2 + Twitter slot 4 — 19:00 Brasilia
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform (instagram or twitter)"
+        required: true
+        default: "twitter"
+      slot:
+        description: "Slot number (1-4)"
+        required: true
+        default: "1"
+
+jobs:
+  social-post:
+    runs-on: ubuntu-latest
+    steps:
+      # Twitter slot 1 — 08:00 Brasilia
+      - name: "Twitter slot 1 (08:00 BRT)"
+        if: github.event.schedule == '0 11 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=twitter&slot=1" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      # Instagram slot 1 + Twitter slot 2 — 12:00 Brasilia
+      - name: "Instagram slot 1 (12:00 BRT)"
+        if: github.event.schedule == '0 15 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=instagram&slot=1" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      - name: "Twitter slot 2 (12:00 BRT)"
+        if: github.event.schedule == '0 15 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=twitter&slot=2" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      # Twitter slot 3 — 17:00 Brasilia
+      - name: "Twitter slot 3 (17:00 BRT)"
+        if: github.event.schedule == '0 20 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=twitter&slot=3" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      # Instagram slot 2 + Twitter slot 4 — 19:00 Brasilia
+      - name: "Instagram slot 2 (19:00 BRT)"
+        if: github.event.schedule == '0 22 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=instagram&slot=2" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      - name: "Twitter slot 4 (19:00 BRT)"
+        if: github.event.schedule == '0 22 * * *'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=twitter&slot=4" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
+
+      # Manual dispatch
+      - name: "Manual dispatch"
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          curl -sf -X GET "${{ secrets.APP_URL }}/api/cron/social?platform=${{ github.event.inputs.platform }}&slot=${{ github.event.inputs.slot }}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" | cat
