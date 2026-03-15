@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import crypto from "crypto"
 import { put } from "@vercel/blob"
+import { TwitterApi } from "twitter-api-v2"
 
 function isAuthorized(req: NextRequest): boolean {
   const auth = req.headers.get("authorization")
@@ -162,111 +162,26 @@ async function postToInstagram(imageUrl: string, caption: string): Promise<strin
 
 // ─── Twitter / X ────────────────────────────────────────────────────────────
 
-function pct(str: string): string {
-  return encodeURIComponent(str)
-    .replace(/!/g, "%21").replace(/'/g, "%27")
-    .replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A")
-}
-
-function oauthHeader(
-  method: string,
-  url: string,
-  bodyParams: Record<string, string> = {}
-): string {
-  const apiKey = process.env.X_API_KEY ?? ""
-  const apiSecret = process.env.X_API_SECRET ?? ""
-  const accessToken = process.env.X_ACCESS_TOKEN ?? ""
-  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET ?? ""
-
-  const oauthBase: Record<string, string> = {
-    oauth_consumer_key: apiKey,
-    oauth_nonce: crypto.randomBytes(16).toString("hex"),
-    oauth_signature_method: "HMAC-SHA1",
-    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
-    oauth_token: accessToken,
-    oauth_version: "1.0",
-  }
-
-  const allParams = { ...oauthBase, ...bodyParams }
-  const paramStr = Object.keys(allParams)
-    .sort()
-    .map((k) => `${pct(k)}=${pct(allParams[k])}`)
-    .join("&")
-
-  const baseStr = [method.toUpperCase(), pct(url), pct(paramStr)].join("&")
-  const signingKey = `${pct(apiSecret)}&${pct(accessTokenSecret)}`
-  const signature = crypto.createHmac("sha1", signingKey).update(baseStr).digest("base64")
-
-  const headerParams: Record<string, string> = { ...oauthBase, oauth_signature: signature }
-  return (
-    "OAuth " +
-    Object.keys(headerParams)
-      .sort()
-      .map((k) => `${pct(k)}="${pct(headerParams[k])}"`)
-      .join(", ")
-  )
-}
-
-async function uploadMediaToTwitter(imageBuffer: Buffer): Promise<string> {
-  const url = "https://upload.twitter.com/1.1/media/upload.json"
-
-  // Use multipart/form-data — body params NOT included in OAuth signature
-  const auth = oauthHeader("POST", url)
-
-  const form = new FormData()
-  form.append("media", new Blob([imageBuffer.buffer as ArrayBuffer], { type: "image/png" }), "card.png")
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: auth },
-    body: form,
-  })
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Twitter media upload failed (${res.status}): ${text}`)
-  }
-
-  const data = await res.json()
-  if (!data.media_id_string) throw new Error(`No media_id in response: ${JSON.stringify(data)}`)
-  return data.media_id_string as string
-}
-
-async function postTweet(text: string, mediaId: string): Promise<string> {
-  const url = "https://api.twitter.com/2/tweets"
-
-  // JSON body — NOT included in OAuth signature
-  const auth = oauthHeader("POST", url)
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { Authorization: auth, "Content-Type": "application/json" },
-    body: JSON.stringify({ text, media: { media_ids: [mediaId] } }),
-  })
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Tweet post failed (${res.status}): ${text}`)
-  }
-
-  const data = await res.json()
-  const tweetId = data.data?.id
-  if (!tweetId) throw new Error(`No tweet ID in response: ${JSON.stringify(data)}`)
-  return tweetId as string
-}
-
 async function postToTwitter(blobUrl: string, caption: string): Promise<string> {
+  const client = new TwitterApi({
+    appKey: process.env.X_API_KEY ?? "",
+    appSecret: process.env.X_API_SECRET ?? "",
+    accessToken: process.env.X_ACCESS_TOKEN ?? "",
+    accessSecret: process.env.X_ACCESS_TOKEN_SECRET ?? "",
+  })
+
   // 1. Fetch image from Blob CDN
   const imgRes = await fetch(blobUrl)
   if (!imgRes.ok) throw new Error(`Failed to fetch blob image: ${imgRes.status}`)
-  const arrayBuf = await imgRes.arrayBuffer()
-  const imageBuffer = Buffer.from(arrayBuf)
+  const imageBuffer = Buffer.from(await imgRes.arrayBuffer())
 
-  // 2. Upload image to Twitter
-  const mediaId = await uploadMediaToTwitter(imageBuffer)
+  // 2. Upload image
+  const mediaId = await client.v1.uploadMedia(imageBuffer, { mimeType: "image/png" })
 
-  // 3. Post tweet with image
-  const tweetId = await postTweet(caption, mediaId)
+  // 3. Post tweet
+  const tweet = await client.v2.tweet({ text: caption, media: { media_ids: [mediaId] } })
+  const tweetId = tweet.data?.id
+  if (!tweetId) throw new Error(`No tweet ID in response`)
   return tweetId
 }
 
