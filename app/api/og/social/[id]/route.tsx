@@ -16,6 +16,18 @@ export async function GET(
   const post = await prisma.socialPost.findUnique({ where: { id: params.id } })
   if (!post) return new Response("Not found", { status: 404 })
 
+  // Pre-fetch Unsplash image as base64 so satori doesn't need to make external requests
+  let bgDataUrl: string | null = null
+  if (post.unsplashUrl) {
+    try {
+      const imgRes = await fetch(post.unsplashUrl)
+      if (imgRes.ok) {
+        const buf = Buffer.from(await imgRes.arrayBuffer())
+        bgDataUrl = `data:image/jpeg;base64,${buf.toString("base64")}`
+      }
+    } catch {}
+  }
+
   const isLandscape = post.imageFormat === "landscape"
   const W = isLandscape ? 1200 : 1080
   const H = isLandscape ? 675 : 1080
@@ -45,10 +57,10 @@ export async function GET(
           fontFamily: "system-ui, sans-serif",
         }}
       >
-        {/* Background photo */}
-        {post.unsplashUrl && (
+        {/* Background photo — embedded as base64 to avoid external fetch during render */}
+        {bgDataUrl && (
           <img
-            src={post.unsplashUrl}
+            src={bgDataUrl}
             style={{
               position: "absolute",
               top: 0, left: 0,
