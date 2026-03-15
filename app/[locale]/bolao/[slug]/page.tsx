@@ -10,6 +10,7 @@ import { BolaoInvite } from "@/components/bolaos/BolaoInvite"
 import { AddPredictionToBolao } from "@/components/bolaos/AddPredictionToBolao"
 import { BolaoPayments } from "@/components/bolaos/BolaoPayments"
 import { GrupoMercados } from "@/components/bolaos/GrupoMercados"
+import { BolaoMembers } from "@/components/bolaos/BolaoMembers"
 import { CATEGORIES, getProbabilityColor, formatDate } from "@/lib/utils"
 
 interface BolaoData {
@@ -28,10 +29,11 @@ interface BolaoData {
   myRole: "ADMIN" | "MEMBER" | null
   isMember: boolean
   ranking: any[]
+  members: { userId: string; name: string; image: string | null; nickname: string | null; role: "ADMIN" | "MEMBER"; joinedAt: string }[]
   predictions: any[]
 }
 
-type Tab = "ranking" | "previsoes" | "mercados" | "pagamentos"
+type Tab = "ranking" | "previsoes" | "mercados" | "pagamentos" | "membros"
 
 export default function BolaoPage() {
   const params = useParams()
@@ -95,7 +97,7 @@ export default function BolaoPage() {
     )
   }
 
-  const { bolao, myRole, isMember, ranking, predictions } = data
+  const { bolao, myRole, isMember, ranking, members, predictions } = data
   const isAdmin = myRole === "ADMIN"
   const currentUserId = session?.user?.id ?? null
   const existingPredictionIds = predictions.map((p: any) => p.predictionId)
@@ -111,7 +113,8 @@ export default function BolaoPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "ranking", label: "Ranking" },
     { key: "previsoes", label: "Previsões" },
-    { key: "mercados", label: "Mercados do Grupo" },
+    { key: "mercados", label: "Mercados" },
+    { key: "membros", label: `Membros (${bolao.memberCount})` },
     { key: "pagamentos", label: "Pagamentos" },
   ]
 
@@ -305,6 +308,18 @@ export default function BolaoPage() {
             isMember={isMember}
             currentUserId={currentUserId}
             isAdmin={isAdmin}
+          />
+        )}
+
+        {activeTab === "membros" && (
+          <BolaoMembers
+            slug={slug}
+            members={members ?? []}
+            currentUserId={currentUserId}
+            creatorId={bolao.creatorId}
+            isAdmin={isAdmin}
+            inviteCode={inviteCode}
+            onRefresh={load}
           />
         )}
 

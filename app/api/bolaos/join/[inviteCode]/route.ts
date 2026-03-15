@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { notifyBolaoJoin } from "@/lib/notifications"
 
 export async function POST(
   _req: Request,
@@ -14,7 +15,10 @@ export async function POST(
 
   const bolao = await prisma.bolao.findUnique({
     where: { inviteCode: params.inviteCode },
-    include: { _count: { select: { members: true } } },
+    include: {
+      _count: { select: { members: true } },
+      members: { where: { role: "ADMIN" }, select: { userId: true } },
+    },
   })
 
   if (!bolao) {
@@ -46,6 +50,11 @@ export async function POST(
       role: "MEMBER",
     },
   })
+
+  // Notify admins
+  const adminIds = bolao.members.map((m) => m.userId).filter((id) => id !== session.user.id)
+  const joinerName = session.user.name ?? session.user.email ?? "Alguém"
+  notifyBolaoJoin(bolao.name, bolao.slug, joinerName, adminIds).catch(() => {})
 
   return NextResponse.json({
     bolao: { id: bolao.id, name: bolao.name, slug: bolao.slug },

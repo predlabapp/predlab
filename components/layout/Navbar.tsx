@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
+import { NotificationBell } from "@/components/layout/NotificationBell"
 
 export function Navbar() {
   const { data: session } = useSession()
@@ -45,6 +46,7 @@ export function Navbar() {
             <Users size={17} />
           </Link>
 
+          <div className="hidden sm:flex"><NotificationBell /></div>
           <div className="hidden sm:flex"><HowItWorksModal /></div>
           <div className="hidden sm:flex"><LocaleSwitcher /></div>
 

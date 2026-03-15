@@ -112,6 +112,14 @@ export async function GET(
     myRole,
     isMember,
     ranking,
+    members: bolao.members.map((m) => ({
+      userId: m.userId,
+      name: m.user.name ?? "—",
+      image: m.user.image ?? null,
+      nickname: m.nickname ?? null,
+      role: m.role,
+      joinedAt: m.joinedAt,
+    })),
     predictions: bolao.predicoes.map((p) => ({
       id: p.id,
       predictionId: p.predictionId,

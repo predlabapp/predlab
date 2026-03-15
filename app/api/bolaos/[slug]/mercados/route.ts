@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { Category } from "@prisma/client"
+import { notifyMercadoCreated } from "@/lib/notifications"
 
 // GET — listar mercados internos
 export async function GET(
@@ -147,6 +148,10 @@ export async function POST(
       expiresAt: new Date(expiresAt),
     },
   })
+
+  const creatorName = session.user.name ?? "Alguém"
+  const memberIds = bolao.members.map((m) => m.userId)
+  notifyMercadoCreated(question, bolao.name, bolao.slug, creatorName, mercado.id, memberIds, session.user.id).catch(() => {})
 
   return NextResponse.json({ mercado }, { status: 201 })
 }

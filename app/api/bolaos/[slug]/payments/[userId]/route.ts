@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { PaymentStatus } from "@prisma/client"
+import { notifyPaymentStatus } from "@/lib/notifications"
 
 const patchSchema = z.object({
   status: z.nativeEnum(PaymentStatus),
@@ -60,6 +61,11 @@ export async function PATCH(
       confirmedAt: status === "CONFIRMED" ? new Date() : null,
     },
   })
+
+  // Notify the member if status changed to CONFIRMED or REJECTED
+  if (status === "CONFIRMED" || status === "REJECTED") {
+    notifyPaymentStatus(params.userId, bolao.name, bolao.slug, status, note).catch(() => {})
+  }
 
   return NextResponse.json({ payment })
 }

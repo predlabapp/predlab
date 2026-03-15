@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { GrupoResolution } from "@prisma/client"
+import { notifyMercadoResolved } from "@/lib/notifications"
 
 const resolveSchema = z.object({
   resolution: z.nativeEnum(GrupoResolution),
@@ -22,7 +23,7 @@ export async function PATCH(
 
   const bolao = await prisma.bolao.findUnique({
     where: { slug: params.slug },
-    include: { members: true },
+    include: { members: { select: { userId: true, role: true } } },
   })
   if (!bolao) return NextResponse.json({ error: "Bolão não encontrado." }, { status: 404 })
 
@@ -61,6 +62,28 @@ export async function PATCH(
       isOpen: false,
     },
   })
+
+  // Notify all members
+  if (resolution !== "CANCELADO") {
+    const totalVotos = mercado.votos.length
+    const mediaGrupo = totalVotos > 0
+      ? Math.round(mercado.votos.reduce((sum, v) => sum + v.probability, 0) / totalVotos)
+      : null
+    const correctValue = resolution === "SIM" ? 100 : 0
+    const bestForecaster = mercado.votos.length > 0
+      ? [...mercado.votos].sort((a, b) => Math.abs(a.probability - correctValue) - Math.abs(b.probability - correctValue))[0]?.user.name ?? null
+      : null
+    const memberIds = bolao.members.map((m) => m.userId)
+    notifyMercadoResolved(
+      mercado.question,
+      bolao.slug,
+      resolution,
+      mediaGrupo,
+      bestForecaster,
+      mercado.votos.map((v) => ({ userId: v.userId, probability: v.probability })),
+      memberIds
+    ).catch(() => {})
+  }
 
   return NextResponse.json({ mercado: updated })
 }

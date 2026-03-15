@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { notifyPromotion } from "@/lib/notifications"
 
 // POST — promover membro a ADMIN (só criador original)
 export async function POST(
@@ -34,6 +35,9 @@ export async function POST(
     where: { bolaoId_userId: { bolaoId: bolao.id, userId: params.userId } },
     data: { role: "ADMIN" },
   })
+
+  const promoterName = session.user.name ?? "Admin"
+  notifyPromotion(params.userId, bolao.name, bolao.slug, promoterName).catch(() => {})
 
   return NextResponse.json({ success: true, role: updated.role })
 }
