@@ -40,6 +40,9 @@ model User {
   predictions      Prediction[]
   badges           UserBadge[]
   coinTransactions CoinTransaction[]
+  bolaosCreated    Bolao[]           @relation("BolaoCreator")
+  bolaoMembers     BolaoMember[]
+  bolaoPredicoes   BolaoPredicao[]
 
   @@map("users")
 }
@@ -114,7 +117,8 @@ model Prediction {
   polymarketUrl         String?
   polymarketUpdatedAt   DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bolaoPredicoes BolaoPredicao[]
 
   @@map("predictions")
 }
@@ -179,6 +183,63 @@ model RankingSnapshot {
 
   @@unique([userId, rankType, period])
   @@map("ranking_snapshots")
+}
+
+enum BolaoRole {
+  ADMIN
+  MEMBER
+}
+
+model Bolao {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  slug        String    @unique
+  inviteCode  String    @unique @default(cuid())
+  creatorId   String
+  isPublic    Boolean   @default(false)
+  coverEmoji  String    @default("🔮")
+  category    Category?
+  endsAt      DateTime?
+  maxMembers  Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  creator    User            @relation("BolaoCreator", fields: [creatorId], references: [id])
+  members    BolaoMember[]
+  predicoes  BolaoPredicao[]
+
+  @@map("bolaos")
+}
+
+model BolaoMember {
+  id       String    @id @default(cuid())
+  bolaoId  String
+  userId   String
+  role     BolaoRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+  nickname String?
+
+  bolao Bolao @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bolaoId, userId])
+  @@map("bolao_members")
+}
+
+model BolaoPredicao {
+  id           String   @id @default(cuid())
+  bolaoId      String
+  predictionId String
+  addedById    String
+  createdAt    DateTime @default(now())
+
+  bolao      Bolao      @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  prediction Prediction @relation(fields: [predictionId], references: [id])
+  addedBy    User       @relation(fields: [addedById], references: [id])
+
+  @@unique([bolaoId, predictionId])
+  @@map("bolao_predicoes")
 }
 
 model SocialPost {
