@@ -31,33 +31,33 @@
   <line x1="375" y1="0" x2="375" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
   <line x1="750" y1="0" x2="750" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
   <line x1="1125" y1="0" x2="1125" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
-  <!-- Large orb right -->
-  <ellipse cx="1220" cy="415" rx="200" ry="14" fill="#2a1560" opacity="0.5"/>
-  <rect x="1150" y="385" width="140" height="28" rx="14" fill="#130a28"/>
-  <circle cx="1220" cy="222" r="195" fill="url(#bb1)"/>
-  <circle cx="1220" cy="222" r="195" fill="url(#blight1)"/>
-  <circle cx="1220" cy="222" r="195" fill="url(#brim1)"/>
-  <!-- Star 1 — large, centre-left -->
-  <path d="M1184,171 L1197,214 L1240,228 L1197,242 L1184,285 L1171,242 L1128,228 L1171,214 Z" fill="#d97706"/>
-  <path d="M1184,171 L1197,214 L1240,228 L1197,242 L1184,285 L1171,242 L1128,228 L1171,214 Z" fill="#fbbf24" opacity="0.55"/>
-  <!-- Star 2 — medium, top-right -->
-  <path d="M1297,108 L1306,136 L1334,145 L1306,154 L1297,182 L1288,154 L1260,145 L1288,136 Z" fill="#d97706"/>
-  <path d="M1297,108 L1306,136 L1334,145 L1306,154 L1297,182 L1288,154 L1260,145 L1288,136 Z" fill="#fbbf24" opacity="0.55"/>
-  <!-- Star 3 — small, bottom-right -->
-  <path d="M1297,292 L1303,310 L1321,316 L1303,322 L1297,340 L1291,322 L1273,316 L1291,310 Z" fill="#d97706"/>
-  <path d="M1297,292 L1303,310 L1321,316 L1303,322 L1297,340 L1291,322 L1273,316 L1291,310 Z" fill="#fbbf24" opacity="0.55"/>
-  <!-- Small icon left -->
+  <!-- Large orb right — cx=1220 cy=210 r=175, base colada -->
+  <ellipse cx="1220" cy="418" rx="160" ry="12" fill="#2a1560" opacity="0.5"/>
+  <rect x="1162" y="385" width="116" height="30" rx="15" fill="#130a28"/>
+  <circle cx="1220" cy="210" r="175" fill="url(#bb1)"/>
+  <circle cx="1220" cy="210" r="175" fill="url(#blight1)"/>
+  <circle cx="1220" cy="210" r="175" fill="url(#brim1)"/>
+  <!-- Star 1 large centre-left -->
+  <path d="M1188,155 L1200,193 L1238,205 L1200,217 L1188,255 L1176,217 L1138,205 L1176,193 Z" fill="#d97706"/>
+  <path d="M1188,155 L1200,193 L1238,205 L1200,217 L1188,255 L1176,217 L1138,205 L1176,193 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 2 medium top-right -->
+  <path d="M1289,100 L1297,124 L1321,132 L1297,140 L1289,164 L1281,140 L1257,132 L1281,124 Z" fill="#d97706"/>
+  <path d="M1289,100 L1297,124 L1321,132 L1297,140 L1289,164 L1281,140 L1257,132 L1281,124 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Star 3 small bottom-right -->
+  <path d="M1289,268 L1295,284 L1311,290 L1295,296 L1289,312 L1283,296 L1267,290 L1283,284 Z" fill="#d97706"/>
+  <path d="M1289,268 L1295,284 L1311,290 L1295,296 L1289,312 L1283,296 L1267,290 L1283,284 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- Small icon left — base colada -->
   <rect x="100" y="158" width="112" height="112" rx="25" fill="#111118" stroke="#1e1e2e" stroke-width="1"/>
-  <ellipse cx="156" cy="252" rx="18" ry="4" fill="#2a1560" opacity="0.5"/>
-  <rect x="138" y="246" width="36" height="9" rx="4.5" fill="#130a28"/>
-  <circle cx="156" cy="200" r="34" fill="url(#ib1)"/>
-  <circle cx="156" cy="200" r="34" fill="url(#il1)"/>
-  <path d="M150,188 L152.2,195.2 L159.5,197.5 L152.2,199.8 L150,207 L147.8,199.8 L140.5,197.5 L147.8,195.2 Z" fill="#d97706"/>
-  <path d="M150,188 L152.2,195.2 L159.5,197.5 L152.2,199.8 L150,207 L147.8,199.8 L140.5,197.5 L147.8,195.2 Z" fill="#fbbf24" opacity="0.55"/>
-  <path d="M169,178 L170.5,182.8 L175.3,184.3 L170.5,185.8 L169,190.6 L167.5,185.8 L162.7,184.3 L167.5,182.8 Z" fill="#d97706"/>
-  <path d="M169,178 L170.5,182.8 L175.3,184.3 L170.5,185.8 L169,190.6 L167.5,185.8 L162.7,184.3 L167.5,182.8 Z" fill="#fbbf24" opacity="0.55"/>
-  <path d="M169,207 L170,210 L173,211 L170,212 L169,215 L168,212 L165,211 L168,210 Z" fill="#d97706"/>
-  <path d="M169,207 L170,210 L173,211 L170,212 L169,215 L168,212 L165,211 L168,210 Z" fill="#fbbf24" opacity="0.55"/>
+  <ellipse cx="156" cy="243" rx="18" ry="3" fill="#2a1560" opacity="0.5"/>
+  <rect x="143" y="230" width="26" height="13" rx="6.5" fill="#130a28"/>
+  <circle cx="156" cy="196" r="34" fill="url(#ib1)"/>
+  <circle cx="156" cy="196" r="34" fill="url(#il1)"/>
+  <path d="M150,184 L152.2,191.2 L159.5,193.5 L152.2,195.8 L150,203 L147.8,195.8 L140.5,193.5 L147.8,191.2 Z" fill="#d97706"/>
+  <path d="M150,184 L152.2,191.2 L159.5,193.5 L152.2,195.8 L150,203 L147.8,195.8 L140.5,193.5 L147.8,191.2 Z" fill="#fbbf24" opacity="0.55"/>
+  <path d="M169,174 L170.5,178.8 L175.3,180.3 L170.5,181.8 L169,186.6 L167.5,181.8 L162.7,180.3 L167.5,178.8 Z" fill="#d97706"/>
+  <path d="M169,174 L170.5,178.8 L175.3,180.3 L170.5,181.8 L169,186.6 L167.5,181.8 L162.7,180.3 L167.5,178.8 Z" fill="#fbbf24" opacity="0.55"/>
+  <path d="M169,203 L170,206 L173,207 L170,208 L169,211 L168,208 L165,207 L168,206 Z" fill="#d97706"/>
+  <path d="M169,203 L170,206 L173,207 L170,208 L169,211 L168,208 L165,207 L168,206 Z" fill="#fbbf24" opacity="0.55"/>
   <!-- Wordmark -->
   <text x="238" y="237" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="92" letter-spacing="-2" fill="#e8e8f0">pred</text>
   <text x="530" y="237" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="92" letter-spacing="-2" fill="#7c6af7">lab</text>
