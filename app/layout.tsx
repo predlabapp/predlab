@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     title: "PredLab | Your Predictions. Proven.",
     description:
       "Record forecasts with real probabilities, compare with live Polymarket data, and build a verifiable reputation as a forecaster. Track accuracy. Climb the rankings.",
-    images: [{ url: "/og-default.svg", width: 1200, height: 630, alt: "PredLab" }],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "PredLab" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     title: "PredLab | Your Predictions. Proven.",
     description:
       "Record forecasts with real probabilities, compare with live Polymarket data, and build a verifiable reputation as a forecaster. Track accuracy. Climb the rankings.",
-    images: ["/og-default.svg"],
+    images: ["/og-image.png"],
   },
 }
 
