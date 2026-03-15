@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import crypto from "crypto"
+import { put } from "@vercel/blob"
 
 function isAuthorized(req: NextRequest): boolean {
   const auth = req.headers.get("authorization")
@@ -112,6 +113,19 @@ async function fetchUnsplashImage(query: string): Promise<{ url: string; author:
   } catch {
     return { url: "", author: "" }
   }
+}
+
+// Upload image to Vercel Blob and return stable CDN URL
+async function uploadImageToBlob(ogImageUrl: string, filename: string): Promise<string> {
+  const res = await fetch(ogImageUrl)
+  if (!res.ok) throw new Error(`Failed to fetch OG image: ${res.status}`)
+  const buffer = await res.arrayBuffer()
+  const blob = await put(`social/${filename}`, buffer, {
+    access: "public",
+    contentType: "image/png",
+    addRandomSuffix: false,
+  })
+  return blob.url
 }
 
 async function postToInstagram(imageUrl: string, caption: string): Promise<string> {
@@ -241,10 +255,10 @@ async function postTweet(text: string, mediaId: string): Promise<string> {
   return tweetId as string
 }
 
-async function postToTwitter(ogImageUrl: string, caption: string): Promise<string> {
-  // 1. Fetch the generated OG image as a buffer
-  const imgRes = await fetch(ogImageUrl)
-  if (!imgRes.ok) throw new Error(`Failed to fetch OG image: ${imgRes.status}`)
+async function postToTwitter(blobUrl: string, caption: string): Promise<string> {
+  // 1. Fetch image from Blob CDN
+  const imgRes = await fetch(blobUrl)
+  if (!imgRes.ok) throw new Error(`Failed to fetch blob image: ${imgRes.status}`)
   const arrayBuf = await imgRes.arrayBuffer()
   const imageBuffer = Buffer.from(arrayBuf)
 
@@ -321,21 +335,26 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // OG image URL (for admin preview)
     const ogImageUrl = `${baseUrl}/api/og/social/${socialPost.id}`
     await prisma.socialPost.update({
       where: { id: socialPost.id },
       data: { ogImageUrl },
     })
 
+    // Upload to Vercel Blob — stable CDN URL required by Instagram/Twitter
+    const blobFilename = `${today}-${platform}-${slot}-${socialPost.id}.png`
+    const blobUrl = await uploadImageToBlob(ogImageUrl, blobFilename)
+
     if (platform === "instagram") {
-      const instagramPostId = await postToInstagram(ogImageUrl, caption)
+      const instagramPostId = await postToInstagram(blobUrl, caption)
       await prisma.socialPost.update({
         where: { id: socialPost.id },
         data: { instagramPostId, status: "published" },
       })
       console.log(`[cron/social] Instagram published: ${instagramPostId}`)
     } else {
-      const twitterPostId = await postToTwitter(ogImageUrl, caption)
+      const twitterPostId = await postToTwitter(blobUrl, caption)
       await prisma.socialPost.update({
         where: { id: socialPost.id },
         data: { twitterPostId, status: "published" },
