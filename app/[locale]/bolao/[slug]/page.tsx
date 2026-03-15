@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Link } from "@/navigation"
-import { ArrowLeft, Users, Calendar, Plus, Loader2, Trash2, Settings } from "lucide-react"
+import { ArrowLeft, Users, Calendar, Plus, Loader2, Trash2 } from "lucide-react"
 import { BolaoRanking } from "@/components/bolaos/BolaoRanking"
 import { BolaoInvite } from "@/components/bolaos/BolaoInvite"
 import { AddPredictionToBolao } from "@/components/bolaos/AddPredictionToBolao"
+import { BolaoPayments } from "@/components/bolaos/BolaoPayments"
+import { GrupoMercados } from "@/components/bolaos/GrupoMercados"
 import { CATEGORIES, getProbabilityColor, formatDate } from "@/lib/utils"
 
 interface BolaoData {
@@ -29,6 +31,8 @@ interface BolaoData {
   predictions: any[]
 }
 
+type Tab = "ranking" | "previsoes" | "mercados" | "pagamentos"
+
 export default function BolaoPage() {
   const params = useParams()
   const slug = params?.slug as string
@@ -39,8 +43,9 @@ export default function BolaoPage() {
   const [showAddPrediction, setShowAddPrediction] = useState(false)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [joining, setJoining] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>("ranking")
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       const res = await fetch(`/api/bolaos/${slug}`)
       const json = await res.json()
@@ -52,9 +57,9 @@ export default function BolaoPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [slug])
 
-  useEffect(() => { load() }, [slug])
+  useEffect(() => { load() }, [load])
 
   async function handleJoin() {
     if (!data?.bolao.inviteCode) return
@@ -94,6 +99,21 @@ export default function BolaoPage() {
   const isAdmin = myRole === "ADMIN"
   const currentUserId = session?.user?.id ?? null
   const existingPredictionIds = predictions.map((p: any) => p.predictionId)
+
+  // Compute scoreGrupo from mercados votos (simplified — full calc is in ranking API)
+  // For now, pass null; the ranking can be enhanced later with mercado scores via API
+  const rankingWithExtras = ranking.map((m: any) => ({
+    ...m,
+    paymentStatus: null,
+    scoreGrupo: null,
+  }))
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "ranking", label: "Ranking" },
+    { key: "previsoes", label: "Previsões" },
+    { key: "mercados", label: "Mercados do Grupo" },
+    { key: "pagamentos", label: "Pagamentos" },
+  ]
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 animate-fade-in">
@@ -135,7 +155,7 @@ export default function BolaoPage() {
             {bolao.description && (
               <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{bolao.description}</p>
             )}
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-4 mt-2 flex-wrap">
               <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
                 <Users size={12} />
                 {bolao.memberCount} membros
@@ -143,7 +163,7 @@ export default function BolaoPage() {
               {bolao.endsAt && (
                 <span className="flex items-center gap-1 text-xs" style={{ color: "var(--text-muted)" }}>
                   <Calendar size={12} />
-                  Encerra em {formatDate(bolao.endsAt)}
+                  Encerra {formatDate(bolao.endsAt)}
                 </span>
               )}
             </div>
@@ -167,90 +187,143 @@ export default function BolaoPage() {
         </div>
       </div>
 
-      {/* Ranking */}
-      <div className="card mb-6">
-        <h2 className="font-display font-semibold text-lg mb-4" style={{ color: "var(--text-primary)" }}>
-          Ranking
-        </h2>
-        <BolaoRanking ranking={ranking} currentUserId={currentUserId} />
+      {/* Tabs */}
+      <div
+        className="flex gap-1 mb-6 p-1 rounded-xl overflow-x-auto"
+        style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className="flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap"
+            style={{
+              background: activeTab === tab.key ? "var(--accent-dim)" : "transparent",
+              color: activeTab === tab.key ? "var(--accent)" : "var(--text-muted)",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Predictions */}
+      {/* Tab content */}
       <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
-            Previsões do Bolão
-          </h2>
-          {isMember && (
-            <button
-              onClick={() => setShowAddPrediction(true)}
-              className="btn-ghost flex items-center gap-1.5 text-sm"
-            >
-              <Plus size={14} />
-              Adicionar
-            </button>
-          )}
-        </div>
+        {activeTab === "ranking" && (
+          <BolaoRanking
+            ranking={rankingWithExtras}
+            currentUserId={currentUserId}
+            showPayments={false}
+            showScoreGrupo={false}
+          />
+        )}
 
-        {predictions.length === 0 ? (
-          <div className="text-center py-8" style={{ color: "var(--text-muted)" }}>
-            <p className="text-sm">Nenhuma previsão partilhada ainda.</p>
-            {isMember && (
-              <button onClick={() => setShowAddPrediction(true)} className="btn-primary mt-3 text-sm">
-                Partilhar a primeira previsão
-              </button>
+        {activeTab === "previsoes" && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
+                Previsões do Bolão
+              </h2>
+              {isMember && (
+                <button
+                  onClick={() => setShowAddPrediction(true)}
+                  className="btn-ghost flex items-center gap-1.5 text-sm"
+                >
+                  <Plus size={14} />
+                  Adicionar
+                </button>
+              )}
+            </div>
+
+            {predictions.length === 0 ? (
+              <div className="text-center py-8" style={{ color: "var(--text-muted)" }}>
+                <p className="text-sm">Nenhuma previsão partilhada ainda.</p>
+                {isMember && (
+                  <button onClick={() => setShowAddPrediction(true)} className="btn-primary mt-3 text-sm">
+                    Partilhar a primeira previsão
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {predictions.map((p: any) => {
+                  const cat = CATEGORIES[p.prediction.category as keyof typeof CATEGORIES]
+                  const canRemove = isAdmin || p.addedById === currentUserId
+                  return (
+                    <div
+                      key={p.id}
+                      className="flex items-center gap-3 p-3 rounded-xl"
+                      style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
+                    >
+                      <div
+                        className="font-mono text-sm font-bold w-10 text-center flex-shrink-0"
+                        style={{ color: getProbabilityColor(p.prediction.probability) }}
+                      >
+                        {p.prediction.probability}%
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                          {p.prediction.title}
+                        </p>
+                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                          {cat?.emoji} {cat?.label} · por {p.addedByName}
+                          {p.prediction.resolution && (
+                            <span
+                              className="ml-2 font-mono"
+                              style={{
+                                color: p.prediction.resolution === "CORRECT" ? "var(--green)" :
+                                       p.prediction.resolution === "INCORRECT" ? "var(--red)" : "var(--yellow)"
+                              }}
+                            >
+                              {p.prediction.resolution}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                      {canRemove && (
+                        <button
+                          onClick={() => handleRemovePrediction(p.predictionId)}
+                          className="p-1.5 rounded-md transition-colors"
+                          style={{ color: "var(--text-muted)" }}
+                          onMouseOver={(e) => { e.currentTarget.style.color = "var(--red)" }}
+                          onMouseOut={(e) => { e.currentTarget.style.color = "var(--text-muted)" }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {predictions.map((p: any) => {
-              const cat = CATEGORIES[p.prediction.category as keyof typeof CATEGORIES]
-              const canRemove = isAdmin || p.addedById === currentUserId
-              return (
-                <div
-                  key={p.id}
-                  className="flex items-center gap-3 p-3 rounded-xl"
-                  style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
-                >
-                  <div
-                    className="font-mono text-sm font-bold w-10 text-center flex-shrink-0"
-                    style={{ color: getProbabilityColor(p.prediction.probability) }}
-                  >
-                    {p.prediction.probability}%
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                      {p.prediction.title}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {cat?.emoji} {cat?.label} · por {p.addedByName}
-                      {p.prediction.resolution && (
-                        <span
-                          className="ml-2 font-mono"
-                          style={{
-                            color: p.prediction.resolution === "CORRECT" ? "var(--green)" :
-                                   p.prediction.resolution === "INCORRECT" ? "var(--red)" : "var(--yellow)"
-                          }}
-                        >
-                          {p.prediction.resolution}
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  {canRemove && (
-                    <button
-                      onClick={() => handleRemovePrediction(p.predictionId)}
-                      className="p-1.5 rounded-md transition-colors"
-                      style={{ color: "var(--text-muted)" }}
-                      onMouseOver={(e) => { e.currentTarget.style.color = "var(--red)" }}
-                      onMouseOut={(e) => { e.currentTarget.style.color = "var(--text-muted)" }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-              )
-            })}
+        )}
+
+        {activeTab === "mercados" && (
+          <GrupoMercados
+            slug={slug}
+            isMember={isMember}
+            currentUserId={currentUserId}
+            isAdmin={isAdmin}
+          />
+        )}
+
+        {activeTab === "pagamentos" && (
+          <div>
+            <h2 className="font-display font-semibold text-lg mb-4" style={{ color: "var(--text-primary)" }}>
+              Pagamentos
+            </h2>
+            {isMember ? (
+              <BolaoPayments
+                slug={slug}
+                isAdmin={isAdmin}
+                currentUserId={currentUserId}
+              />
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
+                Apenas membros podem ver os pagamentos.
+              </p>
+            )}
           </div>
         )}
       </div>

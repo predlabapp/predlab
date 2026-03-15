@@ -35,14 +35,19 @@ model User {
   state   String?
   country String? @default("BR")
 
-  accounts         Account[]
-  sessions         Session[]
-  predictions      Prediction[]
-  badges           UserBadge[]
-  coinTransactions CoinTransaction[]
-  bolaosCreated    Bolao[]           @relation("BolaoCreator")
-  bolaoMembers     BolaoMember[]
-  bolaoPredicoes   BolaoPredicao[]
+  accounts           Account[]
+  sessions           Session[]
+  predictions        Prediction[]
+  badges             UserBadge[]
+  coinTransactions   CoinTransaction[]
+  bolaosCreated      Bolao[]             @relation("BolaoCreator")
+  bolaoMembers       BolaoMember[]
+  bolaoPredicoes     BolaoPredicao[]
+  bolaoPayments      BolaoPayment[]
+  paymentsConfirmed  BolaoPayment[]      @relation("PaymentConfirmer")
+  mercadosCriados    GrupoMercado[]      @relation("MercadoCreator")
+  mercadosResolvidos GrupoMercado[]      @relation("MercadoResolver")
+  mercadoVotos       GrupoMercadoVoto[]
 
   @@map("users")
 }
@@ -208,6 +213,8 @@ model Bolao {
   creator    User            @relation("BolaoCreator", fields: [creatorId], references: [id])
   members    BolaoMember[]
   predicoes  BolaoPredicao[]
+  payments   BolaoPayment[]
+  mercados   GrupoMercado[]
 
   @@map("bolaos")
 }
@@ -240,6 +247,75 @@ model BolaoPredicao {
 
   @@unique([bolaoId, predictionId])
   @@map("bolao_predicoes")
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+model BolaoPayment {
+  id          String        @id @default(cuid())
+  bolaoId     String
+  userId      String
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  confirmedBy String?
+  confirmedAt DateTime?
+  note        String?
+  createdAt   DateTime      @default(now())
+
+  bolao     Bolao @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  user      User  @relation(fields: [userId], references: [id])
+  confirmer User? @relation("PaymentConfirmer", fields: [confirmedBy], references: [id])
+
+  @@unique([bolaoId, userId])
+  @@map("bolao_payments")
+}
+
+enum GrupoResolution {
+  SIM
+  NAO
+  CANCELADO
+}
+
+model GrupoMercado {
+  id           String          @id @default(cuid())
+  bolaoId      String
+  creatorId    String
+  question     String
+  description  String?
+  category     Category?
+  expiresAt    DateTime
+  resolvedAt   DateTime?
+  resolution   GrupoResolution?
+  resolvedById String?
+  isOpen       Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  bolao      Bolao              @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  creator    User               @relation("MercadoCreator", fields: [creatorId], references: [id])
+  resolvedBy User?              @relation("MercadoResolver", fields: [resolvedById], references: [id])
+  votos      GrupoMercadoVoto[]
+
+  @@map("grupo_mercados")
+}
+
+model GrupoMercadoVoto {
+  id          String   @id @default(cuid())
+  mercadoId   String
+  userId      String
+  probability Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  mercado GrupoMercado @relation(fields: [mercadoId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@unique([mercadoId, userId])
+  @@map("grupo_mercado_votos")
 }
 
 model SocialPost {
