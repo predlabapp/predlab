@@ -1,0 +1,383 @@
+import { NextRequest, NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import crypto from "crypto"
+
+function isAuthorized(req: NextRequest): boolean {
+  const auth = req.headers.get("authorization")
+  const secret = process.env.CRON_SECRET
+  if (!secret) return false
+  return auth === `Bearer ${secret}`
+}
+
+function brasiliaDateStr(): string {
+  return new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" })
+  )
+    .toISOString()
+    .slice(0, 10)
+}
+
+function extractKeyword(title: string): string {
+  const stopWords = new Set([
+    "will", "when", "by", "the", "a", "an", "of", "in", "on", "at", "to", "for",
+    "is", "be", "or", "and", "that", "this", "with", "from", "before", "after",
+    "more", "than", "least", "most", "any", "have", "has", "had", "are", "was",
+    "were", "what", "who", "how", "which", "its", "their", "first", "year",
+    "end", "over", "under", "between", "during", "into", "out", "through",
+  ])
+  const words = title
+    .replace(/[^a-zA-Z\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length > 2 && !stopWords.has(w.toLowerCase()))
+  return words.slice(0, 3).join(" ") || "world news"
+}
+
+function buildInstagramCaption(title: string, prob: number): string {
+  const likelihood =
+    prob >= 70 ? "very likely 🟢" :
+    prob >= 55 ? "likely 🟡" :
+    prob >= 45 ? "uncertain ⚖️" :
+    prob >= 30 ? "unlikely 🟠" : "very unlikely 🔴"
+
+  return `🔮 "${title}"
+
+Current market probability: ${prob}% (${likelihood})
+
+What's your prediction? Do you agree with the market — or do you see something others don't?
+
+Record your forecast with real probability at predlab.app and build your verifiable reputation as a forecaster.
+
+📊 Compare with live Polymarket data
+⚡ Automatic resolution & tracking
+🏆 Rankings by accuracy
+
+#forecasting #predictions #predictionmarket #polymarket #predlab #forecast #probability #markets`
+}
+
+function buildTwitterCaption(title: string, prob: number): string {
+  const likely =
+    prob >= 60 ? "likely ✅" :
+    prob >= 40 ? "uncertain ⚖️" : "unlikely ❌"
+
+  return `🔮 "${title}"
+
+Market says: ${prob}% — ${likely}
+
+Do you agree? Record your prediction with real probability at predlab.app
+
+#forecasting #polymarket #predlab #markets`
+}
+
+async function fetchTopMarket(excludeSlugs: string[] = []) {
+  const res = await fetch(
+    "https://gamma-api.polymarket.com/markets?limit=80&active=true&closed=false&order=volume&ascending=false",
+    { headers: { Accept: "application/json" }, next: { revalidate: 0 } }
+  )
+  if (!res.ok) throw new Error(`Polymarket fetch failed: ${res.status}`)
+  const markets = await res.json()
+
+  for (const m of markets) {
+    try {
+      if (excludeSlugs.includes(m.slug)) continue
+      const prices =
+        typeof m.outcomePrices === "string"
+          ? JSON.parse(m.outcomePrices)
+          : m.outcomePrices ?? ["0.5"]
+      const outcomes =
+        typeof m.outcomes === "string"
+          ? JSON.parse(m.outcomes)
+          : m.outcomes ?? ["Yes"]
+      const yesIdx = outcomes.findIndex((o: string) => o.toLowerCase() === "yes")
+      const idx = yesIdx >= 0 ? yesIdx : 0
+      const prob = Math.round(parseFloat(prices[idx]) * 100)
+      if (prob >= 30 && prob <= 70) {
+        return { question: m.question as string, slug: m.slug as string, probability: prob }
+      }
+    } catch {}
+  }
+  throw new Error("No suitable market found")
+}
+
+async function fetchUnsplashImage(query: string): Promise<{ url: string; author: string }> {
+  const key = process.env.UNSPLASH_ACCESS_KEY
+  if (!key) return { url: "", author: "" }
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=squarish&content_filter=high`,
+      { headers: { Authorization: `Client-ID ${key}` }, next: { revalidate: 0 } }
+    )
+    if (!res.ok) return { url: "", author: "" }
+    const data = await res.json()
+    return { url: data.urls?.regular ?? "", author: data.user?.name ?? "" }
+  } catch {
+    return { url: "", author: "" }
+  }
+}
+
+async function postToInstagram(imageUrl: string, caption: string): Promise<string> {
+  const igId = process.env.META_INSTAGRAM_ACCOUNT_ID
+  const token = process.env.META_ACCESS_TOKEN
+  if (!igId || !token) throw new Error("Missing Meta credentials")
+
+  const base = `https://graph.facebook.com/v22.0/${igId}`
+
+  const createRes = await fetch(`${base}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image_url: imageUrl, caption, access_token: token }),
+  })
+  const createData = await createRes.json()
+  if (!createRes.ok || !createData.id) {
+    throw new Error(`Media create failed: ${JSON.stringify(createData)}`)
+  }
+
+  await new Promise((r) => setTimeout(r, 2000))
+
+  const publishRes = await fetch(`${base}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: createData.id, access_token: token }),
+  })
+  const publishData = await publishRes.json()
+  if (!publishRes.ok || !publishData.id) {
+    throw new Error(`Publish failed: ${JSON.stringify(publishData)}`)
+  }
+
+  return publishData.id as string
+}
+
+// ─── Twitter / X ────────────────────────────────────────────────────────────
+
+function pct(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, "%21").replace(/'/g, "%27")
+    .replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A")
+}
+
+function oauthHeader(
+  method: string,
+  url: string,
+  bodyParams: Record<string, string> = {}
+): string {
+  const apiKey = process.env.X_API_KEY ?? ""
+  const apiSecret = process.env.X_API_SECRET ?? ""
+  const accessToken = process.env.X_ACCESS_TOKEN ?? ""
+  const accessTokenSecret = process.env.X_ACCESS_TOKEN_SECRET ?? ""
+
+  const oauthBase: Record<string, string> = {
+    oauth_consumer_key: apiKey,
+    oauth_nonce: crypto.randomBytes(16).toString("hex"),
+    oauth_signature_method: "HMAC-SHA1",
+    oauth_timestamp: Math.floor(Date.now() / 1000).toString(),
+    oauth_token: accessToken,
+    oauth_version: "1.0",
+  }
+
+  const allParams = { ...oauthBase, ...bodyParams }
+  const paramStr = Object.keys(allParams)
+    .sort()
+    .map((k) => `${pct(k)}=${pct(allParams[k])}`)
+    .join("&")
+
+  const baseStr = [method.toUpperCase(), pct(url), pct(paramStr)].join("&")
+  const signingKey = `${pct(apiSecret)}&${pct(accessTokenSecret)}`
+  const signature = crypto.createHmac("sha1", signingKey).update(baseStr).digest("base64")
+
+  const headerParams = { ...oauthBase, oauth_signature: signature }
+  return (
+    "OAuth " +
+    Object.keys(headerParams)
+      .sort()
+      .map((k) => `${pct(k)}="${pct(headerParams[k])}"`)
+      .join(", ")
+  )
+}
+
+async function uploadMediaToTwitter(imageBuffer: Buffer): Promise<string> {
+  const url = "https://upload.twitter.com/1.1/media/upload.json"
+
+  // Use multipart/form-data — body params NOT included in OAuth signature
+  const auth = oauthHeader("POST", url)
+
+  const form = new FormData()
+  form.append("media", new Blob([imageBuffer], { type: "image/png" }), "card.png")
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: auth },
+    body: form,
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Twitter media upload failed (${res.status}): ${text}`)
+  }
+
+  const data = await res.json()
+  if (!data.media_id_string) throw new Error(`No media_id in response: ${JSON.stringify(data)}`)
+  return data.media_id_string as string
+}
+
+async function postTweet(text: string, mediaId: string): Promise<string> {
+  const url = "https://api.twitter.com/2/tweets"
+
+  // JSON body — NOT included in OAuth signature
+  const auth = oauthHeader("POST", url)
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: auth, "Content-Type": "application/json" },
+    body: JSON.stringify({ text, media: { media_ids: [mediaId] } }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Tweet post failed (${res.status}): ${text}`)
+  }
+
+  const data = await res.json()
+  const tweetId = data.data?.id
+  if (!tweetId) throw new Error(`No tweet ID in response: ${JSON.stringify(data)}`)
+  return tweetId as string
+}
+
+async function postToTwitter(ogImageUrl: string, caption: string): Promise<string> {
+  // 1. Fetch the generated OG image as a buffer
+  const imgRes = await fetch(ogImageUrl)
+  if (!imgRes.ok) throw new Error(`Failed to fetch OG image: ${imgRes.status}`)
+  const arrayBuf = await imgRes.arrayBuffer()
+  const imageBuffer = Buffer.from(arrayBuf)
+
+  // 2. Upload image to Twitter
+  const mediaId = await uploadMediaToTwitter(imageBuffer)
+
+  // 3. Post tweet with image
+  const tweetId = await postTweet(caption, mediaId)
+  return tweetId
+}
+
+// ─── Scheduled times ─────────────────────────────────────────────────────────
+
+const SCHEDULE_TIMES: Record<string, Record<string, string>> = {
+  instagram: { "1": "12:00", "2": "19:00" },
+  twitter: { "1": "08:00", "2": "12:00", "3": "17:00", "4": "21:00" },
+}
+
+export async function GET(req: NextRequest) {
+  if (!isAuthorized(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const platform = (searchParams.get("platform") ?? "instagram") as "instagram" | "twitter"
+  const slot = searchParams.get("slot") ?? "1"
+  const scheduledTime = SCHEDULE_TIMES[platform]?.[slot] ?? "19:00"
+  const imageFormat = platform === "twitter" ? "landscape" : "square"
+  const today = brasiliaDateStr()
+
+  // Idempotency: skip if already done for this platform+slot today
+  const existing = await prisma.socialPost.findFirst({
+    where: { date: today, platform, scheduledTime },
+  })
+  if (existing) {
+    return NextResponse.json({ skipped: true, date: today, platform, slot, status: existing.status })
+  }
+
+  // Avoid repeating the same market across slots for the same platform today
+  const todayPosts = await prisma.socialPost.findMany({
+    where: { date: today, platform },
+    select: { marketSlug: true },
+  })
+  const excludeSlugs = todayPosts.map((p) => p.marketSlug).filter(Boolean) as string[]
+
+  let socialPost: { id: string } | null = null
+
+  try {
+    const market = await fetchTopMarket(excludeSlugs)
+    const keyword = extractKeyword(market.question)
+    const { url: unsplashUrl, author: unsplashAuthor } = await fetchUnsplashImage(keyword)
+
+    const caption =
+      platform === "instagram"
+        ? buildInstagramCaption(market.question, market.probability)
+        : buildTwitterCaption(market.question, market.probability)
+
+    const baseUrl = process.env.NEXTAUTH_URL ?? "https://predlab.app"
+
+    socialPost = await prisma.socialPost.create({
+      data: {
+        date: today,
+        marketTitle: market.question,
+        marketSlug: market.slug,
+        probability: market.probability,
+        unsplashUrl,
+        unsplashAuthor,
+        caption,
+        ogImageUrl: "",
+        platform,
+        scheduledTime,
+        imageFormat,
+        status: "pending",
+      },
+    })
+
+    const ogImageUrl = `${baseUrl}/api/og/social/${socialPost.id}`
+    await prisma.socialPost.update({
+      where: { id: socialPost.id },
+      data: { ogImageUrl },
+    })
+
+    if (platform === "instagram") {
+      const instagramPostId = await postToInstagram(ogImageUrl, caption)
+      await prisma.socialPost.update({
+        where: { id: socialPost.id },
+        data: { instagramPostId, status: "published" },
+      })
+      console.log(`[cron/social] Instagram published: ${instagramPostId}`)
+    } else {
+      const twitterPostId = await postToTwitter(ogImageUrl, caption)
+      await prisma.socialPost.update({
+        where: { id: socialPost.id },
+        data: { twitterPostId, status: "published" },
+      })
+      console.log(`[cron/social] Twitter published: ${twitterPostId}`)
+    }
+
+    return NextResponse.json({
+      success: true,
+      date: today,
+      platform,
+      slot,
+      market: market.question,
+    })
+  } catch (err) {
+    const errorMsg = String(err)
+    console.error(`[cron/social] Error (${platform} slot ${slot}):`, errorMsg)
+
+    if (socialPost) {
+      await prisma.socialPost.update({
+        where: { id: socialPost.id },
+        data: { status: "failed", error: errorMsg },
+      }).catch(() => {})
+    } else {
+      await prisma.socialPost.create({
+        data: {
+          date: today,
+          marketTitle: "",
+          marketSlug: "",
+          probability: 0,
+          unsplashUrl: "",
+          caption: "",
+          ogImageUrl: "",
+          platform,
+          scheduledTime,
+          imageFormat,
+          status: "failed",
+          error: errorMsg,
+        },
+      }).catch(() => {})
+    }
+
+    return NextResponse.json({ error: errorMsg }, { status: 500 })
+  }
+}

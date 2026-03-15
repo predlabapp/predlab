@@ -180,3 +180,25 @@ model RankingSnapshot {
   @@unique([userId, rankType, period])
   @@map("ranking_snapshots")
 }
+
+model SocialPost {
+  id              String   @id @default(cuid())
+  date            String   // YYYY-MM-DD in Brasilia time
+  marketTitle     String
+  marketSlug      String
+  probability     Int
+  unsplashUrl     String
+  unsplashAuthor  String?
+  ogImageUrl      String
+  caption         String   @db.Text
+  instagramPostId String?
+  twitterPostId   String?
+  status          String   @default("pending") // pending, published, failed, ready
+  error           String?
+  createdAt       DateTime @default(now())
+  platform      String   @default("instagram") // "instagram" | "twitter"
+  scheduledTime String?                         // "08:00", "12:00", "17:00", "19:00", "21:00"
+  imageFormat   String   @default("square")     // "square" | "landscape"
+
+  @@map("social_posts")
+}
