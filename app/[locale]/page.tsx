@@ -29,8 +29,8 @@ export default async function HomePage({
         style={{ backdropFilter: "blur(12px)", background: "rgba(10,10,15,0.85)" }}
       >
         <nav className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-          <Link href="/" className="font-display text-lg font-bold gradient-text flex items-center gap-2">
-            🔮 PredLab
+          <Link href="/" className="flex items-center">
+            <img src="/logo-horizontal.svg" alt="PredLab" style={{ height: 28 }} />
           </Link>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex"><HowItWorksModal /></div>

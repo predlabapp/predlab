@@ -44,8 +44,8 @@ function SignInForm() {
     <main className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in">
         <div className="text-center mb-8">
-          <Link href="/" className="font-display text-2xl font-bold gradient-text">
-            🔮 PredLab
+          <Link href="/" className="flex justify-center">
+            <img src="/logo-horizontal.svg" alt="PredLab" style={{ height: 32 }} />
           </Link>
           <p className="text-[var(--text-muted)] text-sm mt-2">
             {t("welcomeBack")}
