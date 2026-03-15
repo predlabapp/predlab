@@ -24,7 +24,7 @@ export async function GET(
 
     const maxLen = isLandscape ? 80 : 90
     const title = post.marketTitle.length > maxLen
-      ? post.marketTitle.slice(0, maxLen) + "…"
+      ? post.marketTitle.slice(0, maxLen) + "..."
       : post.marketTitle
     const titleSize = isLandscape
       ? (title.length > 70 ? 30 : title.length > 50 ? 34 : 40)
@@ -36,6 +36,7 @@ export async function GET(
         <div
           style={{
             display: "flex",
+            flexDirection: "column",
             width: `${W}px`,
             height: `${H}px`,
             position: "relative",
@@ -46,6 +47,7 @@ export async function GET(
           {/* Decorative orb */}
           <div
             style={{
+              display: "flex",
               position: "absolute",
               top: isLandscape ? -80 : -120,
               right: isLandscape ? -80 : -120,
@@ -53,70 +55,57 @@ export async function GET(
               height: isLandscape ? 400 : 600,
               borderRadius: "50%",
               background: "radial-gradient(circle, rgba(124,106,247,0.25) 0%, rgba(124,106,247,0) 70%)",
-              display: "flex",
             }}
           />
 
           {/* Top accent line */}
           <div
             style={{
+              display: "flex",
               position: "absolute",
-              top: 0, left: 0, right: 0,
+              top: 0,
+              left: 0,
+              right: 0,
               height: 5,
               background: "linear-gradient(90deg, #7c6af7, #a78bfa, #7c6af7)",
-              display: "flex",
             }}
           />
 
-
-          {/* Watermark — top left */}
+          {/* Watermark */}
           <div
             style={{
+              display: "flex",
               position: "absolute",
               top: isLandscape ? 28 : 36,
               left: isLandscape ? 40 : 48,
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
+              fontSize: isLandscape ? 20 : 22,
+              fontWeight: 800,
+              color: "#ffffff",
             }}
           >
-            <div
-              style={{
-                fontSize: isLandscape ? 20 : 22,
-                fontWeight: 800,
-                color: "#ffffff",
-                letterSpacing: 0.5,
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-              }}
-            >
-              🔮 PredLab
-            </div>
+            PredLab
           </div>
 
-          {/* Main content */}
-          {isLandscape ? (
+          {/* Main content — landscape */}
+          {isLandscape && (
             <div
               style={{
-                position: "absolute",
-                inset: 0,
                 display: "flex",
                 flexDirection: "column",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 justifyContent: "center",
-                padding: "64px 72px",
-                paddingTop: "88px",
+                padding: "88px 72px 64px 72px",
               }}
             >
               {/* Badge */}
-              <div
-                style={{
-                  display: "flex",
-                  marginBottom: 28,
-                }}
-              >
+              <div style={{ display: "flex", marginBottom: 28 }}>
                 <div
                   style={{
+                    display: "flex",
                     background: "rgba(124,106,247,0.2)",
                     border: "1.5px solid rgba(124,106,247,0.5)",
                     borderRadius: 8,
@@ -127,13 +116,14 @@ export async function GET(
                     letterSpacing: 2,
                   }}
                 >
-                  🔥 TRENDING
+                  TRENDING
                 </div>
               </div>
 
               {/* Title */}
               <div
                 style={{
+                  display: "flex",
                   fontSize: titleSize,
                   fontWeight: 700,
                   color: "#e8e8f0",
@@ -145,29 +135,35 @@ export async function GET(
                 {title}
               </div>
 
-              {/* Probability */}
+              {/* Probability row */}
               <div style={{ display: "flex", alignItems: "flex-end", gap: 18 }}>
-                <div style={{ fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
+                <div style={{ display: "flex", fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
                   {post.probability}%
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 4, paddingBottom: 10 }}>
-                  <div style={{ fontSize: 18, color: "#8888aa" }}>market probability</div>
-                  <div style={{ fontSize: 14, color: "#555570" }}>via Polymarket</div>
+                  <div style={{ display: "flex", fontSize: 18, color: "#8888aa" }}>market probability</div>
+                  <div style={{ display: "flex", fontSize: 14, color: "#555570" }}>via Polymarket</div>
                 </div>
               </div>
 
               {/* CTA */}
-              <div style={{ marginTop: 28, fontSize: 17, color: "#7c6af7", fontWeight: 600 }}>
-                Record your prediction → predlab.app
+              <div style={{ display: "flex", marginTop: 28, fontSize: 17, color: "#7c6af7", fontWeight: 600 }}>
+                Record your prediction at predlab.app
               </div>
             </div>
-          ) : (
+          )}
+
+          {/* Main content — square */}
+          {!isLandscape && (
             <div
               style={{
-                position: "absolute",
-                inset: 0,
                 display: "flex",
                 flexDirection: "column",
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 padding: "80px",
                 justifyContent: "space-between",
               }}
@@ -176,6 +172,7 @@ export async function GET(
               <div style={{ display: "flex", justifyContent: "flex-end" }}>
                 <div
                   style={{
+                    display: "flex",
                     background: "rgba(124,106,247,0.2)",
                     border: "1.5px solid rgba(124,106,247,0.5)",
                     borderRadius: 10,
@@ -186,7 +183,7 @@ export async function GET(
                     letterSpacing: 2,
                   }}
                 >
-                  🔥 TRENDING
+                  TRENDING
                 </div>
               </div>
 
@@ -194,6 +191,7 @@ export async function GET(
               <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
                 <div
                   style={{
+                    display: "flex",
                     fontSize: titleSize,
                     fontWeight: 700,
                     color: "#e8e8f0",
@@ -204,17 +202,17 @@ export async function GET(
                 </div>
 
                 <div style={{ display: "flex", alignItems: "flex-end", gap: 20 }}>
-                  <div style={{ fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
+                  <div style={{ display: "flex", fontSize: probSize, fontWeight: 900, color: pColor, lineHeight: 1 }}>
                     {post.probability}%
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingBottom: 14 }}>
-                    <div style={{ fontSize: 24, color: "#8888aa", fontWeight: 500 }}>market probability</div>
-                    <div style={{ fontSize: 18, color: "#555570" }}>via Polymarket</div>
+                    <div style={{ display: "flex", fontSize: 24, color: "#8888aa", fontWeight: 500 }}>market probability</div>
+                    <div style={{ display: "flex", fontSize: 18, color: "#555570" }}>via Polymarket</div>
                   </div>
                 </div>
 
-                <div style={{ fontSize: 22, color: "#7c6af7", fontWeight: 600 }}>
-                  Record your prediction → predlab.app
+                <div style={{ display: "flex", fontSize: 22, color: "#7c6af7", fontWeight: 600 }}>
+                  Record your prediction at predlab.app
                 </div>
               </div>
             </div>
