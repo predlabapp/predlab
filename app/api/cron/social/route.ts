@@ -269,12 +269,19 @@ export async function GET(req: NextRequest) {
       })
       console.log(`[cron/social] Instagram published: ${instagramPostId}`)
     } else {
-      const twitterPostId = await postToTwitter(blobUrl, caption)
+      // TWITTER POSTING TEMPORARILY DISABLED
+      // X flagged account as potential bot — re-enable when cleared
+      // const twitterPostId = await postToTwitter(blobUrl, caption)
+      // await prisma.socialPost.update({
+      //   where: { id: socialPost.id },
+      //   data: { twitterPostId, status: "published" },
+      // })
+      // console.log(`[cron/social] Twitter published: ${twitterPostId}`)
       await prisma.socialPost.update({
         where: { id: socialPost.id },
-        data: { twitterPostId, status: "published" },
+        data: { status: "ready" },
       })
-      console.log(`[cron/social] Twitter published: ${twitterPostId}`)
+      console.log(`[cron/social] Twitter post ready (auto-publish disabled)`)
     }
 
     return NextResponse.json({
