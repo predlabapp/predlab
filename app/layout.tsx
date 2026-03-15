@@ -18,31 +18,31 @@ const dmMono = DM_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://predlab.app"),
   title: {
-    default: "PredLab — Track Your Predictions",
+    default: "PredLab | Your Predictions. Proven.",
     template: "%s | PredLab",
   },
   description:
-    "Record your forecasts with real probabilities, compare with Polymarket live data, and build your verifiable reputation as a forecaster.",
+    "Record forecasts with real probabilities, compare with live Polymarket data, and build a verifiable reputation as a forecaster. Track accuracy. Climb the rankings.",
   keywords: [
     "prediction market", "forecasting", "polymarket", "predictions",
-    "probability", "forecast tracker", "accuracy score",
+    "probability", "forecast tracker", "accuracy score", "predlab",
   ],
   icons: { icon: "/favicon.svg" },
   openGraph: {
     type: "website",
     url: "https://predlab.app",
     siteName: "PredLab",
-    title: "PredLab — Track Your Predictions",
+    title: "PredLab | Your Predictions. Proven.",
     description:
-      "Record your forecasts with real probabilities, compare with Polymarket live data, and build your verifiable reputation as a forecaster.",
+      "Record forecasts with real probabilities, compare with live Polymarket data, and build a verifiable reputation as a forecaster. Track accuracy. Climb the rankings.",
     images: [{ url: "/og-default.svg", width: 1200, height: 630, alt: "PredLab" }],
   },
   twitter: {
     card: "summary_large_image",
     site: "@predlabapp",
-    title: "PredLab — Track Your Predictions",
+    title: "PredLab | Your Predictions. Proven.",
     description:
-      "Record your forecasts with real probabilities, compare with Polymarket live data, and build your verifiable reputation as a forecaster.",
+      "Record forecasts with real probabilities, compare with live Polymarket data, and build a verifiable reputation as a forecaster. Track accuracy. Climb the rankings.",
     images: ["/og-default.svg"],
   },
 }
