@@ -163,13 +163,12 @@ async function postToInstagram(imageUrl: string, caption: string): Promise<strin
 // ─── Twitter / X ────────────────────────────────────────────────────────────
 
 async function postToTwitter(blobUrl: string, caption: string): Promise<string> {
-  const appKey = process.env.X_API_KEY ?? ""
-  const appSecret = process.env.X_API_SECRET ?? ""
-  const accessToken = process.env.X_ACCESS_TOKEN ?? ""
-  const accessSecret = process.env.X_ACCESS_TOKEN_SECRET ?? ""
-  console.log("[twitter] credentials check — appKey:", appKey.slice(0, 6), "appSecret:", appSecret.slice(0, 6), "accessToken:", accessToken.slice(0, 6), "accessSecret:", accessSecret.slice(0, 6))
-
-  const client = new TwitterApi({ appKey, appSecret, accessToken, accessSecret })
+  const client = new TwitterApi({
+    appKey: process.env.X_API_KEY ?? "",
+    appSecret: process.env.X_API_SECRET ?? "",
+    accessToken: process.env.X_ACCESS_TOKEN ?? "",
+    accessSecret: process.env.X_ACCESS_TOKEN_SECRET ?? "",
+  })
 
   // 1. Fetch image from Blob CDN
   const imgRes = await fetch(blobUrl)
