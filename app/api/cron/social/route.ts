@@ -85,6 +85,15 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
 
       // Find the best sub-market: probability in [30, 70] (most uncertain = most engaging)
       for (const m of markets) {
+        const question = String(m.question ?? "")
+
+        // Skip malformed questions: groupItemTitle abbreviations like "AM", "BR", "US"
+        const groupItemTitle = String(m.groupItemTitle ?? "")
+        if (groupItemTitle && groupItemTitle.length <= 3) continue
+
+        // Skip questions that are too short to be meaningful
+        if (question.length < 20) continue
+
         const prices =
           typeof m.outcomePrices === "string"
             ? JSON.parse(m.outcomePrices as string)
@@ -98,7 +107,7 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
         const prob = Math.round(parseFloat(String(prices[idx])) * 100)
         if (prob >= 30 && prob <= 70) {
           return {
-            question: m.question as string,
+            question,
             slug: e.slug as string,
             probability: prob,
           }
