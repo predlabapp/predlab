@@ -9,7 +9,7 @@ const createSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   category: z.nativeEnum(Category).optional(),
-  endsAt: z.string().datetime().optional(),
+  endsAt: z.string().optional(),
   maxMembers: z.number().int().min(2).max(10000).optional(),
   isPublic: z.boolean().optional(),
   coverEmoji: z.string().max(10).optional(),
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
   const body = await req.json()
   const parsed = createSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+    const firstError = parsed.error.errors[0]?.message ?? "Dados inválidos."
+    return NextResponse.json({ error: firstError }, { status: 400 })
   }
 
   const { name, description, category, endsAt, maxMembers, isPublic, coverEmoji } = parsed.data

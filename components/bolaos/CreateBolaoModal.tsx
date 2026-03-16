@@ -64,11 +64,11 @@ export function CreateBolaoModal({ onClose }: Props) {
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="w-full max-w-lg rounded-2xl"
-        style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+        className="w-full max-w-lg rounded-2xl flex flex-col"
+        style={{ background: "var(--bg-card)", border: "1px solid var(--border)", maxHeight: "90vh" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
           <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
             Criar Bolão
           </h2>
@@ -77,7 +77,7 @@ export function CreateBolaoModal({ onClose }: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
           {/* Emoji picker */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
@@ -177,25 +177,34 @@ export function CreateBolaoModal({ onClose }: Props) {
             </div>
           </div>
 
-          {/* Public toggle */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <div
-              className="relative w-10 h-5 rounded-full transition-colors"
-              style={{ background: form.isPublic ? "var(--accent)" : "var(--border-bright)" }}
-              onClick={() => setForm((f) => ({ ...f, isPublic: !f.isPublic }))}
-            >
+          {/* Public/private toggle */}
+          <div className="p-3 rounded-xl" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+            <label className="flex items-center gap-3 cursor-pointer">
               <div
-                className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform"
-                style={{
-                  background: "white",
-                  transform: form.isPublic ? "translateX(20px)" : "translateX(0)",
-                }}
-              />
-            </div>
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              Bolão público (qualquer pessoa pode ver)
-            </span>
-          </label>
+                className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0"
+                style={{ background: form.isPublic ? "var(--accent)" : "var(--border-bright)" }}
+                onClick={() => setForm((f) => ({ ...f, isPublic: !f.isPublic }))}
+              >
+                <div
+                  className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform"
+                  style={{
+                    background: "white",
+                    transform: form.isPublic ? "translateX(20px)" : "translateX(0)",
+                  }}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  {form.isPublic ? "Bolão público" : "Grupo privado"}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  {form.isPublic
+                    ? "Qualquer pessoa pode encontrar e entrar"
+                    : "Acesso só por link de convite — perfeito para amigos"}
+                </p>
+              </div>
+            </label>
+          </div>
 
           {error && (
             <p className="text-sm" style={{ color: "var(--red)" }}>{error}</p>
