@@ -71,28 +71,38 @@ Do you agree? Record your prediction with real probability at predlab.app
 
 async function fetchTopMarket(excludeSlugs: string[] = []) {
   const res = await fetch(
-    "https://gamma-api.polymarket.com/markets?limit=80&active=true&closed=false&order=volume&ascending=false",
+    "https://gamma-api.polymarket.com/events?limit=100&active=true&closed=false&order=volume24hr&ascending=false",
     { headers: { Accept: "application/json" }, next: { revalidate: 0 } }
   )
   if (!res.ok) throw new Error(`Polymarket fetch failed: ${res.status}`)
-  const markets = await res.json()
+  const events = await res.json()
+  if (!Array.isArray(events)) throw new Error("Unexpected Polymarket response")
 
-  for (const m of markets) {
+  for (const e of events) {
     try {
-      if (excludeSlugs.includes(m.slug)) continue
-      const prices =
-        typeof m.outcomePrices === "string"
-          ? JSON.parse(m.outcomePrices)
-          : m.outcomePrices ?? ["0.5"]
-      const outcomes =
-        typeof m.outcomes === "string"
-          ? JSON.parse(m.outcomes)
-          : m.outcomes ?? ["Yes"]
-      const yesIdx = outcomes.findIndex((o: string) => o.toLowerCase() === "yes")
-      const idx = yesIdx >= 0 ? yesIdx : 0
-      const prob = Math.round(parseFloat(prices[idx]) * 100)
-      if (prob >= 30 && prob <= 70) {
-        return { question: m.question as string, slug: m.slug as string, probability: prob }
+      if (excludeSlugs.includes(e.slug)) continue
+      const markets: Array<Record<string, unknown>> = e.markets ?? []
+
+      // Find the best sub-market: probability in [30, 70] (most uncertain = most engaging)
+      for (const m of markets) {
+        const prices =
+          typeof m.outcomePrices === "string"
+            ? JSON.parse(m.outcomePrices as string)
+            : (m.outcomePrices as string[]) ?? ["0.5"]
+        const outcomes =
+          typeof m.outcomes === "string"
+            ? JSON.parse(m.outcomes as string)
+            : (m.outcomes as string[]) ?? ["Yes"]
+        const yesIdx = outcomes.findIndex((o: string) => o.toLowerCase() === "yes")
+        const idx = yesIdx >= 0 ? yesIdx : 0
+        const prob = Math.round(parseFloat(String(prices[idx])) * 100)
+        if (prob >= 30 && prob <= 70) {
+          return {
+            question: m.question as string,
+            slug: e.slug as string,
+            probability: prob,
+          }
+        }
       }
     } catch {}
   }
