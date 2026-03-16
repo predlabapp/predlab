@@ -63,10 +63,10 @@ export default function BolaosPage() {
         >
           <Users size={40} className="mb-4" style={{ opacity: 0.4 }} />
           <p className="font-display text-lg mb-1" style={{ color: "var(--text-secondary)" }}>
-            Ainda não tens bolões
+            Você ainda não tem bolões
           </p>
           <p className="text-sm mb-4">
-            Cria o primeiro e convida os teus amigos!
+            Crie o primeiro e convide seus amigos!
           </p>
           <button onClick={() => setShowCreate(true)} className="btn-primary">
             Criar Bolão

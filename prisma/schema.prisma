@@ -50,12 +50,12 @@ model User {
   coinTransactions   CoinTransaction[]
   bolaosCreated      Bolao[]             @relation("BolaoCreator")
   bolaoMembers       BolaoMember[]
-  bolaoPredicoes     BolaoPredicao[]
   bolaoPayments      BolaoPayment[]
   paymentsConfirmed  BolaoPayment[]      @relation("PaymentConfirmer")
+  gruposCreated      Grupo[]             @relation("GrupoCreator")
+  grupoMembers       GrupoMember[]
   mercadosCriados    GrupoMercado[]      @relation("MercadoCreator")
   mercadosResolvidos GrupoMercado[]      @relation("MercadoResolver")
-  mercadoVotos       GrupoMercadoVoto[]
   notifications      Notification[]
 
   @@map("users")
@@ -131,8 +131,7 @@ model Prediction {
   polymarketUrl         String?
   polymarketUpdatedAt   DateTime?
 
-  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bolaoPredicoes BolaoPredicao[]
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("predictions")
 }
@@ -199,9 +198,35 @@ model RankingSnapshot {
   @@map("ranking_snapshots")
 }
 
+// ─── BOLÃO TRADICIONAL ───────────────────────────────────────────────────────
+
 enum BolaoRole {
   ADMIN
   MEMBER
+}
+
+enum BolaoType {
+  SPORTS
+  CUSTOM
+}
+
+enum JogoStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+enum PrizeStatus {
+  PENDING
+  FINISHED
+  PAID
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
 }
 
 model Bolao {
@@ -211,19 +236,31 @@ model Bolao {
   slug        String    @unique
   inviteCode  String    @unique @default(cuid())
   creatorId   String
+  type        BolaoType @default(SPORTS)
+  coverEmoji  String    @default("🏆")
   isPublic    Boolean   @default(false)
-  coverEmoji  String    @default("🔮")
-  category    Category?
-  endsAt      DateTime?
   maxMembers  Int?
+  endsAt      DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  creator    User            @relation("BolaoCreator", fields: [creatorId], references: [id])
-  members    BolaoMember[]
-  predicoes  BolaoPredicao[]
-  payments   BolaoPayment[]
-  mercados   GrupoMercado[]
+  // Prize
+  hasPrize          Boolean     @default(false)
+  prizeDescription  String?
+  prizePixKey       String?
+  prizePool         String?
+  prizeDistribution String?
+  prizeStatus       PrizeStatus @default(PENDING)
+  prizeWinnerId     String?
+
+  // Scoring
+  pointsExact  Int @default(10)
+  pointsResult Int @default(5)
+
+  creator  User          @relation("BolaoCreator", fields: [creatorId], references: [id])
+  members  BolaoMember[]
+  jogos    BolaoJogo[]
+  payments BolaoPayment[]
 
   @@map("bolaos")
 }
@@ -236,32 +273,54 @@ model BolaoMember {
   joinedAt DateTime  @default(now())
   nickname String?
 
-  bolao Bolao @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bolao    Bolao          @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  palpites BolaoPalpite[]
 
   @@unique([bolaoId, userId])
   @@map("bolao_members")
 }
 
-model BolaoPredicao {
-  id           String   @id @default(cuid())
+model BolaoJogo {
+  id           String     @id @default(cuid())
   bolaoId      String
-  predictionId String
-  addedById    String
-  createdAt    DateTime @default(now())
+  name         String
+  description  String?
+  homeTeam     String?
+  awayTeam     String?
+  options      String?    // JSON array for CUSTOM type
+  scheduledAt  DateTime
+  phase        String?
+  status       JogoStatus @default(SCHEDULED)
+  resultHome   Int?
+  resultAway   Int?
+  resultOption String?
+  resolvedAt   DateTime?
+  resolvedById String?
+  createdAt    DateTime   @default(now())
 
-  bolao      Bolao      @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
-  prediction Prediction @relation(fields: [predictionId], references: [id])
-  addedBy    User       @relation(fields: [addedById], references: [id])
+  bolao    Bolao          @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  palpites BolaoPalpite[]
 
-  @@unique([bolaoId, predictionId])
-  @@map("bolao_predicoes")
+  @@map("bolao_jogos")
 }
 
-enum PaymentStatus {
-  PENDING
-  CONFIRMED
-  REJECTED
+model BolaoPalpite {
+  id            String   @id @default(cuid())
+  jogoId        String
+  memberId      String
+  palpiteHome   Int?
+  palpiteAway   Int?
+  palpiteOption String?
+  pontos        Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  jogo   BolaoJogo   @relation(fields: [jogoId], references: [id], onDelete: Cascade)
+  member BolaoMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([jogoId, memberId])
+  @@map("bolao_palpites")
 }
 
 model BolaoPayment {
@@ -283,15 +342,57 @@ model BolaoPayment {
   @@map("bolao_payments")
 }
 
+// ─── GRUPOS (MERCADOS DE PROBABILIDADE) ─────────────────────────────────────
+
+enum GrupoRole {
+  ADMIN
+  MEMBER
+}
+
 enum GrupoResolution {
   SIM
   NAO
   CANCELADO
 }
 
+model Grupo {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  slug        String   @unique
+  inviteCode  String   @unique @default(cuid())
+  creatorId   String
+  coverEmoji  String   @default("🔮")
+  isPublic    Boolean  @default(false)
+  maxMembers  Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator  User           @relation("GrupoCreator", fields: [creatorId], references: [id])
+  members  GrupoMember[]
+  mercados GrupoMercado[]
+
+  @@map("grupos")
+}
+
+model GrupoMember {
+  id       String    @id @default(cuid())
+  grupoId  String
+  userId   String
+  role     GrupoRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  grupo  Grupo              @relation(fields: [grupoId], references: [id], onDelete: Cascade)
+  user   User               @relation(fields: [userId], references: [id])
+  votos  GrupoMercadoVoto[]
+
+  @@unique([grupoId, userId])
+  @@map("grupo_members")
+}
+
 model GrupoMercado {
-  id           String          @id @default(cuid())
-  bolaoId      String
+  id           String           @id @default(cuid())
+  grupoId      String
   creatorId    String
   question     String
   description  String?
@@ -300,11 +401,11 @@ model GrupoMercado {
   resolvedAt   DateTime?
   resolution   GrupoResolution?
   resolvedById String?
-  isOpen       Boolean         @default(true)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  isOpen       Boolean          @default(true)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  bolao      Bolao              @relation(fields: [bolaoId], references: [id], onDelete: Cascade)
+  grupo      Grupo              @relation(fields: [grupoId], references: [id], onDelete: Cascade)
   creator    User               @relation("MercadoCreator", fields: [creatorId], references: [id])
   resolvedBy User?              @relation("MercadoResolver", fields: [resolvedById], references: [id])
   votos      GrupoMercadoVoto[]
@@ -315,17 +416,19 @@ model GrupoMercado {
 model GrupoMercadoVoto {
   id          String   @id @default(cuid())
   mercadoId   String
-  userId      String
+  memberId    String
   probability Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   mercado GrupoMercado @relation(fields: [mercadoId], references: [id], onDelete: Cascade)
-  user    User         @relation(fields: [userId], references: [id])
+  member  GrupoMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
-  @@unique([mercadoId, userId])
+  @@unique([mercadoId, memberId])
   @@map("grupo_mercado_votos")
 }
+
+// ─── NOTIFICATIONS & SOCIAL ──────────────────────────────────────────────────
 
 model Notification {
   id        String   @id @default(cuid())
@@ -344,7 +447,7 @@ model Notification {
 
 model SocialPost {
   id              String   @id @default(cuid())
-  date            String   // YYYY-MM-DD in Brasilia time
+  date            String
   marketTitle     String
   marketSlug      String
   probability     Int
@@ -354,12 +457,12 @@ model SocialPost {
   caption         String   @db.Text
   instagramPostId String?
   twitterPostId   String?
-  status          String   @default("pending") // pending, published, failed, ready
+  status          String   @default("pending")
   error           String?
   createdAt       DateTime @default(now())
-  platform      String   @default("instagram") // "instagram" | "twitter"
-  scheduledTime String?                         // "08:00", "12:00", "17:00", "19:00", "21:00"
-  imageFormat   String   @default("square")     // "square" | "landscape"
+  platform      String   @default("instagram")
+  scheduledTime String?
+  imageFormat   String   @default("square")
 
   @@map("social_posts")
 }

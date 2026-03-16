@@ -3,43 +3,6 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import { Category } from "@prisma/client"
-import { calculateAccuracyScore } from "@/lib/utils"
-
-const POLYMARKET_BONUS = 10 // bonus pts per auto-verified prediction
-
-function calcMemberScore(predicoes: Array<{
-  addedById: string
-  prediction: {
-    userId: string
-    probability: number
-    resolution: string | null
-    resolutionType: string | null
-    resolvedAt: Date | null
-  }
-}>, userId: string) {
-  const mine = predicoes.filter((p) => p.addedById === userId)
-  const resolved = mine.filter((p) => p.prediction.resolvedAt && p.prediction.resolution !== "CANCELLED")
-  const correct = resolved.filter((p) => p.prediction.resolution === "CORRECT").length
-  const verifiedResolved = resolved.filter((p) => p.prediction.resolutionType === "AUTOMATIC")
-
-  const scoreGeneral = calculateAccuracyScore(
-    resolved.map((p) => ({ probability: p.prediction.probability, resolution: p.prediction.resolution as any }))
-  )
-  const scoreVerified = verifiedResolved.length > 0
-    ? calculateAccuracyScore(
-        verifiedResolved.map((p) => ({ probability: p.prediction.probability, resolution: p.prediction.resolution as any }))
-      ) + verifiedResolved.length * POLYMARKET_BONUS
-    : 0
-
-  return {
-    totalPredictions: mine.length,
-    resolvedPredictions: resolved.length,
-    correctPredictions: correct,
-    scoreGeneral,
-    scoreVerified,
-  }
-}
 
 export async function GET(
   req: Request,
@@ -54,13 +17,6 @@ export async function GET(
         include: {
           user: { select: { id: true, name: true, image: true, currentStreak: true, badges: true } },
         },
-      },
-      predicoes: {
-        include: {
-          prediction: true,
-          addedBy: { select: { id: true, name: true } },
-        },
-        orderBy: { createdAt: "desc" },
       },
     },
   })
@@ -79,21 +35,21 @@ export async function GET(
     return NextResponse.json({ error: "Acesso negado. Este bolão é privado." }, { status: 403 })
   }
 
-  // Build ranking
+  // Build ranking (scores based on palpites — all zero until jogos are played)
   const ranking = bolao.members
-    .map((m, idx) => {
-      const scores = calcMemberScore(bolao.predicoes as any, m.userId)
-      return {
-        userId: m.userId,
-        name: m.user.name ?? "—",
-        image: m.user.image ?? null,
-        nickname: m.nickname ?? null,
-        streak: m.user.currentStreak,
-        badges: m.user.badges.map((b) => b.badgeKey),
-        ...scores,
-      }
-    })
-    .sort((a, b) => b.scoreVerified - a.scoreVerified || b.scoreGeneral - a.scoreGeneral)
+    .map((m) => ({
+      userId: m.userId,
+      name: m.user.name ?? "—",
+      image: m.user.image ?? null,
+      nickname: m.nickname ?? null,
+      streak: m.user.currentStreak,
+      badges: m.user.badges.map((b) => b.badgeKey),
+      totalPredictions: 0,
+      resolvedPredictions: 0,
+      correctPredictions: 0,
+      scoreGeneral: 0,
+      scoreVerified: 0,
+    }))
     .map((m, idx) => ({ position: idx + 1, ...m }))
 
   return NextResponse.json({
@@ -108,6 +64,8 @@ export async function GET(
       isPublic: bolao.isPublic,
       creatorId: bolao.creatorId,
       memberCount: bolao.members.length,
+      hasPrize: bolao.hasPrize,
+      type: bolao.type,
     },
     myRole,
     isMember,
@@ -120,23 +78,6 @@ export async function GET(
       role: m.role,
       joinedAt: m.joinedAt,
     })),
-    predictions: bolao.predicoes.map((p) => ({
-      id: p.id,
-      predictionId: p.predictionId,
-      addedById: p.addedById,
-      addedByName: p.addedBy.name,
-      createdAt: p.createdAt,
-      prediction: {
-        id: p.prediction.id,
-        title: p.prediction.title,
-        probability: p.prediction.probability,
-        category: p.prediction.category,
-        resolution: p.prediction.resolution,
-        resolvedAt: p.prediction.resolvedAt,
-        expiresAt: p.prediction.expiresAt,
-        resolutionType: p.prediction.resolutionType,
-      },
-    })),
   })
 }
 
@@ -147,7 +88,6 @@ const editSchema = z.object({
   maxMembers: z.number().int().min(2).optional().nullable(),
   isPublic: z.boolean().optional(),
   coverEmoji: z.string().max(10).optional(),
-  category: z.nativeEnum(Category).optional().nullable(),
 })
 
 export async function PATCH(

@@ -4,14 +4,12 @@ import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { Link } from "@/navigation"
-import { ArrowLeft, Users, Calendar, Plus, Loader2, Trash2 } from "lucide-react"
+import { ArrowLeft, Users, Calendar, Loader2 } from "lucide-react"
 import { BolaoRanking } from "@/components/bolaos/BolaoRanking"
 import { BolaoInvite } from "@/components/bolaos/BolaoInvite"
-import { AddPredictionToBolao } from "@/components/bolaos/AddPredictionToBolao"
 import { BolaoPayments } from "@/components/bolaos/BolaoPayments"
-import { GrupoMercados } from "@/components/bolaos/GrupoMercados"
 import { BolaoMembers } from "@/components/bolaos/BolaoMembers"
-import { CATEGORIES, getProbabilityColor, formatDate } from "@/lib/utils"
+import { formatDate } from "@/lib/utils"
 
 interface BolaoData {
   bolao: {
@@ -25,15 +23,16 @@ interface BolaoData {
     isPublic: boolean
     creatorId: string
     memberCount: number
+    hasPrize: boolean
+    type: "SPORTS" | "CUSTOM"
   }
   myRole: "ADMIN" | "MEMBER" | null
   isMember: boolean
   ranking: any[]
   members: { userId: string; name: string; image: string | null; nickname: string | null; role: "ADMIN" | "MEMBER"; joinedAt: string }[]
-  predictions: any[]
 }
 
-type Tab = "ranking" | "previsoes" | "mercados" | "pagamentos" | "membros"
+type Tab = "ranking" | "jogos" | "membros" | "pagamentos"
 
 export default function BolaoPage() {
   const params = useParams()
@@ -42,7 +41,6 @@ export default function BolaoPage() {
   const [data, setData] = useState<BolaoData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [showAddPrediction, setShowAddPrediction] = useState(false)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
   const [joining, setJoining] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>("ranking")
@@ -74,12 +72,6 @@ export default function BolaoPage() {
     }
   }
 
-  async function handleRemovePrediction(predictionId: string) {
-    if (!confirm("Remover esta previsão do bolão?")) return
-    await fetch(`/api/bolaos/${slug}/predictions/${predictionId}`, { method: "DELETE" })
-    await load()
-  }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -97,13 +89,10 @@ export default function BolaoPage() {
     )
   }
 
-  const { bolao, myRole, isMember, ranking, members, predictions } = data
+  const { bolao, myRole, isMember, ranking, members } = data
   const isAdmin = myRole === "ADMIN"
   const currentUserId = session?.user?.id ?? null
-  const existingPredictionIds = predictions.map((p: any) => p.predictionId)
 
-  // Compute scoreGrupo from mercados votos (simplified — full calc is in ranking API)
-  // For now, pass null; the ranking can be enhanced later with mercado scores via API
   const rankingWithExtras = ranking.map((m: any) => ({
     ...m,
     paymentStatus: null,
@@ -112,10 +101,9 @@ export default function BolaoPage() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "ranking", label: "Ranking" },
-    { key: "previsoes", label: "Previsões" },
-    { key: "mercados", label: "Mercados" },
+    { key: "jogos", label: "Jogos" },
     { key: "membros", label: `Membros (${bolao.memberCount})` },
-    { key: "pagamentos", label: "Pagamentos" },
+    ...(bolao.hasPrize ? [{ key: "pagamentos" as Tab, label: "Pagamentos" }] : []),
   ]
 
   return (
@@ -127,7 +115,7 @@ export default function BolaoPage() {
         style={{ color: "var(--text-muted)" }}
       >
         <ArrowLeft size={14} />
-        Os meus Bolões
+        Meus Bolões
       </Link>
 
       {/* Header */}
@@ -149,6 +137,9 @@ export default function BolaoPage() {
                   admin
                 </span>
               )}
+              <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ background: "rgba(85,85,112,0.2)", color: "var(--text-muted)" }}>
+                {bolao.type === "SPORTS" ? "⚽ Esportivo" : "🗳️ Personalizado"}
+              </span>
               {!bolao.isPublic && (
                 <span className="font-mono text-xs px-2 py-0.5 rounded" style={{ background: "rgba(85,85,112,0.2)", color: "var(--text-muted)" }}>
                   privado
@@ -216,99 +207,23 @@ export default function BolaoPage() {
           <BolaoRanking
             ranking={rankingWithExtras}
             currentUserId={currentUserId}
-            showPayments={false}
+            showPayments={bolao.hasPrize}
             showScoreGrupo={false}
           />
         )}
 
-        {activeTab === "previsoes" && (
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-display font-semibold text-lg" style={{ color: "var(--text-primary)" }}>
-                Previsões do Bolão
-              </h2>
-              {isMember && (
-                <button
-                  onClick={() => setShowAddPrediction(true)}
-                  className="btn-ghost flex items-center gap-1.5 text-sm"
-                >
-                  <Plus size={14} />
-                  Adicionar
-                </button>
-              )}
-            </div>
-
-            {predictions.length === 0 ? (
-              <div className="text-center py-8" style={{ color: "var(--text-muted)" }}>
-                <p className="text-sm">Nenhuma previsão partilhada ainda.</p>
-                {isMember && (
-                  <button onClick={() => setShowAddPrediction(true)} className="btn-primary mt-3 text-sm">
-                    Partilhar a primeira previsão
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {predictions.map((p: any) => {
-                  const cat = CATEGORIES[p.prediction.category as keyof typeof CATEGORIES]
-                  const canRemove = isAdmin || p.addedById === currentUserId
-                  return (
-                    <div
-                      key={p.id}
-                      className="flex items-center gap-3 p-3 rounded-xl"
-                      style={{ background: "var(--bg)", border: "1px solid var(--border)" }}
-                    >
-                      <div
-                        className="font-mono text-sm font-bold w-10 text-center flex-shrink-0"
-                        style={{ color: getProbabilityColor(p.prediction.probability) }}
-                      >
-                        {p.prediction.probability}%
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                          {p.prediction.title}
-                        </p>
-                        <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                          {cat?.emoji} {cat?.label} · por {p.addedByName}
-                          {p.prediction.resolution && (
-                            <span
-                              className="ml-2 font-mono"
-                              style={{
-                                color: p.prediction.resolution === "CORRECT" ? "var(--green)" :
-                                       p.prediction.resolution === "INCORRECT" ? "var(--red)" : "var(--yellow)"
-                              }}
-                            >
-                              {p.prediction.resolution}
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      {canRemove && (
-                        <button
-                          onClick={() => handleRemovePrediction(p.predictionId)}
-                          className="p-1.5 rounded-md transition-colors"
-                          style={{ color: "var(--text-muted)" }}
-                          onMouseOver={(e) => { e.currentTarget.style.color = "var(--red)" }}
-                          onMouseOut={(e) => { e.currentTarget.style.color = "var(--text-muted)" }}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+        {activeTab === "jogos" && (
+          <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
+            <p className="text-3xl mb-3">⚽</p>
+            <p className="font-display font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>
+              Jogos em breve
+            </p>
+            <p className="text-sm">
+              {isAdmin
+                ? "Em breve poderás adicionar jogos e os membros fazem os seus palpites."
+                : "O admin ainda não adicionou jogos."}
+            </p>
           </div>
-        )}
-
-        {activeTab === "mercados" && (
-          <GrupoMercados
-            slug={slug}
-            isMember={isMember}
-            currentUserId={currentUserId}
-            isAdmin={isAdmin}
-          />
         )}
 
         {activeTab === "membros" && (
@@ -342,15 +257,6 @@ export default function BolaoPage() {
           </div>
         )}
       </div>
-
-      {showAddPrediction && (
-        <AddPredictionToBolao
-          slug={slug}
-          existingPredictionIds={existingPredictionIds}
-          onClose={() => setShowAddPrediction(false)}
-          onAdded={() => { setShowAddPrediction(false); load() }}
-        />
-      )}
     </div>
   )
 }

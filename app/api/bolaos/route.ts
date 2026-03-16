@@ -3,16 +3,23 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
-import { Category } from "@prisma/client"
+import { BolaoType } from "@prisma/client"
 
 const createSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
-  category: z.nativeEnum(Category).optional(),
+  type: z.nativeEnum(BolaoType).optional(),
   endsAt: z.string().optional(),
   maxMembers: z.number().int().min(2).max(10000).optional(),
   isPublic: z.boolean().optional(),
   coverEmoji: z.string().max(10).optional(),
+  hasPrize: z.boolean().optional(),
+  prizeDescription: z.string().max(500).optional(),
+  prizePixKey: z.string().max(200).optional(),
+  prizePool: z.string().max(200).optional(),
+  prizeDistribution: z.string().max(500).optional(),
+  pointsExact: z.number().int().min(1).max(100).optional(),
+  pointsResult: z.number().int().min(1).max(100).optional(),
 })
 
 function generateSlug(name: string, suffix: string): string {
@@ -40,7 +47,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: firstError }, { status: 400 })
   }
 
-  const { name, description, category, endsAt, maxMembers, isPublic, coverEmoji } = parsed.data
+  const {
+    name,
+    description,
+    type,
+    endsAt,
+    maxMembers,
+    isPublic,
+    coverEmoji,
+    hasPrize,
+    prizeDescription,
+    prizePixKey,
+    prizePool,
+    prizeDistribution,
+    pointsExact,
+    pointsResult,
+  } = parsed.data
 
   // Generate unique slug
   const suffix = Math.random().toString(36).slice(2, 7)
@@ -51,11 +73,18 @@ export async function POST(req: Request) {
       name,
       description,
       slug,
-      category,
+      type: type ?? "SPORTS",
       endsAt: endsAt ? new Date(endsAt) : undefined,
       maxMembers,
       isPublic: isPublic ?? false,
-      coverEmoji: coverEmoji ?? "🔮",
+      coverEmoji: coverEmoji ?? "🏆",
+      hasPrize: hasPrize ?? false,
+      prizeDescription,
+      prizePixKey,
+      prizePool,
+      prizeDistribution,
+      pointsExact: pointsExact ?? 10,
+      pointsResult: pointsResult ?? 5,
       creatorId: session.user.id,
       // Creator joins automatically as ADMIN
       members: {
@@ -94,11 +123,6 @@ export async function GET(req: Request) {
               user: { select: { id: true, name: true, image: true } },
             },
           },
-          predicoes: {
-            include: {
-              prediction: true,
-            },
-          },
         },
       },
     },
@@ -106,38 +130,11 @@ export async function GET(req: Request) {
   })
 
   const bolaos = memberships.map(({ bolao, role }) => {
-    // Calculate my score in this bolão
-    const myPredicoes = bolao.predicoes.filter(
-      (p) => p.addedById === session.user.id && p.prediction.resolvedAt
-    )
-    const correct = myPredicoes.filter(
-      (p) => p.prediction.resolution === "CORRECT"
-    ).length
-    const myScore = myPredicoes.length > 0
-      ? Math.round((correct / myPredicoes.length) * 100)
-      : 0
-
-    // Top forecaster (most correct predictions)
-    const memberScores = bolao.members.map((m) => {
-      const preds = bolao.predicoes.filter(
-        (p) => p.addedById === m.userId && p.prediction.resolvedAt
-      )
-      const c = preds.filter((p) => p.prediction.resolution === "CORRECT").length
-      return { name: m.user.name ?? "—", score: preds.length > 0 ? Math.round((c / preds.length) * 100) : 0 }
-    })
-    const sortedScores = [...memberScores].sort((a, b) => b.score - a.score)
-    const top = sortedScores[0] ?? null
-    const myPositionIdx = sortedScores.findIndex((s) => {
-      const m = bolao.members.find((bm) => bm.user.name === s.name)
-      return m?.userId === session.user.id
-    })
-    const myPosition = myPositionIdx >= 0 ? myPositionIdx + 1 : null
-
-    // Recent activity (last 24h)
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
-    const recentActivity = bolao.predicoes.filter(
-      (p) => new Date(p.createdAt) > since
-    ).length
+    // Scores based on palpites — all zero until jogos are played
+    const myScore = 0
+    const myPosition = null
+    const top = null
+    const recentActivity = 0
 
     return {
       id: bolao.id,
@@ -152,6 +149,8 @@ export async function GET(req: Request) {
       recentActivity,
       endsAt: bolao.endsAt,
       isPublic: bolao.isPublic,
+      hasPrize: bolao.hasPrize,
+      type: bolao.type,
     }
   })
 

@@ -2,11 +2,9 @@
 
 import { useState } from "react"
 import { X, Loader2 } from "lucide-react"
-import { CATEGORIES } from "@/lib/utils"
-import { Category } from "@prisma/client"
 import { useRouter } from "@/navigation"
 
-const EMOJI_OPTIONS = ["🔮", "🏆", "⚽", "🏀", "🎯", "🧠", "📈", "🌍", "🎪", "🎲", "💡", "🚀", "🌟", "🔥", "💰", "🎭"]
+const EMOJI_OPTIONS = ["🏆", "⚽", "🏀", "🎯", "🧠", "📈", "🌍", "🎪", "🎲", "💡", "🚀", "🌟", "🔥", "💰", "🎭", "🔮"]
 
 interface Props {
   onClose: () => void
@@ -19,11 +17,16 @@ export function CreateBolaoModal({ onClose }: Props) {
   const [form, setForm] = useState({
     name: "",
     description: "",
-    coverEmoji: "🔮",
-    category: "" as Category | "",
+    coverEmoji: "🏆",
+    type: "SPORTS" as "SPORTS" | "CUSTOM",
     endsAt: "",
     maxMembers: "",
     isPublic: false,
+    hasPrize: false,
+    prizeDescription: "",
+    prizePixKey: "",
+    prizePool: "",
+    prizeDistribution: "",
   })
 
   async function handleSubmit(e: React.FormEvent) {
@@ -40,10 +43,15 @@ export function CreateBolaoModal({ onClose }: Props) {
           name: form.name.trim(),
           description: form.description.trim() || undefined,
           coverEmoji: form.coverEmoji,
-          category: form.category || undefined,
+          type: form.type,
           endsAt: form.endsAt || undefined,
           maxMembers: form.maxMembers ? parseInt(form.maxMembers) : undefined,
           isPublic: form.isPublic,
+          hasPrize: form.hasPrize,
+          prizeDescription: form.prizeDescription.trim() || undefined,
+          prizePixKey: form.prizePixKey.trim() || undefined,
+          prizePool: form.prizePool.trim() || undefined,
+          prizeDistribution: form.prizeDistribution.trim() || undefined,
         }),
       })
       const data = await res.json()
@@ -78,6 +86,35 @@ export function CreateBolaoModal({ onClose }: Props) {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4 overflow-y-auto">
+          {/* Type selector */}
+          <div>
+            <label className="block text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+              Tipo de Bolão
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: "SPORTS", label: "⚽ Esportivo", desc: "Palpites em jogos" },
+                { value: "CUSTOM", label: "🗳️ Personalizado", desc: "Perguntas livres" },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, type: opt.value }))}
+                  className="p-3 rounded-xl text-left transition-all"
+                  style={{
+                    background: form.type === opt.value ? "var(--accent-dim)" : "var(--bg)",
+                    border: form.type === opt.value ? "2px solid var(--accent)" : "1px solid var(--border)",
+                  }}
+                >
+                  <p className="text-sm font-medium" style={{ color: form.type === opt.value ? "var(--accent)" : "var(--text-primary)" }}>
+                    {opt.label}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{opt.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Emoji picker */}
           <div>
             <label className="block text-xs font-mono uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
@@ -129,23 +166,6 @@ export function CreateBolaoModal({ onClose }: Props) {
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               maxLength={500}
             />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
-              Categoria
-            </label>
-            <select
-              className="input-base w-full"
-              value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value as Category | "" }))}
-            >
-              <option value="">Qualquer categoria</option>
-              {Object.entries(CATEGORIES).map(([key, { label, emoji }]) => (
-                <option key={key} value={key}>{emoji} {label}</option>
-              ))}
-            </select>
           </div>
 
           {/* Ends at + Max members */}
@@ -205,6 +225,81 @@ export function CreateBolaoModal({ onClose }: Props) {
               </div>
             </label>
           </div>
+
+          {/* Prize toggle */}
+          <div className="p-3 rounded-xl" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                className="relative w-10 h-5 rounded-full transition-colors flex-shrink-0"
+                style={{ background: form.hasPrize ? "var(--accent)" : "var(--border-bright)" }}
+                onClick={() => setForm((f) => ({ ...f, hasPrize: !f.hasPrize }))}
+              >
+                <div
+                  className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full transition-transform"
+                  style={{
+                    background: "white",
+                    transform: form.hasPrize ? "translateX(20px)" : "translateX(0)",
+                  }}
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  Bolão com premiação
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  Ativar controle de pagamentos e prêmio
+                </p>
+              </div>
+            </label>
+          </div>
+
+          {/* Prize fields (shown only when hasPrize=true) */}
+          {form.hasPrize && (
+            <div className="flex flex-col gap-3 p-3 rounded-xl" style={{ background: "var(--bg)", border: "1px solid var(--border)" }}>
+              <p className="text-xs font-mono uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Detalhes do Prêmio</p>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Descrição do prêmio</label>
+                <input
+                  className="input-base w-full"
+                  placeholder="Ex: R$100 para o campeão"
+                  value={form.prizeDescription}
+                  onChange={(e) => setForm((f) => ({ ...f, prizeDescription: e.target.value }))}
+                  maxLength={500}
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Chave PIX para pagamentos</label>
+                <input
+                  className="input-base w-full"
+                  placeholder="CPF, e-mail ou chave aleatória"
+                  value={form.prizePixKey}
+                  onChange={(e) => setForm((f) => ({ ...f, prizePixKey: e.target.value }))}
+                  maxLength={200}
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Valor por participante</label>
+                <input
+                  className="input-base w-full"
+                  placeholder="Ex: R$20"
+                  value={form.prizePool}
+                  onChange={(e) => setForm((f) => ({ ...f, prizePool: e.target.value }))}
+                  maxLength={200}
+                />
+              </div>
+              <div>
+                <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Distribuição do prêmio</label>
+                <textarea
+                  className="input-base w-full resize-none"
+                  placeholder="Ex: 1º lugar: 60%, 2º lugar: 30%, 3º lugar: 10%"
+                  rows={2}
+                  value={form.prizeDistribution}
+                  onChange={(e) => setForm((f) => ({ ...f, prizeDistribution: e.target.value }))}
+                  maxLength={500}
+                />
+              </div>
+            </div>
+          )}
 
           {error && (
             <p className="text-sm" style={{ color: "var(--red)" }}>{error}</p>
