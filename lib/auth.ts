@@ -46,6 +46,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      // Ensure emailVerified is set for OAuth users (Google already verifies emails)
+      if (account?.provider === "google" && user.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        }).catch(() => {})
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id

@@ -8,26 +8,32 @@ export async function GET() {
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      username: true,
-      bio: true,
-      image: true,
-      city: true,
-      state: true,
-      country: true,
-      emailVerified: true,
-      notifEmailDigest: true,
-      notifExpiringPredictions: true,
-      createdAt: true,
-    },
-  })
+  const [user, googleAccount] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        username: true,
+        bio: true,
+        image: true,
+        city: true,
+        state: true,
+        country: true,
+        emailVerified: true,
+        notifEmailDigest: true,
+        notifExpiringPredictions: true,
+        createdAt: true,
+      },
+    }),
+    prisma.account.findFirst({
+      where: { userId: session.user.id, provider: "google" },
+      select: { id: true },
+    }),
+  ])
 
-  return NextResponse.json(user)
+  return NextResponse.json({ ...user, isGoogleUser: !!googleAccount })
 }
 
 const updateSchema = z.object({

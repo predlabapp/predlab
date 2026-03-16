@@ -17,6 +17,7 @@ interface Profile {
   emailVerified: string | null
   notifEmailDigest: boolean
   notifExpiringPredictions: boolean
+  isGoogleUser: boolean
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -118,8 +119,8 @@ export default function ProfilePage() {
         Perfil
       </h1>
 
-      {/* Email verification banner */}
-      {!profile.emailVerified && (
+      {/* Email verification banner — not shown for Google users */}
+      {!profile.emailVerified && !profile.isGoogleUser && (
         <div className="mb-4 p-4 rounded-xl flex items-start gap-3" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.3)" }}>
           <AlertCircle size={16} className="mt-0.5 flex-shrink-0" style={{ color: "var(--yellow)" }} />
           <div className="flex-1">
@@ -229,30 +230,32 @@ export default function ProfilePage() {
         </button>
       </form>
 
-      {/* Change password — only for email/password accounts */}
-      <div className="mt-4 card">
-        <h2 className="font-display font-semibold text-base mb-4" style={{ color: "var(--text-primary)" }}>
-          Alterar Senha
-        </h2>
-        <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
-          <div>
-            <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Senha atual</label>
-            <input type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} className="input-base" required />
-          </div>
-          <div>
-            <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Nova senha</label>
-            <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} className="input-base" minLength={8} required />
-          </div>
-          {pwdMsg && (
-            <p className="text-xs p-2 rounded" style={{ background: pwdMsg.type === "ok" ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)", color: pwdMsg.type === "ok" ? "var(--green)" : "var(--red)" }}>
-              {pwdMsg.text}
-            </p>
-          )}
-          <button type="submit" disabled={pwdLoading} className="btn-ghost w-full">
-            {pwdLoading ? "A alterar..." : "Alterar Senha"}
-          </button>
-        </form>
-      </div>
+      {/* Change password — only for email/password accounts (not Google) */}
+      {!profile.isGoogleUser && (
+        <div className="mt-4 card">
+          <h2 className="font-display font-semibold text-base mb-4" style={{ color: "var(--text-primary)" }}>
+            Alterar Senha
+          </h2>
+          <form onSubmit={handleChangePassword} className="flex flex-col gap-3">
+            <div>
+              <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Senha atual</label>
+              <input type="password" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} className="input-base" required />
+            </div>
+            <div>
+              <label className="block text-xs mb-1" style={{ color: "var(--text-muted)" }}>Nova senha</label>
+              <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} className="input-base" minLength={8} required />
+            </div>
+            {pwdMsg && (
+              <p className="text-xs p-2 rounded" style={{ background: pwdMsg.type === "ok" ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)", color: pwdMsg.type === "ok" ? "var(--green)" : "var(--red)" }}>
+                {pwdMsg.text}
+              </p>
+            )}
+            <button type="submit" disabled={pwdLoading} className="btn-ghost w-full">
+              {pwdLoading ? "A alterar..." : "Alterar Senha"}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   )
 }
