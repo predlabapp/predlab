@@ -2,72 +2,106 @@ import { NextRequest, NextResponse } from "next/server"
 
 export const revalidate = 600 // 10 minutes
 
-const CATEGORY_MAP: Record<string, string> = {
+// Map Polymarket tag slugs → our landing categories
+const TAG_TO_CATEGORY: Record<string, string> = {
   politics: "POLITICS",
-  political: "POLITICS",
+  elections: "POLITICS",
   election: "POLITICS",
   government: "POLITICS",
+  "us-politics": "POLITICS",
   crypto: "CRYPTO",
   bitcoin: "CRYPTO",
   ethereum: "CRYPTO",
   defi: "CRYPTO",
+  blockchain: "CRYPTO",
   sports: "SPORTS",
-  football: "SPORTS",
   soccer: "SPORTS",
+  football: "SPORTS",
   nba: "SPORTS",
   nfl: "SPORTS",
   mma: "SPORTS",
+  tennis: "SPORTS",
+  "fifa-world-cup": "SPORTS",
+  "2026-fifa-world-cup": "SPORTS",
+  baseball: "SPORTS",
+  golf: "SPORTS",
   economy: "ECONOMY",
   economics: "ECONOMY",
+  "fed-rates": "ECONOMY",
   fed: "ECONOMY",
   inflation: "ECONOMY",
   gdp: "ECONOMY",
-  tech: "TECH",
+  "economic-policy": "ECONOMY",
+  stocks: "ECONOMY",
   technology: "TECH",
+  tech: "TECH",
   ai: "TECH",
+  "artificial-intelligence": "TECH",
   openai: "TECH",
   nvidia: "TECH",
   geopolitics: "GEOPOLITICS",
   war: "GEOPOLITICS",
   nato: "GEOPOLITICS",
   russia: "GEOPOLITICS",
-  china: "GEOPOLITICS",
   ukraine: "GEOPOLITICS",
+  china: "GEOPOLITICS",
+  "middle-east": "GEOPOLITICS",
+  iran: "GEOPOLITICS",
+  israel: "GEOPOLITICS",
 }
 
-const LANDING_CATEGORIES: Record<string, string[]> = {
-  TRENDING: [],
-  POLITICS: ["politics", "election", "government", "political"],
-  CRYPTO: ["crypto", "bitcoin", "ethereum", "defi", "blockchain"],
-  GEOPOLITICS: ["geopolitics", "war", "nato", "international"],
-  SPORTS: ["sports", "football", "soccer", "nba", "nfl", "mma", "tennis"],
-  ECONOMY: ["economics", "economy", "fed", "inflation", "gdp", "market"],
-  TECH: ["technology", "tech", "ai", "openai", "nvidia", "software"],
-}
+// Text-based fallback
+const TEXT_KEYWORDS: Array<[string, string]> = [
+  ["crypto", "CRYPTO"],
+  ["bitcoin", "CRYPTO"],
+  ["ethereum", "CRYPTO"],
+  ["btc", "CRYPTO"],
+  ["eth", "CRYPTO"],
+  ["world cup", "SPORTS"],
+  ["nba", "SPORTS"],
+  ["nfl", "SPORTS"],
+  ["soccer", "SPORTS"],
+  ["football", "SPORTS"],
+  ["champion", "SPORTS"],
+  ["tournament", "SPORTS"],
+  ["fed rate", "ECONOMY"],
+  ["inflation", "ECONOMY"],
+  ["recession", "ECONOMY"],
+  ["gdp", "ECONOMY"],
+  ["openai", "TECH"],
+  ["nvidia", "TECH"],
+  ["apple", "TECH"],
+  ["google", "TECH"],
+  ["microsoft", "TECH"],
+  ["war", "GEOPOLITICS"],
+  ["nato", "GEOPOLITICS"],
+  ["russia", "GEOPOLITICS"],
+  ["ukraine", "GEOPOLITICS"],
+  ["china", "GEOPOLITICS"],
+  ["iran", "GEOPOLITICS"],
+  ["israel", "GEOPOLITICS"],
+  ["election", "POLITICS"],
+  ["president", "POLITICS"],
+  ["congress", "POLITICS"],
+  ["senate", "POLITICS"],
+  ["parliament", "POLITICS"],
+]
 
-function detectLandingCategory(market: {
-  question: string
-  groupItemTitle?: string
+function getCategoryFromEvent(event: {
+  title: string
   slug: string
-  tags?: Array<{ slug?: string; id?: string; label?: string }>
+  tags?: Array<{ slug?: string; label?: string }>
 }): string {
-  const text = `${market.question} ${market.slug} ${market.groupItemTitle ?? ""}`.toLowerCase()
-  const tagSlugs = (market.tags ?? []).map((t) => (t.slug ?? t.label ?? "").toLowerCase())
-
-  for (const [cat, keywords] of Object.entries(LANDING_CATEGORIES)) {
-    if (cat === "TRENDING") continue
-    for (const kw of keywords) {
-      if (text.includes(kw) || tagSlugs.some((s) => s.includes(kw))) {
-        return cat
-      }
-    }
+  // 1. Polymarket tags (most accurate)
+  for (const tag of event.tags ?? []) {
+    const slug = (tag.slug ?? "").toLowerCase()
+    if (TAG_TO_CATEGORY[slug]) return TAG_TO_CATEGORY[slug]
   }
-
-  // Fallback via CATEGORY_MAP
-  for (const [kw, cat] of Object.entries(CATEGORY_MAP)) {
+  // 2. Text matching on title + slug
+  const text = `${event.title} ${event.slug}`.toLowerCase()
+  for (const [kw, cat] of TEXT_KEYWORDS) {
     if (text.includes(kw)) return cat
   }
-
   return "TRENDING"
 }
 
@@ -84,14 +118,63 @@ function getCategoryEmoji(cat: string): string {
   return map[cat] ?? "🔥"
 }
 
+// For a negRisk multi-outcome event, pick the most interesting sub-market:
+// prefer the leading candidate (highest Yes price in range 5–95%)
+function pickBestMarket(
+  markets: Array<Record<string, unknown>>
+): { question: string; probability: number } | null {
+  if (!markets.length) return null
+
+  const parsed = markets
+    .map((m) => {
+      try {
+        const prices =
+          typeof m.outcomePrices === "string"
+            ? JSON.parse(m.outcomePrices as string)
+            : ((m.outcomePrices as number[]) ?? [])
+        const outcomes =
+          typeof m.outcomes === "string"
+            ? JSON.parse(m.outcomes as string)
+            : ((m.outcomes as string[]) ?? [])
+        const yesIdx = outcomes.findIndex(
+          (o: string) => o.toLowerCase() === "yes"
+        )
+        const idx = yesIdx >= 0 ? yesIdx : 0
+        const probability = Math.round(parseFloat(String(prices[idx])) * 100)
+        return { question: String(m.question ?? ""), probability }
+      } catch {
+        return null
+      }
+    })
+    .filter(Boolean) as Array<{ question: string; probability: number }>
+
+  if (!parsed.length) return null
+
+  // Prefer markets in [5, 95] — interesting enough to display
+  const interesting = parsed.filter(
+    (m) => m.probability >= 5 && m.probability <= 95
+  )
+
+  if (interesting.length > 0) {
+    // Among interesting ones, pick the leading candidate (highest probability)
+    return interesting.sort((a, b) => b.probability - a.probability)[0]
+  }
+
+  // No market in [5,95]: if best probability is ≥ 99 or ≤ 1, skip — market is essentially resolved
+  const best = parsed.sort((a, b) => b.probability - a.probability)[0]
+  if (best.probability >= 99 || best.probability <= 1) return null
+  return best
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const categoryFilter = searchParams.get("category") ?? "TRENDING"
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "10"), 20)
 
   try {
+    // Use /events — aggregates sub-markets so volumes reflect real activity
     const res = await fetch(
-      `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=50&order=volume&ascending=false`,
+      `https://gamma-api.polymarket.com/events?active=true&closed=false&limit=100&order=volume24hr&ascending=false`,
       {
         headers: { Accept: "application/json" },
         next: { revalidate: 600 },
@@ -103,63 +186,60 @@ export async function GET(req: NextRequest) {
     }
 
     const data = await res.json()
-    const rawMarkets = Array.isArray(data) ? data : []
+    const rawEvents: Array<Record<string, unknown>> = Array.isArray(data)
+      ? data
+      : []
 
-    // Parse each market
-    const parsed = rawMarkets
-      .map((m: Record<string, unknown>) => {
-        let probability = 50
-        try {
-          const prices =
-            typeof m.outcomePrices === "string"
-              ? JSON.parse(m.outcomePrices as string)
-              : (m.outcomePrices as number[] | null) ?? []
-          const outcomes =
-            typeof m.outcomes === "string"
-              ? JSON.parse(m.outcomes as string)
-              : (m.outcomes as string[] | null) ?? []
-          const yesIdx = outcomes.findIndex(
-            (o: string) => o.toLowerCase() === "yes"
-          )
-          const idx = yesIdx >= 0 ? yesIdx : 0
-          probability = Math.round(parseFloat(prices[idx]) * 100)
-        } catch {}
+    const parsed = rawEvents
+      .map((e) => {
+        const markets = (e.markets as Array<Record<string, unknown>>) ?? []
+        const best = pickBestMarket(markets)
+        if (!best || !best.question) return null
 
-        const volume = parseFloat(String(m.volume ?? m.volumeNum ?? 0)) || 0
-        const volume24h = parseFloat(String(m.volume24hr ?? 0)) || 0
+        const volume = parseFloat(String(e.volume ?? 0)) || 0
+        const volume24h = parseFloat(String(e.volume24hr ?? 0)) || 0
         const prevVolume = volume - volume24h
         const volumeChange24h =
           prevVolume > 0 ? Math.round((volume24h / prevVolume) * 100) : 0
 
-        const category = detectLandingCategory({
-          question: String(m.question ?? ""),
-          slug: String(m.slug ?? ""),
-          groupItemTitle: m.groupItemTitle as string | undefined,
-          tags: m.tags as Array<{ slug?: string; label?: string }> | undefined,
+        const category = getCategoryFromEvent({
+          title: String(e.title ?? ""),
+          slug: String(e.slug ?? ""),
+          tags: e.tags as Array<{ slug?: string; label?: string }> | undefined,
         })
 
         return {
-          slug: String(m.slug ?? ""),
-          question: String(m.question ?? ""),
-          probability,
+          slug: String(e.slug ?? ""),
+          question: best.question,
+          probability: best.probability,
           volume: Math.round(volume),
           volumeChange24h,
-          expiresAt: String(m.endDate ?? m.expiresAt ?? ""),
+          expiresAt: String(e.endDate ?? ""),
           category,
           categoryEmoji: getCategoryEmoji(category),
-          isHot: volume >= 1_000_000,
-          isTrending: volumeChange24h > 20,
+          isHot: volume >= 10_000_000,
+          isTrending: volume24h >= 1_000_000,
         }
       })
-      .filter((m) => m.slug && m.question)
+      .filter(Boolean) as Array<{
+      slug: string
+      question: string
+      probability: number
+      volume: number
+      volumeChange24h: number
+      expiresAt: string
+      category: string
+      categoryEmoji: string
+      isHot: boolean
+      isTrending: boolean
+    }>
 
-    // Filter by category
     let filtered = parsed
     if (categoryFilter !== "TRENDING") {
       filtered = parsed.filter((m) => m.category === categoryFilter)
     }
 
-    // If not enough after filter, fall back to top by volume
+    // Fallback: if not enough results for the filter, return global trending
     if (filtered.length < 3 && categoryFilter !== "TRENDING") {
       filtered = parsed
     }
