@@ -256,6 +256,11 @@ export default function AdminSocialPage() {
                   {h.ogImageUrl && (
                     <a href={h.ogImageUrl} target="_blank" rel="noopener" style={{ color: "#555570", fontSize: 11, textDecoration: "none" }}>view ↗</a>
                   )}
+                  {h.error && (
+                    <span style={{ color: "#f87171", fontSize: 11, fontFamily: "monospace", width: "100%", marginTop: 4 }}>
+                      ⚠ {h.error.slice(0, 200)}
+                    </span>
+                  )}
                 </div>
               ))}
             </div>
