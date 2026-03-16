@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Loader2, Search } from "lucide-react"
+import { X, Loader2, Search, Plus } from "lucide-react"
 import { CATEGORIES, getProbabilityColor } from "@/lib/utils"
 import { Prediction } from "@/types"
+import { CreatePredictionModal } from "@/components/predictions/CreatePredictionModal"
 
 interface Props {
   slug: string
@@ -18,14 +19,17 @@ export function AddPredictionToBolao({ slug, existingPredictionIds, onClose, onA
   const [adding, setAdding] = useState<string | null>(null)
   const [search, setSearch] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [showCreate, setShowCreate] = useState(false)
 
-  useEffect(() => {
-    fetch("/api/predictions")
+  async function loadPredictions() {
+    return fetch("/api/predictions")
       .then((r) => r.json())
       .then((data) => setPredictions(Array.isArray(data) ? data : (data.predictions ?? [])))
       .catch(() => setError("Erro ao carregar previsões"))
       .finally(() => setLoading(false))
-  }, [])
+  }
+
+  useEffect(() => { loadPredictions() }, [])
 
   async function handleAdd(predictionId: string) {
     setAdding(predictionId)
@@ -68,9 +72,19 @@ export function AddPredictionToBolao({ slug, existingPredictionIds, onClose, onA
           <h2 className="font-display text-lg font-bold" style={{ color: "var(--text-primary)" }}>
             Adicionar Previsão ao Bolão
           </h2>
-          <button onClick={onClose} style={{ color: "var(--text-muted)" }}>
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg transition-colors"
+              style={{ background: "var(--accent-dim)", color: "var(--accent)", border: "1px solid var(--accent-dim)" }}
+            >
+              <Plus size={12} />
+              Nova
+            </button>
+            <button onClick={onClose} style={{ color: "var(--text-muted)" }}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -94,9 +108,21 @@ export function AddPredictionToBolao({ slug, existingPredictionIds, onClose, onA
             </div>
           )}
           {!loading && available.length === 0 && (
-            <p className="text-center py-8 text-sm" style={{ color: "var(--text-muted)" }}>
-              Nenhuma previsão disponível para adicionar.
-            </p>
+            <div className="text-center py-8">
+              <p className="text-sm mb-1" style={{ color: "var(--text-muted)" }}>
+                Nenhuma previsão disponível para adicionar.
+              </p>
+              <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+                Crie uma nova previsão e ela será adicionada automaticamente ao bolão.
+              </p>
+              <button
+                onClick={() => setShowCreate(true)}
+                className="btn-primary flex items-center gap-2 mx-auto"
+              >
+                <Plus size={14} />
+                Criar nova previsão
+              </button>
+            </div>
           )}
           {available.map((p) => {
             const cat = CATEGORIES[p.category]
@@ -138,6 +164,19 @@ export function AddPredictionToBolao({ slug, existingPredictionIds, onClose, onA
           </div>
         )}
       </div>
+
+      {showCreate && (
+        <CreatePredictionModal
+          onClose={() => setShowCreate(false)}
+          onCreated={async (p) => {
+            setShowCreate(false)
+            setLoading(true)
+            await loadPredictions()
+            // Auto-add the newly created prediction to the bolão
+            await handleAdd(p.id)
+          }}
+        />
+      )}
     </div>
   )
 }
