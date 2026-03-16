@@ -87,12 +87,20 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
       for (const m of markets) {
         const question = String(m.question ?? "")
 
-        // Skip malformed questions: groupItemTitle abbreviations like "AM", "Team AM", "BR", "USA"
+        // Skip malformed or low-quality questions
         const groupItemTitle = String(m.groupItemTitle ?? "")
+
+        // Skip country/team code abbreviations: "AM", "Team AM", "BR", "USA"
         if (groupItemTitle && /^(Team\s+)?[A-Z]{2,4}$/.test(groupItemTitle.trim())) continue
 
+        // Skip "Any Other" catch-all markets
+        if (question.includes("Any Other")) continue
+
+        // Skip short-term esports / sports betting micro-markets
+        if (/Total Kills|First Blood|Game \d Winner|O\/U \d|Over\/Under|Game Handicap|Match Winner.*LoL|Match Winner.*Dota/i.test(question)) continue
+
         // Skip questions that are too short to be meaningful
-        if (question.length < 20) continue
+        if (question.length < 25) continue
 
         const prices =
           typeof m.outcomePrices === "string"
