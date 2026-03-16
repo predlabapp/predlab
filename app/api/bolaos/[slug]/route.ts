@@ -16,8 +16,10 @@ export async function GET(
       members: {
         include: {
           user: { select: { id: true, name: true, image: true, currentStreak: true, badges: true } },
+          palpites: { select: { pontos: true } },
         },
       },
+      payments: { select: { userId: true, status: true } },
     },
   })
 
@@ -35,22 +37,31 @@ export async function GET(
     return NextResponse.json({ error: "Acesso negado. Este bolão é privado." }, { status: 403 })
   }
 
-  // Build ranking (scores based on palpites — all zero until jogos are played)
-  const ranking = bolao.members
-    .map((m) => ({
+  // Build ranking based on palpite pontos
+  const memberScores = bolao.members.map((m) => {
+    const resolvedPalpites = m.palpites.filter((p) => p.pontos !== null)
+    const totalPontos = resolvedPalpites.reduce((sum, p) => sum + (p.pontos ?? 0), 0)
+    const palpitesExactos = resolvedPalpites.filter((p) => p.pontos === bolao.pointsExact).length
+    const palpitesResultado = resolvedPalpites.filter((p) => p.pontos === bolao.pointsResult).length
+    const palpitesErrados = resolvedPalpites.filter((p) => p.pontos === 0).length
+    const payment = bolao.payments.find((pay) => pay.userId === m.userId)
+    return {
       userId: m.userId,
       name: m.user.name ?? "—",
       image: m.user.image ?? null,
       nickname: m.nickname ?? null,
       streak: m.user.currentStreak,
       badges: m.user.badges.map((b) => b.badgeKey),
-      totalPredictions: 0,
-      resolvedPredictions: 0,
-      correctPredictions: 0,
-      scoreGeneral: 0,
-      scoreVerified: 0,
-    }))
-    .map((m, idx) => ({ position: idx + 1, ...m }))
+      totalPontos,
+      palpitesExactos,
+      palpitesResultado,
+      palpitesErrados,
+      totalPalpites: m.palpites.length,
+      paymentStatus: payment?.status ?? null,
+    }
+  }).sort((a, b) => b.totalPontos - a.totalPontos)
+
+  const ranking = memberScores.map((m, idx) => ({ position: idx + 1, ...m }))
 
   return NextResponse.json({
     bolao: {
@@ -65,7 +76,14 @@ export async function GET(
       creatorId: bolao.creatorId,
       memberCount: bolao.members.length,
       hasPrize: bolao.hasPrize,
+      prizeDescription: bolao.prizeDescription,
+      prizePixKey: isMember ? bolao.prizePixKey : null,
+      prizePool: bolao.prizePool,
+      prizeDistribution: bolao.prizeDistribution,
+      prizeStatus: bolao.prizeStatus,
       type: bolao.type,
+      pointsExact: bolao.pointsExact,
+      pointsResult: bolao.pointsResult,
     },
     myRole,
     isMember,

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react"
 import { Link } from "@/navigation"
 import { ArrowLeft, Users, Calendar, Loader2 } from "lucide-react"
 import { BolaoRanking } from "@/components/bolaos/BolaoRanking"
+import { BolaoJogos } from "@/components/bolaos/BolaoJogos"
 import { BolaoInvite } from "@/components/bolaos/BolaoInvite"
 import { BolaoPayments } from "@/components/bolaos/BolaoPayments"
 import { BolaoMembers } from "@/components/bolaos/BolaoMembers"
@@ -92,12 +93,6 @@ export default function BolaoPage() {
   const { bolao, myRole, isMember, ranking, members } = data
   const isAdmin = myRole === "ADMIN"
   const currentUserId = session?.user?.id ?? null
-
-  const rankingWithExtras = ranking.map((m: any) => ({
-    ...m,
-    paymentStatus: null,
-    scoreGrupo: null,
-  }))
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "ranking", label: "Ranking" },
@@ -205,25 +200,19 @@ export default function BolaoPage() {
       <div className="card">
         {activeTab === "ranking" && (
           <BolaoRanking
-            ranking={rankingWithExtras}
+            ranking={ranking}
             currentUserId={currentUserId}
             showPayments={bolao.hasPrize}
-            showScoreGrupo={false}
           />
         )}
 
         {activeTab === "jogos" && (
-          <div className="text-center py-12" style={{ color: "var(--text-muted)" }}>
-            <p className="text-3xl mb-3">⚽</p>
-            <p className="font-display font-semibold mb-1" style={{ color: "var(--text-secondary)" }}>
-              Jogos em breve
-            </p>
-            <p className="text-sm">
-              {isAdmin
-                ? "Em breve poderás adicionar jogos e os membros fazem os seus palpites."
-                : "O admin ainda não adicionou jogos."}
-            </p>
-          </div>
+          <BolaoJogos
+            slug={slug}
+            isAdmin={isAdmin}
+            bolaoType={bolao.type}
+            isMember={isMember}
+          />
         )}
 
         {activeTab === "membros" && (

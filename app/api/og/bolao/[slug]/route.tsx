@@ -1,23 +1,7 @@
 import { ImageResponse } from "next/og"
 import { prisma } from "@/lib/prisma"
-import { calculateAccuracyScore } from "@/lib/utils"
 
 export const runtime = "nodejs"
-
-const POLYMARKET_BONUS = 10
-
-function calcScore(predicoes: any[], userId: string) {
-  const mine = predicoes.filter((p: any) => p.addedById === userId)
-  const resolved = mine.filter((p: any) => p.prediction.resolvedAt && p.prediction.resolution !== "CANCELLED")
-  const verified = resolved.filter((p: any) => p.prediction.resolutionType === "AUTOMATIC")
-  const score = calculateAccuracyScore(
-    resolved.map((p: any) => ({ probability: p.prediction.probability, resolution: p.prediction.resolution }))
-  )
-  const scoreVerified = verified.length > 0
-    ? calculateAccuracyScore(verified.map((p: any) => ({ probability: p.prediction.probability, resolution: p.prediction.resolution }))) + verified.length * POLYMARKET_BONUS
-    : 0
-  return { score, scoreVerified, total: mine.length, resolved: resolved.length }
-}
 
 const MEDAL = ["🥇", "🥈", "🥉"]
 
@@ -30,10 +14,10 @@ export async function GET(
       where: { slug: params.slug },
       include: {
         members: {
-          include: { user: { select: { id: true, name: true } } },
-        },
-        predicoes: {
-          include: { prediction: true },
+          include: {
+            user: { select: { id: true, name: true } },
+            palpites: { select: { pontos: true } },
+          },
         },
       },
     })
@@ -42,13 +26,11 @@ export async function GET(
 
     const ranking = bolao.members
       .map((m) => {
-        const { score, scoreVerified, total, resolved } = calcScore(bolao.predicoes as any, m.userId)
-        return { name: m.user.name ?? "—", score, scoreVerified, total, resolved }
+        const totalPontos = m.palpites.reduce((sum, p) => sum + (p.pontos ?? 0), 0)
+        return { name: m.user.name ?? "—", totalPontos, totalPalpites: m.palpites.length }
       })
-      .sort((a, b) => b.scoreVerified - a.scoreVerified || b.score - a.score)
+      .sort((a, b) => b.totalPontos - a.totalPontos)
       .slice(0, 3)
-
-    const top3 = ranking
 
     return new ImageResponse(
       (
@@ -96,9 +78,9 @@ export async function GET(
             </div>
 
             {/* Ranking */}
-            {top3.length > 0 && (
+            {ranking.length > 0 && (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {top3.map((m, i) => (
+                {ranking.map((m, i) => (
                   <div
                     key={i}
                     style={{
@@ -119,10 +101,10 @@ export async function GET(
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2 }}>
                       <div style={{ display: "flex", fontSize: 22, fontWeight: 800, color: i === 0 ? "#7c6af7" : "#555570", fontFamily: "monospace" }}>
-                        {m.scoreVerified > 0 ? `${m.scoreVerified} pts` : m.score > 0 ? `${m.score}%` : "—"}
+                        {m.totalPontos > 0 ? `${m.totalPontos} pts` : "—"}
                       </div>
                       <div style={{ display: "flex", fontSize: 13, color: "#555570" }}>
-                        {m.resolved}/{m.total} previsões
+                        {m.totalPalpites} palpites
                       </div>
                     </div>
                   </div>
@@ -130,9 +112,9 @@ export async function GET(
               </div>
             )}
 
-            {top3.length === 0 && (
+            {ranking.length === 0 && (
               <div style={{ display: "flex", fontSize: 20, color: "#555570" }}>
-                Bolão sem previsões ainda — entra e faz a tua!
+                Bolão sem palpites ainda — entra e faça o seu!
               </div>
             )}
 
@@ -151,7 +133,7 @@ export async function GET(
                   letterSpacing: 1,
                 }}
               >
-                Entra no bolao
+                Entra no bolão
               </div>
               <div style={{ display: "flex", fontSize: 15, color: "#7c6af7", fontWeight: 600 }}>
                 predlab.app
