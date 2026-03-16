@@ -47,8 +47,8 @@ export function OnboardingGuard({
             Complete o seu perfil
           </h2>
           <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
-            Para usar a plataforma, precisa primeiro definir um <strong>username</strong>. Isso
-            permite aparecer nos rankings e partilhar as suas previsões.
+            Para usar a plataforma, você precisa primeiro definir um <strong>username</strong>. Isso
+            permite aparecer nos rankings e compartilhar suas previsões.
           </p>
           <Link href="/dashboard/profile" className="btn-primary block w-full">
             Completar Perfil

@@ -82,7 +82,7 @@ export default function ProfilePage() {
     const data = await res.json()
     setSaving(false)
     if (res.ok) {
-      setSaveMsg({ type: "ok", text: "Perfil guardado." })
+      setSaveMsg({ type: "ok", text: "Perfil salvo." })
       router.refresh()
     } else {
       setSaveMsg({ type: "err", text: data.error ?? "Erro ao guardar." })
@@ -107,7 +107,7 @@ export default function ProfilePage() {
   async function handleResend() {
     setResendLoading(true)
     await fetch("/api/user/resend-verification", { method: "POST" })
-    setResendMsg("Email enviado! Verifique a sua caixa de entrada.")
+    setResendMsg("Email enviado! Verifique sua caixa de entrada.")
     setResendLoading(false)
   }
 
@@ -132,7 +132,7 @@ export default function ProfilePage() {
           <div className="flex-1">
             <p className="text-sm font-medium" style={{ color: "var(--yellow)" }}>Email não confirmado</p>
             <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-              Confirme o seu email para aceder a todas as funcionalidades.
+              Confirme seu email para acessar todas as funcionalidades.
             </p>
           </div>
           <button onClick={handleResend} disabled={resendLoading} className="text-xs btn-ghost py-1">
@@ -159,7 +159,7 @@ export default function ProfilePage() {
                 value={username}
                 onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
                 className="input-base pl-7"
-                placeholder="o_teu_username"
+                placeholder="seu_username"
                 maxLength={30}
               />
             </div>
@@ -173,7 +173,7 @@ export default function ProfilePage() {
               className="input-base resize-none"
               rows={2}
               maxLength={200}
-              placeholder="Apresenta-te em poucas palavras..."
+              placeholder="Apresente-se em poucas palavras..."
             />
           </div>
         </Section>
@@ -232,7 +232,7 @@ export default function ProfilePage() {
 
         <button type="submit" disabled={saving} className="btn-primary w-full">
           {saving ? <Loader2 size={16} className="animate-spin inline mr-2" /> : null}
-          Guardar Perfil
+          Salvar Perfil
         </button>
       </form>
 
