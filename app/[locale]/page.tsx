@@ -92,6 +92,9 @@ export default async function HomePage({
           <Link href="/privacy" className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
             {t("footerPrivacy")}
           </Link>
+          <a href="mailto:contact@predlab.app" className="text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)]">
+            {t("footerContact")}
+          </a>
         </div>
       </footer>
 

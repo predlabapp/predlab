@@ -1,21 +1,31 @@
 <svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="b" cx="42%" cy="38%" r="70%">
-      <stop offset="0%" stop-color="#2d1b55"/>
-      <stop offset="45%" stop-color="#130a28"/>
-      <stop offset="100%" stop-color="#06030f"/>
+    <radialGradient id="orb" cx="35%" cy="25%" r="70%">
+      <stop offset="0%" stop-color="#b8acff"/>
+      <stop offset="30%" stop-color="#7c6af7"/>
+      <stop offset="65%" stop-color="#4c35c7"/>
+      <stop offset="100%" stop-color="#2a1a8a"/>
     </radialGradient>
-    <radialGradient id="light" cx="25%" cy="20%" r="55%">
-      <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.38"/>
-      <stop offset="40%" stop-color="#a78bfa" stop-opacity="0.12"/>
-      <stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/>
+    <radialGradient id="shine" cx="28%" cy="18%" r="35%">
+      <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0"/>
     </radialGradient>
-    <radialGradient id="rim" cx="75%" cy="78%" r="45%">
-      <stop offset="0%" stop-color="#4c1d95" stop-opacity="0.4"/>
-      <stop offset="100%" stop-color="#4c1d95" stop-opacity="0"/>
-    </radialGradient>
+    <linearGradient id="base" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#e8e8f0"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <linearGradient id="s1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+    <linearGradient id="s2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+    <linearGradient id="s3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+    <!-- Clip para bola grande: escala 4.0, clip height=72*4=288 -->
+    <clipPath id="clip_lg"><rect x="1020" y="50" width="400" height="288"/></clipPath>
+    <!-- Clip para ícone pequeno: escala 1.1, clip height=72*1.1=79.2 -->
+    <clipPath id="clip_sm"><rect x="100" y="158" width="110" height="80"/></clipPath>
   </defs>
+
+  <!-- Background -->
   <rect width="1500" height="500" fill="#0a0a0f"/>
+  <!-- Grid -->
   <line x1="0" y1="125" x2="1500" y2="125" stroke="#1e1e2e" stroke-width="0.5"/>
   <line x1="0" y1="250" x2="1500" y2="250" stroke="#1e1e2e" stroke-width="0.5"/>
   <line x1="0" y1="375" x2="1500" y2="375" stroke="#1e1e2e" stroke-width="0.5"/>
@@ -23,44 +33,43 @@
   <line x1="750" y1="0" x2="750" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
   <line x1="1125" y1="0" x2="1125" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
 
-  <!-- Orb grande direita: escala 4.0 centrado em 1220,250 -->
-  <!-- viewBox 100x100, scale 4: 100*4=400px, centro no meio = translate(1220-50*4, 250-50*4) = translate(1020, 50) -->
-  <g transform="translate(1020, 50) scale(4.0)">
-    <rect width="100" height="100" rx="22" fill="none"/>
-    <ellipse cx="50" cy="84" rx="19" ry="4" fill="#2a1560" opacity="0.5"/>
-    <rect x="37" y="77" width="26" height="8" rx="4" fill="#130a28"/>
-    <circle cx="50" cy="44" r="33" fill="url(#b)"/>
-    <circle cx="50" cy="44" r="33" fill="url(#light)"/>
-    <circle cx="50" cy="44" r="33" fill="url(#rim)"/>
-    <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#d97706"/>
-    <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#fbbf24" opacity="0.55"/>
-    <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#d97706"/>
-    <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#fbbf24" opacity="0.55"/>
-    <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#d97706"/>
-    <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- BOLA GRANDE direita — scale(4.0) translate(1020,50) -->
+  <!-- viewBox 100x100 * 4 = 400x400, centrada em ~1220,250 -->
+  <g transform="translate(1020,50) scale(4.0)">
+    <path d="M28,72 L24,88 Q24,91 28,91 L72,91 Q76,91 76,88 L72,72 Z" fill="url(#base)"/>
+  </g>
+  <g clip-path="url(#clip_lg)">
+    <g transform="translate(1020,50) scale(4.0)">
+      <circle cx="50" cy="46" r="34" fill="url(#orb)"/>
+      <circle cx="50" cy="46" r="34" fill="url(#shine)"/>
+    </g>
+  </g>
+  <g transform="translate(1020,50) scale(4.0)">
+    <path d="M40,38 L42.8,46.5 L51.5,49.3 L42.8,52.1 L40,60.5 L37.2,52.1 L28.5,49.3 L37.2,46.5 Z" fill="url(#s1)"/>
+    <path d="M55,24 L56.5,28.8 L61.3,30.3 L56.5,31.8 L55,36.6 L53.5,31.8 L48.7,30.3 L53.5,28.8 Z" fill="url(#s2)"/>
+    <path d="M65,36 L66,39 L69,40 L66,41 L65,44 L64,41 L61,40 L64,39 Z" fill="url(#s3)"/>
   </g>
 
-  <!-- Ícone pequeno esquerda: escala 1.1 -->
-  <g transform="translate(100, 158) scale(1.1)">
-    <rect width="100" height="100" rx="22" fill="#1a0d35"/>
-    <rect width="100" height="100" rx="22" fill="none" stroke="#3d2070" stroke-width="2"/>
-    <ellipse cx="50" cy="84" rx="19" ry="4" fill="#2a1560" opacity="0.5"/>
-    <rect x="37" y="77" width="26" height="8" rx="4" fill="#130a28"/>
-    <circle cx="50" cy="44" r="33" fill="url(#b)"/>
-    <circle cx="50" cy="44" r="33" fill="url(#light)"/>
-    <circle cx="50" cy="44" r="33" fill="url(#rim)"/>
-    <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#d97706"/>
-    <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#fbbf24" opacity="0.55"/>
-    <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#d97706"/>
-    <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#fbbf24" opacity="0.55"/>
-    <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#d97706"/>
-    <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#fbbf24" opacity="0.55"/>
+  <!-- ÍCONE PEQUENO esquerda — scale(1.1) translate(100,158) -->
+  <g transform="translate(100,158) scale(1.1)">
+    <path d="M28,72 L24,88 Q24,91 28,91 L72,91 Q76,91 76,88 L72,72 Z" fill="url(#base)"/>
+  </g>
+  <g clip-path="url(#clip_sm)">
+    <g transform="translate(100,158) scale(1.1)">
+      <circle cx="50" cy="46" r="34" fill="url(#orb)"/>
+      <circle cx="50" cy="46" r="34" fill="url(#shine)"/>
+    </g>
+  </g>
+  <g transform="translate(100,158) scale(1.1)">
+    <path d="M40,38 L42.8,46.5 L51.5,49.3 L42.8,52.1 L40,60.5 L37.2,52.1 L28.5,49.3 L37.2,46.5 Z" fill="url(#s1)"/>
+    <path d="M55,24 L56.5,28.8 L61.3,30.3 L56.5,31.8 L55,36.6 L53.5,31.8 L48.7,30.3 L53.5,28.8 Z" fill="url(#s2)"/>
+    <path d="M65,36 L66,39 L69,40 L66,41 L65,44 L64,41 L61,40 L64,39 Z" fill="url(#s3)"/>
   </g>
 
   <!-- Wordmark -->
   <text x="238" y="237" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="92" letter-spacing="-2">
     <tspan fill="#e8e8f0">pred</tspan><tspan fill="#7c6af7">lab</tspan>
   </text>
-  <text x="240" y="290" font-family="'DM Mono','Courier New',monospace" font-size="18" letter-spacing="3" fill="#555570">TRACK · COMPARE · RANK</text>
-  <text x="240" y="334" font-family="'DM Mono','Courier New',monospace" font-size="16" letter-spacing="1" fill="#3d3580">predlab.app</text>
+  <text x="240" y="294" font-family="'DM Mono','Courier New',monospace" font-size="18" letter-spacing="3" fill="#555570">TRACK · COMPARE · RANK</text>
+  <text x="240" y="334" font-family="'DM Mono','Courier New',monospace" font-size="15" letter-spacing="1" fill="#3d3580">predlab.app</text>
 </svg>
