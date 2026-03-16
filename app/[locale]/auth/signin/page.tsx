@@ -9,6 +9,7 @@ import { useTranslations } from "next-intl"
 function SignInForm() {
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard"
+  const verified = searchParams.get("verified") === "1"
 
   const router = useRouter()
   const t = useTranslations("Auth")
@@ -51,6 +52,12 @@ function SignInForm() {
             {t("welcomeBack")}
           </p>
         </div>
+
+        {verified && (
+          <div className="mb-4 px-4 py-3 rounded-lg text-sm font-medium" style={{ background: "rgba(52,211,153,0.1)", color: "var(--green)", border: "1px solid rgba(52,211,153,0.2)" }}>
+            Email confirmado! Faça login.
+          </div>
+        )}
 
         <div className="card space-y-4">
           <button

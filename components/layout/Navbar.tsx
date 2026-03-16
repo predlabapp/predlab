@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
-import { LogOut, BarChart2, ChevronDown, Trophy, Users } from "lucide-react"
+import { LogOut, BarChart2, ChevronDown, Trophy, Users, User } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
@@ -76,6 +76,14 @@ export function Navbar() {
                       {session?.user?.email}
                     </p>
                   </div>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg)] transition-colors"
+                  >
+                    <User size={14} />
+                    Perfil
+                  </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--red)] hover:bg-[rgba(248,113,113,0.05)] transition-colors"

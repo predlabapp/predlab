@@ -35,6 +35,14 @@ model User {
   state   String?
   country String? @default("BR")
 
+  // Email verification
+  emailVerificationToken   String?
+  emailVerificationExpires DateTime?
+
+  // Notification preferences
+  notifEmailDigest         Boolean   @default(true)
+  notifExpiringPredictions Boolean   @default(true)
+
   accounts           Account[]
   sessions           Session[]
   predictions        Prediction[]

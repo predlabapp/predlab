@@ -43,7 +43,7 @@ function SignUpForm() {
       return
     }
 
-    await signIn("credentials", { email, password, callbackUrl })
+    router.push("/auth/verify-email")
   }
 
   async function handleGoogle() {
