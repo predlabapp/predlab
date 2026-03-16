@@ -179,10 +179,10 @@ export default function AdminSocialPage() {
     setTriggering(true)
     setTriggerResult(null)
     try {
-      const res = await fetch(`/api/social/today?password=${encodeURIComponent(pwdRef.current)}`, {
+      const res = await fetch(`/api/social/trigger`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, slot }),
+        body: JSON.stringify({ platform, slot, password: pwdRef.current }),
       })
       const json = await res.json()
       if (res.ok) {
