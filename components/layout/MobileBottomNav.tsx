@@ -5,7 +5,7 @@ import { usePathname } from "@/navigation"
 import { Link } from "@/navigation"
 import { signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Home, BarChart2, Trophy, Users, MoreHorizontal, X, LogOut } from "lucide-react"
+import { Home, BarChart2, Trophy, Users, MoreHorizontal, X, LogOut, UserCircle } from "lucide-react"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 
@@ -144,6 +144,17 @@ export function MobileBottomNav() {
                 </span>
                 <LocaleSwitcher />
               </div>
+
+              {/* Profile */}
+              <Link
+                href="/dashboard/profile"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-3 w-full px-2 py-3 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}
+              >
+                <UserCircle size={16} />
+                <span className="text-sm">Perfil</span>
+              </Link>
 
               {/* Sign out */}
               <button
