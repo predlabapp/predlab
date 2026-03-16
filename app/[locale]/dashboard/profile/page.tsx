@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
 import { Loader2, Check, AlertCircle } from "lucide-react"
 
 interface Profile {
@@ -33,6 +34,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default function ProfilePage() {
   const { data: session } = useSession()
+  const router = useRouter()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -79,8 +81,12 @@ export default function ProfilePage() {
     })
     const data = await res.json()
     setSaving(false)
-    if (res.ok) setSaveMsg({ type: "ok", text: "Perfil guardado." })
-    else setSaveMsg({ type: "err", text: data.error ?? "Erro ao guardar." })
+    if (res.ok) {
+      setSaveMsg({ type: "ok", text: "Perfil guardado." })
+      router.refresh()
+    } else {
+      setSaveMsg({ type: "err", text: data.error ?? "Erro ao guardar." })
+    }
   }
 
   async function handleChangePassword(e: React.FormEvent) {
