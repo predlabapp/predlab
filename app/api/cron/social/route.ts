@@ -83,6 +83,10 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
       if (excludeSlugs.includes(e.slug)) continue
       const markets: Array<Record<string, unknown>> = e.markets ?? []
 
+      // Skip multi-outcome "who will win" events — they have placeholder sub-markets
+      // like "Team Z", "Any Other", etc. Only use events with ≤ 8 sub-markets.
+      if (markets.length > 8) continue
+
       // Find the best sub-market: probability in [30, 70] (most uncertain = most engaging)
       for (const m of markets) {
         const question = String(m.question ?? "")
