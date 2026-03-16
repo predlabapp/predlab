@@ -87,9 +87,9 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
       for (const m of markets) {
         const question = String(m.question ?? "")
 
-        // Skip malformed questions: groupItemTitle abbreviations like "AM", "BR", "US"
+        // Skip malformed questions: groupItemTitle abbreviations like "AM", "Team AM", "BR", "USA"
         const groupItemTitle = String(m.groupItemTitle ?? "")
-        if (groupItemTitle && groupItemTitle.length <= 3) continue
+        if (groupItemTitle && /^(Team\s+)?[A-Z]{2,4}$/.test(groupItemTitle.trim())) continue
 
         // Skip questions that are too short to be meaningful
         if (question.length < 20) continue
