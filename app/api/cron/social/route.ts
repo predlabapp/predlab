@@ -5,9 +5,12 @@ import { TwitterApi } from "twitter-api-v2"
 
 function isAuthorized(req: NextRequest): boolean {
   const auth = req.headers.get("authorization")
-  const secret = process.env.CRON_SECRET
-  if (!secret) return false
-  return auth === `Bearer ${secret}`
+  if (!auth) return false
+  const cronSecret = process.env.CRON_SECRET
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return true
+  const adminPwd = process.env.ADMIN_PASSWORD
+  if (adminPwd && auth === `Bearer ${adminPwd}`) return true
+  return false
 }
 
 function brasiliaDateStr(): string {
