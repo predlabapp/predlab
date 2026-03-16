@@ -5,7 +5,7 @@ import { usePathname } from "@/navigation"
 import { Link } from "@/navigation"
 import { signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Home, BarChart2, Trophy, Users, MoreHorizontal, X, LogOut, UserCircle } from "lucide-react"
+import { Home, BarChart2, Trophy, Users, Brain, MoreHorizontal, X, LogOut, UserCircle } from "lucide-react"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 
@@ -57,16 +57,16 @@ export function MobileBottomNav() {
             <span style={{ fontSize: 10 }}>{t("stats")}</span>
           </Link>
 
-          {/* Rankings */}
-          <Link href="/dashboard/rankings" className={tabClass("/dashboard/rankings")} style={tabColor("/dashboard/rankings")}>
-            <Trophy size={20} />
-            <span style={{ fontSize: 10 }}>{t("rankings")}</span>
-          </Link>
-
           {/* Bolões */}
           <Link href="/dashboard/bolaos" className={tabClass("/dashboard/bolaos")} style={tabColor("/dashboard/bolaos")}>
             <Users size={20} />
             <span style={{ fontSize: 10 }}>Bolões</span>
+          </Link>
+
+          {/* Grupos */}
+          <Link href="/grupos" className={tabClass("/grupos")} style={tabColor("/grupos")}>
+            <Brain size={20} />
+            <span style={{ fontSize: 10 }}>Grupos</span>
           </Link>
 
           {/* More */}
@@ -122,6 +122,17 @@ export function MobileBottomNav() {
 
             {/* Drawer items */}
             <div className="flex flex-col px-4 py-3 gap-1">
+              {/* Rankings */}
+              <Link
+                href="/dashboard/rankings"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-3 w-full px-2 py-3 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}
+              >
+                <Trophy size={16} />
+                <span className="text-sm">{t("rankings")}</span>
+              </Link>
+
               {/* How it works */}
               <div
                 className="flex items-center px-2 py-3"

@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
-import { LogOut, BarChart2, ChevronDown, Trophy, Users, User } from "lucide-react"
+import { LogOut, BarChart2, ChevronDown, Trophy, Users, User, Brain } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
@@ -40,10 +40,20 @@ export function Navbar() {
 
           <Link
             href="/dashboard/bolaos"
-            className="hidden sm:flex p-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
             title="Bolões"
           >
-            <Users size={17} />
+            <Users size={15} />
+            <span className="hidden md:inline">Bolões</span>
+          </Link>
+
+          <Link
+            href="/grupos"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-md text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            title="Grupos"
+          >
+            <Brain size={15} />
+            <span className="hidden md:inline">Grupos</span>
           </Link>
 
           <div className="hidden sm:flex"><NotificationBell /></div>

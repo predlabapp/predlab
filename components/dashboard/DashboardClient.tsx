@@ -10,7 +10,7 @@ import { StatsBar } from "@/components/dashboard/StatsBar"
 import { OnboardingState } from "@/components/dashboard/OnboardingState"
 import { HotMarketsBar } from "@/components/dashboard/HotMarketsBar"
 import { CATEGORIES } from "@/lib/utils"
-import { Plus, Search, Tag, X, Globe, Bell, Download } from "lucide-react"
+import { Plus, Search, Tag, X, Globe, Bell, Download, Users, Brain, ArrowRight } from "lucide-react"
 import { Category } from "@prisma/client"
 import { useTranslations } from "next-intl"
 
@@ -192,6 +192,38 @@ export function DashboardClient({ initialPredictions, pendingMarketSlug }: Props
           </div>
         </div>
       )}
+
+      {/* Quick access — Bolões + Grupos */}
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <a
+          href="/dashboard/bolaos"
+          className="flex items-center gap-3 p-4 rounded-xl transition-all hover:scale-[1.02]"
+          style={{ background: "var(--bg-card)", border: "1px solid var(--border)", textDecoration: "none" }}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--accent-dim)" }}>
+            <Users size={18} style={{ color: "var(--accent)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Bolões</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Palpites com amigos</p>
+          </div>
+          <ArrowRight size={14} style={{ color: "var(--text-muted)" }} />
+        </a>
+        <a
+          href="/grupos"
+          className="flex items-center gap-3 p-4 rounded-xl transition-all hover:scale-[1.02]"
+          style={{ background: "var(--bg-card)", border: "1px solid var(--border)", textDecoration: "none" }}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "var(--accent-dim)" }}>
+            <Brain size={18} style={{ color: "var(--accent)" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>Grupos</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>Mercados de probabilidade</p>
+          </div>
+          <ArrowRight size={14} style={{ color: "var(--text-muted)" }} />
+        </a>
+      </div>
 
       <HotMarketsBar onMarketSelect={handleMarketSelected} />
 
