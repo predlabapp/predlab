@@ -137,6 +137,8 @@ export default function AdminSocialPage() {
   const [data, setData] = useState<ApiData | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [triggering, setTriggering] = useState(false)
+  const [triggerResult, setTriggerResult] = useState<string | null>(null)
 
   const fetchData = useCallback(async (password: string) => {
     if (!password) return
@@ -171,6 +173,28 @@ export default function AdminSocialPage() {
   function handlePwdChange(v: string) {
     setPwd(v)
     pwdRef.current = v
+  }
+
+  async function handleTrigger(platform: string, slot: string) {
+    setTriggering(true)
+    setTriggerResult(null)
+    try {
+      const res = await fetch(`/api/social/today?password=${encodeURIComponent(pwdRef.current)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform, slot }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setTriggerResult(`✅ ${json.market ?? "Post publicado com sucesso"}`)
+        await fetchData(pwdRef.current)
+      } else {
+        setTriggerResult(`❌ ${json.error ?? "Erro desconhecido"}`)
+      }
+    } catch (e) {
+      setTriggerResult(`❌ Erro de rede: ${String(e)}`)
+    }
+    setTriggering(false)
   }
 
   function logout() {
@@ -210,7 +234,11 @@ export default function AdminSocialPage() {
               {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
+            <button onClick={() => handleTrigger("instagram", "1")} disabled={triggering || loading}
+              style={{ background: "rgba(124,106,247,0.15)", border: "1px solid #3d3580", borderRadius: 8, padding: "8px 14px", color: "#a78bfa", fontSize: 13, cursor: "pointer", fontWeight: 600 }}>
+              {triggering ? "⏳ A publicar…" : "📸 Post IG agora"}
+            </button>
             <button onClick={() => fetchData(pwdRef.current)} disabled={loading}
               style={{ background: "#1e1e2e", border: "1px solid #2a2a3e", borderRadius: 8, padding: "8px 16px", color: "#8888aa", fontSize: 13, cursor: "pointer" }}>
               {loading ? "…" : "↻ Refresh"}
@@ -221,6 +249,12 @@ export default function AdminSocialPage() {
             </button>
           </div>
         </div>
+
+        {triggerResult && (
+          <div style={{ background: triggerResult.startsWith("✅") ? "rgba(52,211,153,0.1)" : "rgba(248,113,113,0.1)", border: `1px solid ${triggerResult.startsWith("✅") ? "#34d399" : "#f87171"}`, borderRadius: 10, padding: "12px 16px", marginBottom: 24, color: triggerResult.startsWith("✅") ? "#34d399" : "#f87171", fontSize: 13, fontFamily: "monospace", whiteSpace: "pre-wrap" as const }}>
+            {triggerResult}
+          </div>
+        )}
 
         <Section
           title="📸 Instagram — 12:00 and 19:00 Brasilia"
