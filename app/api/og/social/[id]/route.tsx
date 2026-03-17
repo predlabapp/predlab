@@ -44,6 +44,35 @@ export async function GET(
             background: "linear-gradient(135deg, #0a0a0f 0%, #12101e 40%, #0d0a1a 100%)",
           }}
         >
+          {/* Unsplash background photo */}
+          {post.unsplashUrl && (
+            <>
+              <img
+                src={post.unsplashUrl}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+              {/* Dark overlay so text stays readable */}
+              <div
+                style={{
+                  display: "flex",
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "linear-gradient(135deg, rgba(10,10,15,0.82) 0%, rgba(18,16,30,0.78) 100%)",
+                }}
+              />
+            </>
+          )}
+
           {/* Decorative orb */}
           <div
             style={{
