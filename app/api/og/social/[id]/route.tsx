@@ -61,17 +61,12 @@ export async function GET(
         >
           {/* Unsplash background photo (pre-fetched as data URI) */}
           {bgDataUri && (
-            <>
+            <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: W, height: H }}>
               <img
                 src={bgDataUri}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                }}
+                width={W}
+                height={H}
+                style={{ objectFit: "cover" }}
               />
               {/* Dark overlay so text stays readable */}
               <div
@@ -80,12 +75,12 @@ export async function GET(
                   position: "absolute",
                   top: 0,
                   left: 0,
-                  right: 0,
-                  bottom: 0,
+                  width: W,
+                  height: H,
                   background: "linear-gradient(135deg, rgba(10,10,15,0.82) 0%, rgba(18,16,30,0.78) 100%)",
                 }}
               />
-            </>
+            </div>
           )}
 
           {/* Decorative orb */}
