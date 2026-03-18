@@ -130,28 +130,34 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
   throw new Error("No suitable market found")
 }
 
+const UNSPLASH_FALLBACKS = ["world news", "technology", "global", "future", "finance"]
+
 async function fetchUnsplashImage(query: string): Promise<{ url: string; author: string }> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key) {
     console.error("[cron/social] UNSPLASH_ACCESS_KEY not set")
     return { url: "", author: "" }
   }
-  try {
-    const res = await fetch(
-      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=squarish&content_filter=high`,
-      { headers: { Authorization: `Client-ID ${key}` }, next: { revalidate: 0 } }
-    )
-    if (!res.ok) {
-      const body = await res.text()
-      console.error(`[cron/social] Unsplash API error ${res.status}: ${body.slice(0, 200)}`)
-      return { url: "", author: "" }
+  const queries = [query, ...UNSPLASH_FALLBACKS]
+  for (const q of queries) {
+    try {
+      const res = await fetch(
+        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(q)}&orientation=squarish&content_filter=high`,
+        { headers: { Authorization: `Client-ID ${key}` }, next: { revalidate: 0 } }
+      )
+      if (res.status === 404) continue
+      if (!res.ok) {
+        console.error(`[cron/social] Unsplash API error ${res.status} for query "${q}"`)
+        continue
+      }
+      const data = await res.json()
+      const url = data.urls?.regular ?? ""
+      if (url) return { url, author: data.user?.name ?? "" }
+    } catch (e) {
+      console.error(`[cron/social] Unsplash fetch exception: ${String(e)}`)
     }
-    const data = await res.json()
-    return { url: data.urls?.regular ?? "", author: data.user?.name ?? "" }
-  } catch (e) {
-    console.error(`[cron/social] Unsplash fetch exception: ${String(e)}`)
-    return { url: "", author: "" }
   }
+  return { url: "", author: "" }
 }
 
 // Upload image to Vercel Blob and return stable CDN URL
