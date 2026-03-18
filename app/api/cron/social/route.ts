@@ -132,16 +132,24 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
 
 async function fetchUnsplashImage(query: string): Promise<{ url: string; author: string }> {
   const key = process.env.UNSPLASH_ACCESS_KEY
-  if (!key) return { url: "", author: "" }
+  if (!key) {
+    console.error("[cron/social] UNSPLASH_ACCESS_KEY not set")
+    return { url: "", author: "" }
+  }
   try {
     const res = await fetch(
       `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&orientation=squarish&content_filter=high`,
       { headers: { Authorization: `Client-ID ${key}` }, next: { revalidate: 0 } }
     )
-    if (!res.ok) return { url: "", author: "" }
+    if (!res.ok) {
+      const body = await res.text()
+      console.error(`[cron/social] Unsplash API error ${res.status}: ${body.slice(0, 200)}`)
+      return { url: "", author: "" }
+    }
     const data = await res.json()
     return { url: data.urls?.regular ?? "", author: data.user?.name ?? "" }
-  } catch {
+  } catch (e) {
+    console.error(`[cron/social] Unsplash fetch exception: ${String(e)}`)
     return { url: "", author: "" }
   }
 }
