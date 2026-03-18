@@ -100,6 +100,10 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
         // Skip "Any Other" catch-all markets
         if (question.includes("Any Other")) continue
 
+        // Skip sports betting spread/moneyline/total markets
+        if (/^Spread:|^Moneyline:|^Total:|^O\/U /i.test(question)) continue
+        if (/\(-?\d+\.?\d*\)/.test(question)) continue // point spreads like (-3.5) or (+110)
+
         // Skip short-term esports / sports betting micro-markets
         if (/Total Kills|First Blood|Game \d Winner|O\/U \d|Over\/Under|Game Handicap|Match Winner.*LoL|Match Winner.*Dota/i.test(question)) continue
 
