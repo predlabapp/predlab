@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Mono:wght@400&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111118; padding: 40px 20px; font-family: 'DM Mono', monospace; }
+  .label { font-size: 11px; color: #555570; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 24px; text-align: center; }
+  .section { margin-bottom: 32px; }
+  .section-title { font-size: 10px; color: #555570; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; }
+  .navbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; height: 56px;
+    background: #0a0a0f;
+    border-radius: 10px;
+    border: 1px solid #1e1e2e;
+    margin-bottom: 6px;
+  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-link { font-size: 12px; color: #8888aa; font-family: 'Syne', sans-serif; }
+  .nav-btn { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 6px 14px; border-radius: 7px; cursor: pointer; }
+  .ghost { background: transparent; border: 1px solid #1e1e2e; color: #8888aa; }
+  .primary { background: #7c6af7; border: none; color: white; }
+  .caption { font-size: 10px; color: #555570; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="label">PredLab · Navbar test · Base branca + sem fundo</div>
+
+<!-- Versão anterior -->
+<div class="section">
+  <div class="section-title">Versão anterior — base escura, com fundo próprio</div>
+  <div class="navbar">
+    <svg width="200" height="48" viewBox="0 0 200 48" fill="none">
+      <defs>
+        <radialGradient id="b1" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="40%" stop-color="#7c6af7"/><stop offset="100%" stop-color="#4c35c7"/></radialGradient>
+        <radialGradient id="l1" cx="25%" cy="20%" r="55%"><stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.4"/><stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="r1" cx="75%" cy="78%" r="45%"><stop offset="0%" stop-color="#3d2070" stop-opacity="0.5"/><stop offset="100%" stop-color="#3d2070" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="48" height="48" rx="11" fill="#1a0d35"/>
+      <rect width="48" height="48" rx="11" fill="none" stroke="#3d2070" stroke-width="1"/>
+      <ellipse cx="24" cy="40.3" rx="9.1" ry="1.9" fill="#2a1560" opacity="0.5"/>
+      <rect x="17.8" y="37" width="12.5" height="3.8" rx="1.9" fill="#130a28"/>
+      <circle cx="24" cy="21.1" r="15.8" fill="url(#b1)"/>
+      <circle cx="24" cy="21.1" r="15.8" fill="url(#l1)"/>
+      <circle cx="24" cy="21.1" r="15.8" fill="url(#r1)"/>
+      <path d="M21.1,17.3 L22.2,20.7 L25.7,21.8 L22.2,22.9 L21.1,26.4 L20,22.9 L16.6,21.8 L20,20.7 Z" fill="#d97706"/>
+      <path d="M21.1,17.3 L22.2,20.7 L25.7,21.8 L22.2,22.9 L21.1,26.4 L20,22.9 L16.6,21.8 L20,20.7 Z" fill="#fbbf24" opacity="0.55"/>
+      <path d="M30.2,12.5 L30.9,14.8 L33.3,15.5 L30.9,16.2 L30.2,18.5 L29.5,16.2 L27.2,15.5 L29.5,14.8 Z" fill="#d97706"/>
+      <path d="M30.2,26.4 L30.7,27.8 L32.2,28.3 L30.7,28.8 L30.2,30.2 L29.7,28.8 L28.3,28.3 L29.7,27.8 Z" fill="#d97706"/>
+      <text x="56" y="32" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5" fill="#e8e8f0">pred</text>
+      <text x="106" y="32" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5" fill="#7c6af7">lab</text>
+    </svg>
+    <div class="nav-right">
+      <span class="nav-link">Rankings</span>
+      <button class="nav-btn ghost">Entrar</button>
+      <button class="nav-btn primary">Começar</button>
+    </div>
+  </div>
+  <div class="caption">Base escura · fundo #1a0d35 separado</div>
+</div>
+
+<!-- Nova versão -->
+<div class="section">
+  <div class="section-title">Nova versão — base branca + sem fundo próprio</div>
+  <div class="navbar">
+    <svg width="200" height="48" viewBox="0 0 200 48" fill="none">
+      <defs>
+        <radialGradient id="b2" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#a78bfa"/><stop offset="40%" stop-color="#7c6af7"/><stop offset="100%" stop-color="#4c35c7"/></radialGradient>
+        <radialGradient id="l2" cx="25%" cy="20%" r="55%"><stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.4"/><stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/></radialGradient>
+        <radialGradient id="r2" cx="75%" cy="78%" r="45%"><stop offset="0%" stop-color="#3d2070" stop-opacity="0.5"/><stop offset="100%" stop-color="#3d2070" stop-opacity="0"/></radialGradient>
+      </defs>
+      <!-- SEM rect de fundo -->
+      <!-- Base branca -->
+      <ellipse cx="24" cy="41" rx="9.5" ry="2.2" fill="white" opacity="0.25"/>
+      <rect x="17.5" y="37.5" width="13" height="4" rx="2" fill="white" opacity="0.35"/>
+      <!-- Orb -->
+      <circle cx="24" cy="21" r="15.8" fill="url(#b2)"/>
+      <circle cx="24" cy="21" r="15.8" fill="url(#l2)"/>
+      <circle cx="24" cy="21" r="15.8" fill="url(#r2)"/>
+      <path d="M21.1,17.3 L22.2,20.7 L25.7,21.8 L22.2,22.9 L21.1,26.4 L20,22.9 L16.6,21.8 L20,20.7 Z" fill="#d97706"/>
+      <path d="M21.1,17.3 L22.2,20.7 L25.7,21.8 L22.2,22.9 L21.1,26.4 L20,22.9 L16.6,21.8 L20,20.7 Z" fill="#fbbf24" opacity="0.55"/>
+      <path d="M30.2,12.5 L30.9,14.8 L33.3,15.5 L30.9,16.2 L30.2,18.5 L29.5,16.2 L27.2,15.5 L29.5,14.8 Z" fill="#d97706"/>
+      <path d="M30.2,12.5 L30.9,14.8 L33.3,15.5 L30.9,16.2 L30.2,18.5 L29.5,16.2 L27.2,15.5 L29.5,14.8 Z" fill="#fbbf24" opacity="0.55"/>
+      <path d="M30.2,26.4 L30.7,27.8 L32.2,28.3 L30.7,28.8 L30.2,30.2 L29.7,28.8 L28.3,28.3 L29.7,27.8 Z" fill="#d97706"/>
+      <path d="M30.2,26.4 L30.7,27.8 L32.2,28.3 L30.7,28.8 L30.2,30.2 L29.7,28.8 L28.3,28.3 L29.7,27.8 Z" fill="#fbbf24" opacity="0.55"/>
+      <text x="52" y="32" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5" fill="#e8e8f0">pred</text>
+      <text x="102" y="32" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="22" letter-spacing="-0.5" fill="#7c6af7">lab</text>
+    </svg>
+    <div class="nav-right">
+      <span class="nav-link">Rankings</span>
+      <button class="nav-btn ghost">Entrar</button>
+      <button class="nav-btn primary">Começar</button>
+    </div>
+  </div>
+  <div class="caption">Base branca · sem fundo · bola flutuando na navbar</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #111118; font-family: 'Syne', sans-serif; padding: 40px 20px; }
+
+  .page-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: #555570;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    text-align: center; margin-bottom: 32px;
+  }
+
+  .grid {
+    display: flex; flex-wrap: wrap;
+    gap: 24px; justify-content: center;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  .slide-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
+  }
+
+  .slide-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: #555570;
+  }
+
+  /* Slide base — 1080x1080 scaled to 300x300 */
+  .slide {
+    width: 300px; height: 300px;
+    background: #0a0a0f;
+    border-radius: 12px;
+    border: 1px solid #1e1e2e;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 20px 16px;
+  }
+
+  /* Grid lines — same as app globals.css */
+  .slide::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(#1e1e2e 1px, transparent 1px),
+      linear-gradient(90deg, #1e1e2e 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0.4;
+  }
+
+  .z { position: relative; z-index: 2; }
+
+  /* Logo row — same as Navbar */
+  .logo-row {
+    display: flex; align-items: center; gap: 7px;
+    margin-bottom: 18px;
+  }
+  .wordmark {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 14px;
+    letter-spacing: -0.5px;
+  }
+  .pred { color: #e8e8f0; }
+  .lab  { color: #7c6af7; }
+
+  /* Dots nav */
+  .dots {
+    display: flex; gap: 4px;
+    margin-top: auto; padding-top: 12px;
+  }
+  .di {
+    height: 4px; border-radius: 2px;
+    background: #1e1e2e;
+    width: 14px;
+    transition: all 0.2s;
+  }
+  .di.on { background: #7c6af7; width: 22px; }
+
+  /* ─── SLIDE 1 — Capa ─── */
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.25);
+    border-radius: 20px; padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; color: #a78bfa;
+    margin-bottom: 14px;
+  }
+  .hero-dot { width: 5px; height: 5px; border-radius: 50%; background: #a78bfa; }
+  .hero-title {
+    font-size: 22px; font-weight: 800;
+    line-height: 1.2; color: #e8e8f0;
+    margin-bottom: 10px;
+  }
+  .hero-title em { color: #7c6af7; font-style: normal; }
+  .hero-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: #8888aa; line-height: 1.6;
+  }
+
+  /* ─── SLIDES 2-4 — How it works (fiel ao componente) ─── */
+  .hiw-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; color: #555570;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  /* Emoji — text-4xl como no componente */
+  .step-emoji {
+    font-size: 32px; margin-bottom: 8px;
+    line-height: 1;
+  }
+  /* Número — font-mono text-xs accent como no componente */
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: #7c6af7;
+    margin-bottom: 4px;
+  }
+  /* Título — font-display text-base font-bold */
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    color: #e8e8f0; margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  /* Desc — text-sm text-secondary */
+  .step-desc {
+    font-size: 11px; color: #8888aa;
+    line-height: 1.5; margin-bottom: 6px;
+  }
+  /* Detail — text-xs text-muted italic */
+  .step-detail {
+    font-size: 10px; color: #555570;
+    font-style: italic; line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  /* Mini card visual abaixo do texto */
+  .mini-card {
+    background: #111118;
+    border: 1px solid #1e1e2e;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .mini-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; color: #555570;
+    margin-bottom: 5px;
+  }
+  .mini-title {
+    font-size: 11px; font-weight: 700;
+    color: #e8e8f0; margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .bar-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: #555570; width: 40px; text-align: right; flex-shrink: 0; }
+  .bar-bg { flex: 1; height: 5px; border-radius: 3px; background: #1e1e2e; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-val { font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 700; min-width: 28px; text-align: right; }
+
+  /* ─── SLIDE 5 — Bolões ─── */
+  .bolao-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(124,106,247,0.1);
+    border: 1px solid rgba(124,106,247,0.2);
+    border-radius: 6px; padding: 3px 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; color: #a78bfa;
+    margin-bottom: 10px;
+  }
+  .bolao-title {
+    font-size: 16px; font-weight: 800;
+    color: #e8e8f0; margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .bolao-desc {
+    font-size: 10px; color: #8888aa;
+    margin-bottom: 12px; line-height: 1.5;
+  }
+  .rank-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid #1e1e2e;
+  }
+  .rank-pos { font-family: 'DM Mono', monospace; font-size: 10px; color: #555570; width: 20px; }
+  .rank-name { font-size: 11px; color: #e8e8f0; flex: 1; }
+  .rank-score { font-family: 'DM Mono', monospace; font-size: 10px; color: #7c6af7; font-weight: 700; }
+  .rank-pay-ok { font-size: 11px; margin-left: 6px; }
+
+  /* ─── SLIDE 6 — CTA ─── */
+  .cta-glow {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,106,247,0.18) 0%, transparent 70%);
+  }
+  .cta-emoji { font-size: 40px; text-align: center; margin-bottom: 10px; }
+  .cta-title {
+    font-size: 20px; font-weight: 800;
+    color: #e8e8f0; text-align: center;
+    line-height: 1.2; margin-bottom: 8px;
+  }
+  .cta-title em { color: #7c6af7; font-style: normal; }
+  .cta-url {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; color: #7c6af7;
+    text-align: center; margin-bottom: 14px;
+  }
+  .cta-items {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .cta-item {
+    display: flex; align-items: center;
+    justify-content: center; gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; color: #8888aa;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-label">PredLab · Carrossel Instagram · 6 slides · 1080×1080</div>
+
+<div class="grid">
+
+  <!-- ═══ SLIDE 1 — Capa ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="z" style="display:flex;flex-direction:column;height:100%">
+
+        <div class="logo-row">
+          <!-- Crystal ball icon inline -->
+          <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+            <defs>
+              <radialGradient id="cb1" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#2d1b55"/><stop offset="45%" stop-color="#130a28"/><stop offset="100%" stop-color="#06030f"/></radialGradient>
+              <radialGradient id="cl1" cx="25%" cy="20%" r="55%"><stop offset="0%" stop-color="#7c6af7" stop-opacity="0.35"/><stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="100" height="100" rx="22" fill="#1a0d35"/>
+            <rect width="100" height="100" rx="22" fill="none" stroke="#3d2070" stroke-width="2"/>
+            <ellipse cx="50" cy="84" rx="19" ry="4" fill="#2a1560" opacity="0.5"/>
+            <rect x="37" y="77" width="26" height="8" rx="4" fill="#130a28"/>
+            <circle cx="50" cy="44" r="33" fill="url(#cb1)"/>
+            <circle cx="50" cy="44" r="33" fill="url(#cl1)"/>
+            <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#d97706"/>
+            <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#fbbf24" opacity="0.5"/>
+            <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#d97706"/>
+            <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#d97706"/>
+          </svg>
+          <span class="wordmark"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+
+        <div class="hero-badge"><span class="hero-dot"></span> predlab.app · Grátis</div>
+
+        <div class="hero-title">Toda a gente palpita.<br><em>Poucos têm coragem</em><br>de registar.</div>
+        <div class="hero-sub">Previsões com probabilidade real.<br>Compara com o Polymarket.<br>Sobe no ranking global.</div>
+
+        <div class="dots" style="margin-top:auto">
+          <div class="di on"></div>
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div><div class="di"></div><div class="di"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 1 · Capa</div>
+  </div>
+
+  <!-- ═══ SLIDE 2 — Passo ① ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="z" style="display:flex;flex-direction:column;height:100%">
+        <div class="logo-row">
+          <span class="wordmark" style="font-size:12px"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+        <div class="hiw-label">Como funciona · 1 de 3</div>
+
+        <div class="step-emoji">🌍</div>
+        <div class="step-num">①</div>
+        <div class="step-title">Escolhe um mercado</div>
+        <div class="step-desc">Mercados do Polymarket em português. Política, crypto, esportes, economia e muito mais.</div>
+        <div class="step-detail">Ou cria a tua própria previsão livre sobre qualquer evento.</div>
+
+        <div class="mini-card">
+          <div class="mini-label">🌍 Geopolítica · 🔥 Em alta</div>
+          <div class="mini-title">"Novo líder no Irão antes de 2027?"</div>
+          <div class="bar-row">
+            <div class="bar-lbl">Mercado</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:67%;background:#7c6af7"></div></div>
+            <div class="bar-val" style="color:#7c6af7">67%</div>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;color:#555570;margin-top:4px">Volume: $2.4M · 3.2k participantes</div>
+        </div>
+
+        <div class="dots">
+          <div class="di"></div>
+          <div class="di on"></div>
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div><div class="di"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 2 · Passo ①</div>
+  </div>
+
+  <!-- ═══ SLIDE 3 — Passo ② ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="z" style="display:flex;flex-direction:column;height:100%">
+        <div class="logo-row">
+          <span class="wordmark" style="font-size:12px"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+        <div class="hiw-label">Como funciona · 2 de 3</div>
+
+        <div class="step-emoji">📊</div>
+        <div class="step-num">②</div>
+        <div class="step-title">Define a tua probabilidade</div>
+        <div class="step-desc">Não é Sim ou Não. É de 1% a 99%. Regista o teu argumento.</div>
+        <div class="step-detail">Imutável após 10 minutos. Sem edições, sem exclusões. A tua reputação é real.</div>
+
+        <div class="mini-card">
+          <div class="mini-label">"Bitcoin > $200k até Dez 2026?"</div>
+          <div class="bar-row">
+            <div class="bar-lbl">Tu</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:72%;background:#34d399"></div></div>
+            <div class="bar-val" style="color:#34d399">72%</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;margin-top:6px;font-family:'DM Mono',monospace;font-size:9px;color:#34d399;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.15);border-radius:5px;padding:4px 7px">
+            🔒 Imutável após 10 min
+          </div>
+        </div>
+
+        <div class="dots">
+          <div class="di"></div><div class="di"></div>
+          <div class="di on"></div>
+          <div class="di"></div><div class="di"></div><div class="di"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 3 · Passo ②</div>
+  </div>
+
+  <!-- ═══ SLIDE 4 — Passo ③ ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="z" style="display:flex;flex-direction:column;height:100%">
+        <div class="logo-row">
+          <span class="wordmark" style="font-size:12px"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+        <div class="hiw-label">Como funciona · 3 de 3</div>
+
+        <div class="step-emoji">🔥</div>
+        <div class="step-num">③</div>
+        <div class="step-title">Acompanha, resolve e partilha</div>
+        <div class="step-desc">Vê a diferença entre a tua previsão e o mercado. Sobe no ranking global.</div>
+        <div class="step-detail">Quando acertas, partilha o teu card no X e LinkedIn. Constrói reputação verificável.</div>
+
+        <div class="mini-card">
+          <div class="mini-label" style="margin-bottom:7px">"Bitcoin > $200k até Dez 2026?"</div>
+          <div class="bar-row">
+            <div class="bar-lbl">Tu</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:72%;background:#34d399"></div></div>
+            <div class="bar-val" style="color:#34d399">72%</div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-lbl">Mercado</div>
+            <div class="bar-bg"><div class="bar-fill" style="width:41%;background:#7c6af7"></div></div>
+            <div class="bar-val" style="color:#7c6af7">41%</div>
+          </div>
+          <div style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:'DM Mono',monospace;font-size:9px;color:#a78bfa;background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.2);border-radius:5px;padding:3px 7px">
+            ⚡ Divergência de 31%
+          </div>
+        </div>
+
+        <div class="dots">
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div>
+          <div class="di on"></div>
+          <div class="di"></div><div class="di"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 4 · Passo ③</div>
+  </div>
+
+  <!-- ═══ SLIDE 5 — Bolões ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="z" style="display:flex;flex-direction:column;height:100%">
+        <div class="logo-row">
+          <span class="wordmark" style="font-size:12px"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+
+        <div class="bolao-tag">🏆 Feature · Bolões</div>
+        <div class="step-emoji" style="font-size:28px">🏆</div>
+        <div class="bolao-title">Cria bolões<br>com os teus amigos</div>
+        <div class="bolao-desc">Copa do Mundo, eleições, Brasileirão. Resultados incontestáveis — árbitro neutro.</div>
+
+        <div class="mini-card">
+          <div class="mini-label" style="margin-bottom:7px">🏆 Bolão Copa 2026 · 24 membros</div>
+          <div class="rank-row">
+            <span class="rank-pos">🥇</span>
+            <span class="rank-name" style="font-size:10px">João Silva</span>
+            <span class="rank-score">84%</span>
+            <span class="rank-pay-ok">✅</span>
+          </div>
+          <div class="rank-row">
+            <span class="rank-pos">🥈</span>
+            <span class="rank-name" style="font-size:10px">Ana Costa</span>
+            <span class="rank-score">78%</span>
+            <span class="rank-pay-ok">✅</span>
+          </div>
+          <div class="rank-row" style="border:none">
+            <span class="rank-pos">🥉</span>
+            <span class="rank-name" style="font-size:10px">Pedro Ramos</span>
+            <span class="rank-score">72%</span>
+            <span class="rank-pay-ok" style="color:#fbbf24">⏳</span>
+          </div>
+        </div>
+
+        <div class="dots">
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div><div class="di"></div>
+          <div class="di on"></div>
+          <div class="di"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 5 · Bolões</div>
+  </div>
+
+  <!-- ═══ SLIDE 6 — CTA ═══ -->
+  <div class="slide-wrap">
+    <div class="slide">
+      <div class="cta-glow"></div>
+      <div class="z" style="display:flex;flex-direction:column;height:100%;align-items:center;justify-content:center;text-align:center">
+        <div class="logo-row" style="justify-content:center;margin-bottom:14px">
+          <svg width="20" height="20" viewBox="0 0 100 100" fill="none">
+            <defs>
+              <radialGradient id="cb6" cx="42%" cy="38%" r="70%"><stop offset="0%" stop-color="#2d1b55"/><stop offset="45%" stop-color="#130a28"/><stop offset="100%" stop-color="#06030f"/></radialGradient>
+              <radialGradient id="cl6" cx="25%" cy="20%" r="55%"><stop offset="0%" stop-color="#7c6af7" stop-opacity="0.35"/><stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="100" height="100" rx="22" fill="#1a0d35"/>
+            <rect width="100" height="100" rx="22" fill="none" stroke="#3d2070" stroke-width="2"/>
+            <ellipse cx="50" cy="84" rx="19" ry="4" fill="#2a1560" opacity="0.5"/>
+            <rect x="37" y="77" width="26" height="8" rx="4" fill="#130a28"/>
+            <circle cx="50" cy="44" r="33" fill="url(#cb6)"/>
+            <circle cx="50" cy="44" r="33" fill="url(#cl6)"/>
+            <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#d97706"/>
+            <path d="M44,36 L46.2,43.2 L53.5,45.5 L46.2,47.8 L44,55 L41.8,47.8 L34.5,45.5 L41.8,43.2 Z" fill="#fbbf24" opacity="0.5"/>
+            <path d="M63,26 L64.5,30.8 L69.3,32.3 L64.5,33.8 L63,38.6 L61.5,33.8 L56.7,32.3 L61.5,30.8 Z" fill="#d97706"/>
+            <path d="M63,55 L64,58 L67,59 L64,60 L63,63 L62,60 L59,59 L62,58 Z" fill="#d97706"/>
+          </svg>
+          <span class="wordmark" style="font-size:13px"><span class="pred">pred</span><span class="lab">lab</span></span>
+        </div>
+
+        <div class="cta-title">Tens coragem de<br><em>registar</em> os teus<br>palpites?</div>
+        <div class="cta-url">predlab.app</div>
+        <div class="cta-items">
+          <div class="cta-item">✅ Grátis · Sem cartão · Sem crypto</div>
+          <div class="cta-item">⚡ Verificado pelo Polymarket</div>
+          <div class="cta-item">🏆 Rankings globais por categoria</div>
+          <div class="cta-item">🎯 Bolões com amigos</div>
+        </div>
+
+        <div class="dots" style="justify-content:center">
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div><div class="di"></div>
+          <div class="di"></div>
+          <div class="di on"></div>
+        </div>
+      </div>
+    </div>
+    <div class="slide-num">Slide 6 · CTA</div>
+  </div>
+
+</div>
+
+<!-- Caption -->
+<div style="max-width:560px;margin:40px auto 0;background:#0a0a0f;border:1px solid #1e1e2e;border-radius:14px;padding:24px">
+  <div style="font-family:'DM Mono',monospace;font-size:10px;color:#555570;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:14px">📝 Caption sugerida</div>
+  <div style="font-size:12px;color:#e8e8f0;line-height:1.9;font-family:'DM Mono',monospace">
+    🔮 Toda a gente tem opiniões sobre o futuro.<br>
+    Poucos têm coragem de registá-las formalmente.<br><br>
+    No PredLab podes:<br>
+    🌍 Escolher mercados do Polymarket em português<br>
+    📊 Registar a tua probabilidade — de 1% a 99%<br>
+    🔥 Comparar com o mercado e subir no ranking<br>
+    🏆 Criar bolões com amigos — Copa, eleições, Série A<br><br>
+    As tuas previsões são imutáveis.<br>
+    Sem edições. Sem exclusões.<br>
+    A reputação que constróis aqui é real.<br><br>
+    👇 Link na bio · predlab.app<br><br>
+    <span style="color:#3d3580">#predlab #previsões #polymarket #prediction #forecasting #bitcoin #eleições2026 #copa2026 #bolão #apostas</span>
+  </div>
+</div>
+
+</body>
+</html>

@@ -44,8 +44,8 @@ export async function GET(req: NextRequest) {
   // --- Coins ranking (no period) ---
   if (type === "coins") {
     const users = await prisma.user.findMany({
-      select: { id: true, name: true, username: true, level: true, predictionCoins: true },
-      orderBy: { predictionCoins: "desc" },
+      select: { id: true, name: true, username: true, level: true, orbs: true },
+      orderBy: { orbs: "desc" },
       take: limit,
     })
 
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       name: u.name,
       username: u.username,
       level: u.level,
-      score: u.predictionCoins,
+      score: u.orbs,
       isCurrentUser: u.id === session.user.id,
     }))
 
@@ -211,18 +211,18 @@ export async function GET(req: NextRequest) {
 async function coinPosition(userId: string, db: typeof prisma) {
   const user = await db.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, username: true, level: true, predictionCoins: true },
+    select: { id: true, name: true, username: true, level: true, orbs: true },
   })
   if (!user) return null
   const rank =
-    (await db.user.count({ where: { predictionCoins: { gt: user.predictionCoins } } })) + 1
+    (await db.user.count({ where: { orbs: { gt: user.orbs } } })) + 1
   return {
     rank,
     userId: user.id,
     name: user.name,
     username: user.username,
     level: user.level,
-    score: user.predictionCoins,
+    score: user.orbs,
     isCurrentUser: true,
   } as RankingEntry
 }

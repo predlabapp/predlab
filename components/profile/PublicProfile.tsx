@@ -25,7 +25,7 @@ interface User {
   level: number
   currentStreak: number
   longestStreak: number
-  predictionCoins: number
+  orbs: number
   predictions: Prediction[]
   badges: Badge[]
 }
@@ -111,7 +111,7 @@ export function PublicProfile({ user }: Props) {
           {/* Coins */}
           <div className="text-center">
             <p className="font-mono text-lg font-bold text-[var(--text-primary)]">
-              {user.predictionCoins.toLocaleString()}
+              {user.orbs.toLocaleString()}
             </p>
             <p className="text-xs text-[var(--text-muted)]">{t("coins")}</p>
           </div>

@@ -20,13 +20,17 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Gamification
-  predictionCoins  Int       @default(500)
-  totalCoinsEarned Int       @default(0)
-  totalCoinsLost   Int       @default(0)
+  // Orbs (moeda interna)
+  orbs             Int       @default(500)  @map("prediction_coins")
+  totalOrbsEarned  Int       @default(0)   @map("total_coins_earned")
+  totalOrbsLost    Int       @default(0)   @map("total_coins_lost")
+
+  // Streaks
   currentStreak    Int       @default(0)
   longestStreak    Int       @default(0)
   lastActivityAt   DateTime?
+
+  // Nível e XP
   level            Int       @default(1)
   xp               Int       @default(0)
 
@@ -47,7 +51,7 @@ model User {
   sessions           Session[]
   predictions        Prediction[]
   badges             UserBadge[]
-  coinTransactions   CoinTransaction[]
+  orbTransactions    OrbTransaction[]
   bolaosCreated      Bolao[]             @relation("BolaoCreator")
   bolaoMembers       BolaoMember[]
   bolaoPayments      BolaoPayment[]
@@ -161,10 +165,11 @@ enum ResolutionType {
 }
 
 model UserBadge {
-  id       String   @id @default(cuid())
+  id       String      @id @default(cuid())
   userId   String
   badgeKey String
-  earnedAt DateTime @default(now())
+  earnedAt DateTime    @default(now())
+  source   BadgeSource @default(AUTOMATIC)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -172,17 +177,42 @@ model UserBadge {
   @@map("user_badges")
 }
 
-model CoinTransaction {
-  id           String   @id @default(cuid())
+enum BadgeSource {
+  AUTOMATIC
+  PURCHASED
+}
+
+model OrbTransaction {
+  id           String    @id @default(cuid())
   userId       String
   amount       Int
-  reason       String
+  reason       OrbReason
+  description  String?
   predictionId String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("coin_transactions")
+  @@map("orb_transactions")
+}
+
+enum OrbReason {
+  SIGNUP_BONUS
+  PREDICTION_CORRECT
+  PREDICTION_EXACT
+  PREDICTION_INCORRECT
+  STREAK_BONUS
+  STREAK_MILESTONE
+  LEVEL_UP
+  FIRST_PREDICTION
+  BOLAO_WIN
+  BOLAO_TOP3
+  DAILY_LOGIN
+  SHARE_PREDICTION
+  BADGE_PURCHASE
+  THEME_PURCHASE
+  BOOST_PURCHASE
+  BADGE_EARNED
 }
 
 model RankingSnapshot {

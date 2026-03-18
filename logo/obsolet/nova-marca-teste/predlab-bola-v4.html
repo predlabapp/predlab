@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Mono:wght@400&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0a0f; padding: 60px 40px; font-family: 'DM Mono', monospace; }
+  .label { font-size: 11px; color: #555570; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 40px; text-align: center; }
+  .row { display: flex; gap: 48px; align-items: flex-end; justify-content: center; margin-bottom: 48px; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .lbl { font-size: 10px; color: #555570; }
+  .navbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 64px;
+    background: #0a0a0f;
+    border: 1px solid #1e1e2e;
+    border-radius: 12px;
+    max-width: 700px; margin: 0 auto;
+  }
+  .nav-right { display: flex; align-items: center; gap: 14px; }
+  .nav-link { font-size: 13px; color: #8888aa; font-family: 'Syne', sans-serif; }
+  .btn { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12px; padding: 7px 16px; border-radius: 8px; cursor: pointer; }
+  .ghost { background: transparent; border: 1px solid #1e1e2e; color: #8888aa; }
+  .primary { background: #7c6af7; border: none; color: white; }
+</style>
+</head>
+<body>
+
+<div class="label">PredLab · Bola v4 · #7c6af7 · base branca · polo inferior cortado</div>
+
+<!-- Tamanhos isolados -->
+<div class="row">
+
+  <!-- 160px -->
+  <div class="item">
+    <svg width="160" height="160" viewBox="0 0 100 100" fill="none">
+      <defs>
+        <radialGradient id="orb_a" cx="35%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#b8acff"/>
+          <stop offset="30%" stop-color="#7c6af7"/>
+          <stop offset="65%" stop-color="#4c35c7"/>
+          <stop offset="100%" stop-color="#2a1a8a"/>
+        </radialGradient>
+        <radialGradient id="shine_a" cx="28%" cy="18%" r="35%">
+          <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="base_a" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#e8e8f0"/>
+          <stop offset="100%" stop-color="#c4b5fd"/>
+        </linearGradient>
+        <linearGradient id="s1a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+        <linearGradient id="s2a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+        <linearGradient id="s3a" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+        <!-- Clip: corta o polo inferior da bola em y=72 -->
+        <clipPath id="clip_a"><rect x="0" y="0" width="100" height="72"/></clipPath>
+      </defs>
+      <!-- BASE: trapezoide com topo em y=72, encostado -->
+      <path d="M28,72 L24,88 Q24,91 28,91 L72,91 Q76,91 76,88 L72,72 Z" fill="url(#base_a)" rx="4"/>
+      <!-- ORB clipado -->
+      <g clip-path="url(#clip_a)">
+        <circle cx="50" cy="46" r="34" fill="url(#orb_a)"/>
+        <circle cx="50" cy="46" r="34" fill="url(#shine_a)"/>
+      </g>
+      <!-- Estrela grande centro-esquerda -->
+      <path d="M40,38 L42.8,46.5 L51.5,49.3 L42.8,52.1 L40,60.5 L37.2,52.1 L28.5,49.3 L37.2,46.5 Z" fill="url(#s1a)"/>
+      <!-- Estrela média topo centro -->
+      <path d="M55,24 L56.5,28.8 L61.3,30.3 L56.5,31.8 L55,36.6 L53.5,31.8 L48.7,30.3 L53.5,28.8 Z" fill="url(#s2a)"/>
+      <!-- Estrela pequena direita -->
+      <path d="M65,36 L66,39 L69,40 L66,41 L65,44 L64,41 L61,40 L64,39 Z" fill="url(#s3a)"/>
+    </svg>
+    <div class="lbl">160px</div>
+  </div>
+
+  <!-- 100px -->
+  <div class="item">
+    <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+      <defs>
+        <radialGradient id="orb_b" cx="35%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#b8acff"/>
+          <stop offset="30%" stop-color="#7c6af7"/>
+          <stop offset="65%" stop-color="#4c35c7"/>
+          <stop offset="100%" stop-color="#2a1a8a"/>
+        </radialGradient>
+        <radialGradient id="shine_b" cx="28%" cy="18%" r="35%">
+          <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="base_b" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#e8e8f0"/>
+          <stop offset="100%" stop-color="#c4b5fd"/>
+        </linearGradient>
+        <linearGradient id="s1b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+        <linearGradient id="s2b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+        <linearGradient id="s3b" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+        <clipPath id="clip_b"><rect x="0" y="0" width="100" height="72"/></clipPath>
+      </defs>
+      <path d="M28,72 L24,88 Q24,91 28,91 L72,91 Q76,91 76,88 L72,72 Z" fill="url(#base_b)"/>
+      <g clip-path="url(#clip_b)">
+        <circle cx="50" cy="46" r="34" fill="url(#orb_b)"/>
+        <circle cx="50" cy="46" r="34" fill="url(#shine_b)"/>
+      </g>
+      <path d="M40,38 L42.8,46.5 L51.5,49.3 L42.8,52.1 L40,60.5 L37.2,52.1 L28.5,49.3 L37.2,46.5 Z" fill="url(#s1b)"/>
+      <path d="M55,24 L56.5,28.8 L61.3,30.3 L56.5,31.8 L55,36.6 L53.5,31.8 L48.7,30.3 L53.5,28.8 Z" fill="url(#s2b)"/>
+      <path d="M65,36 L66,39 L69,40 L66,41 L65,44 L64,41 L61,40 L64,39 Z" fill="url(#s3b)"/>
+    </svg>
+    <div class="lbl">100px</div>
+  </div>
+
+  <!-- 60px -->
+  <div class="item">
+    <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+      <defs>
+        <radialGradient id="orb_c" cx="35%" cy="25%" r="70%">
+          <stop offset="0%" stop-color="#b8acff"/>
+          <stop offset="30%" stop-color="#7c6af7"/>
+          <stop offset="65%" stop-color="#4c35c7"/>
+          <stop offset="100%" stop-color="#2a1a8a"/>
+        </radialGradient>
+        <radialGradient id="shine_c" cx="28%" cy="18%" r="35%">
+          <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="base_c" x1="0.5" y1="0" x2="0.5" y2="1">
+          <stop offset="0%" stop-color="#e8e8f0"/>
+          <stop offset="100%" stop-color="#c4b5fd"/>
+        </linearGradient>
+        <linearGradient id="s1c" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+        <linearGradient id="s2c" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+        <linearGradient id="s3c" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+        <clipPath id="clip_c"><rect x="0" y="0" width="100" height="72"/></clipPath>
+      </defs>
+      <path d="M28,72 L24,88 Q24,91 28,91 L72,91 Q76,91 76,88 L72,72 Z" fill="url(#base_c)"/>
+      <g clip-path="url(#clip_c)">
+        <circle cx="50" cy="46" r="34" fill="url(#orb_c)"/>
+        <circle cx="50" cy="46" r="34" fill="url(#shine_c)"/>
+      </g>
+      <path d="M40,38 L42.8,46.5 L51.5,49.3 L42.8,52.1 L40,60.5 L37.2,52.1 L28.5,49.3 L37.2,46.5 Z" fill="url(#s1c)"/>
+      <path d="M55,24 L56.5,28.8 L61.3,30.3 L56.5,31.8 L55,36.6 L53.5,31.8 L48.7,30.3 L53.5,28.8 Z" fill="url(#s2c)"/>
+      <path d="M65,36 L66,39 L69,40 L66,41 L65,44 L64,41 L61,40 L64,39 Z" fill="url(#s3c)"/>
+    </svg>
+    <div class="lbl">60px</div>
+  </div>
+
+</div>
+
+<!-- Navbar -->
+<div class="navbar">
+  <svg width="210" height="52" viewBox="0 0 210 52" fill="none">
+    <defs>
+      <radialGradient id="orb_n" cx="35%" cy="25%" r="70%">
+        <stop offset="0%" stop-color="#b8acff"/>
+        <stop offset="30%" stop-color="#7c6af7"/>
+        <stop offset="65%" stop-color="#4c35c7"/>
+        <stop offset="100%" stop-color="#2a1a8a"/>
+      </radialGradient>
+      <radialGradient id="shine_n" cx="28%" cy="18%" r="35%">
+        <stop offset="0%" stop-color="#ddd6fe" stop-opacity="0.5"/>
+        <stop offset="100%" stop-color="#ddd6fe" stop-opacity="0"/>
+      </radialGradient>
+      <linearGradient id="base_n" x1="0.5" y1="0" x2="0.5" y2="1">
+        <stop offset="0%" stop-color="#e8e8f0"/>
+        <stop offset="100%" stop-color="#c4b5fd"/>
+      </linearGradient>
+      <linearGradient id="s1n" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fbbf24"/><stop offset="100%" stop-color="#f97316"/></linearGradient>
+      <linearGradient id="s2n" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fcd34d"/><stop offset="100%" stop-color="#f59e0b"/></linearGradient>
+      <linearGradient id="s3n" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fde68a"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
+      <!-- Clip height=38 = corte do polo inferior da bola na navbar -->
+      <clipPath id="clip_n"><rect x="0" y="0" width="52" height="38"/></clipPath>
+    </defs>
+    <!-- BASE encostada em y=38 -->
+    <path d="M10,38 L8,48 Q8,51 11,51 L41,51 Q44,51 44,48 L42,38 Z" fill="url(#base_n)"/>
+    <!-- ORB clipada -->
+    <g clip-path="url(#clip_n)">
+      <circle cx="26" cy="23" r="18" fill="url(#orb_n)"/>
+      <circle cx="26" cy="23" r="18" fill="url(#shine_n)"/>
+    </g>
+    <!-- Estrela grande -->
+    <path d="M21,19 L22.5,23.8 L27.4,25.3 L22.5,26.8 L21,31.6 L19.5,26.8 L14.6,25.3 L19.5,23.8 Z" fill="url(#s1n)"/>
+    <!-- Estrela média -->
+    <path d="M29,12 L29.8,14.5 L32.3,15.3 L29.8,16.1 L29,18.6 L28.2,16.1 L25.7,15.3 L28.2,14.5 Z" fill="url(#s2n)"/>
+    <!-- Estrela pequena -->
+    <path d="M34,20 L34.5,21.6 L36.1,22.1 L34.5,22.6 L34,24.2 L33.5,22.6 L31.9,22.1 L33.5,21.6 Z" fill="url(#s3n)"/>
+    <!-- Wordmark -->
+    <text x="56" y="34" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="23" letter-spacing="-0.5" fill="#e8e8f0">pred</text>
+    <text x="110" y="34" font-family="'Syne','Arial Black',sans-serif" font-weight="800" font-size="23" letter-spacing="-0.5" fill="#7c6af7">lab</text>
+  </svg>
+  <div class="nav-right">
+    <span class="nav-link">Rankings</span>
+    <button class="btn ghost">Entrar</button>
+    <button class="btn primary">Começar</button>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<svg width="1500" height="500" viewBox="0 0 1500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg_grad" x1="0" y1="0" x2="1500" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#0f0a1a"/>
+    </linearGradient>
+    <linearGradient id="curve_grad" x1="0" y1="0" x2="1500" y2="500" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c6af7"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="75%" cy="40%" r="35%">
+      <stop offset="0%" stop-color="#7c6af7" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#7c6af7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="25%" cy="60%" r="25%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1500" height="500" fill="url(#bg_grad)"/>
+  <rect width="1500" height="500" fill="url(#glow1)"/>
+  <rect width="1500" height="500" fill="url(#glow2)"/>
+
+  <!-- Subtle grid -->
+  <line x1="0" y1="125" x2="1500" y2="125" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="0" y1="250" x2="1500" y2="250" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="0" y1="375" x2="1500" y2="375" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="375" y1="0" x2="375" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="750" y1="0" x2="750" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+  <line x1="1125" y1="0" x2="1125" y2="500" stroke="#1e1e2e" stroke-width="0.5"/>
+
+  <!-- Background curve (decorative, large) -->
+  <path d="M-100 420 Q200 420 400 380 Q550 340 650 200 Q750 60 900 30 Q1020 10 1100 60 Q1180 110 1300 420 Q1400 420 1600 420"
+        stroke="#7c6af7" stroke-width="1.5" fill="none" opacity="0.15"/>
+
+  <!-- Main curve -->
+  <path d="M800 430 Q900 430 980 400 Q1040 375 1080 290 Q1120 200 1160 175 Q1190 155 1220 170 Q1250 185 1280 430"
+        fill="#7c6af715"/>
+  <path d="M800 430 Q900 430 980 400 Q1040 375 1080 290 Q1120 200 1160 175 Q1190 155 1220 170 Q1250 185 1280 430"
+        stroke="url(#curve_grad)" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+  <!-- Peak glow -->
+  <circle cx="1160" cy="175" r="40" fill="#a78bfa" opacity="0.1"/>
+  <circle cx="1160" cy="175" r="20" fill="#a78bfa" opacity="0.15"/>
+  <circle cx="1160" cy="175" r="8" fill="#a78bfa"/>
+
+  <!-- X axis -->
+  <line x1="800" y1="430" x2="1290" y2="430" stroke="#3d3580" stroke-width="1.5"/>
+
+  <!-- Logo icon (left side) -->
+  <rect x="100" y="160" width="120" height="120" rx="26" fill="#111118"/>
+  <rect x="100" y="160" width="120" height="120" rx="26" fill="none" stroke="#1e1e2e" stroke-width="1"/>
+
+  <!-- Small curve in icon -->
+  <line x1="114" y1="258" x2="206" y2="258" stroke="#2a2a3e" stroke-width="1"/>
+  <path d="M114 258 Q128 258 140 252 Q150 246 160 220 Q170 194 178 188 Q185 183 192 188 Q197 193 206 258 Z"
+        fill="#7c6af718"/>
+  <path d="M114 258 Q128 258 140 252 Q150 246 160 220 Q170 194 178 188 Q185 183 192 188 Q197 193 206 258"
+        stroke="url(#curve_grad)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <circle cx="178" cy="188" r="6" fill="#a78bfa"/>
+  <circle cx="178" cy="188" r="10" fill="#a78bfa" opacity="0.2"/>
+  <line x1="114" y1="258" x2="206" y2="258" stroke="#3d3580" stroke-width="1.5"/>
+
+  <!-- Wordmark -->
+  <text x="240" y="228"
+        font-family="'Syne', 'Arial Black', sans-serif"
+        font-weight="800"
+        font-size="80"
+        letter-spacing="-2"
+        fill="#e8e8f0">pred</text>
+  <text x="488" y="228"
+        font-family="'Syne', 'Arial Black', sans-serif"
+        font-weight="800"
+        font-size="80"
+        letter-spacing="-2"
+        fill="#7c6af7">lab</text>
+
+  <!-- Tagline -->
+  <text x="242" y="272"
+        font-family="'DM Mono', 'Courier New', monospace"
+        font-size="18"
+        letter-spacing="3"
+        fill="#555570">TRACK · COMPARE · RANK</text>
+
+  <!-- URL -->
+  <text x="242" y="320"
+        font-family="'DM Mono', 'Courier New', monospace"
+        font-size="16"
+        letter-spacing="1"
+        fill="#3d3580">predlab.app</text>
+</svg>

@@ -1,0 +1,64 @@
+<svg width="200" height="48" viewBox="0 0 200 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Bola: #7c6af7 como cor principal -->
+    <radialGradient id="orb" cx="38%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="35%" stop-color="#7c6af7"/>
+      <stop offset="70%" stop-color="#4c35c7"/>
+      <stop offset="100%" stop-color="#2e1a8a"/>
+    </radialGradient>
+    <!-- Reflexo suave topo esquerdo -->
+    <radialGradient id="shine" cx="28%" cy="18%" r="38%">
+      <stop offset="0%" stop-color="#c4b5fd" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#c4b5fd" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Base: branco do "pred" (#e8e8f0) em cima, lilás suave em baixo -->
+    <linearGradient id="base" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#e8e8f0"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <!-- Estrelas gradiente laranja -->
+    <linearGradient id="slg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="smd" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fcd34d"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="ssm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <!-- Clip para cortar o polo inferior da bola -->
+    <clipPath id="orbClip">
+      <rect x="0" y="0" width="48" height="37"/>
+    </clipPath>
+  </defs>
+
+  <!-- BASE — trapezoide encostado, começa onde a bola é cortada (y=37) -->
+  <path d="M15,37 L13,45 Q13,47 15,47 L33,47 Q35,47 35,45 L33,37 Z" fill="url(#base)"/>
+
+  <!-- ORB — clipado no polo inferior para junção limpa com a base -->
+  <g clip-path="url(#orbClip)">
+    <circle cx="24" cy="22" r="17" fill="url(#orb)"/>
+    <circle cx="24" cy="22" r="17" fill="url(#shine)"/>
+  </g>
+
+  <!-- ESTRELA GRANDE — centro-esquerda -->
+  <path d="M19,17 L20.9,22.8 L26.8,24.7 L20.9,26.6 L19,32.4 L17.1,26.6 L11.2,24.7 L17.1,22.8 Z" fill="url(#slg)"/>
+  <!-- ESTRELA MÉDIA — topo centro -->
+  <path d="M25.5,11 L26.4,13.8 L29.3,14.7 L26.4,15.6 L25.5,18.4 L24.6,15.6 L21.7,14.7 L24.6,13.8 Z" fill="url(#smd)"/>
+  <!-- ESTRELA PEQUENA — direita -->
+  <path d="M31.5,19.5 L32.1,21.4 L34,22 L32.1,22.6 L31.5,24.5 L30.9,22.6 L29,22 L30.9,21.4 Z" fill="url(#ssm)"/>
+
+  <!-- Wordmark -->
+  <text x="52" y="32"
+    font-family="'Syne','Arial Black',sans-serif"
+    font-weight="800" font-size="22" letter-spacing="-0.5"
+    fill="#e8e8f0">pred</text>
+  <text x="102" y="32"
+    font-family="'Syne','Arial Black',sans-serif"
+    font-weight="800" font-size="22" letter-spacing="-0.5"
+    fill="#7c6af7">lab</text>
+</svg>

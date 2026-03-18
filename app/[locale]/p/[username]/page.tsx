@@ -75,7 +75,7 @@ export default async function ProfilePage({ params }: Props) {
         level: user.level,
         currentStreak: user.currentStreak,
         longestStreak: user.longestStreak,
-        predictionCoins: user.predictionCoins,
+        orbs: user.orbs,
         predictions: user.predictions as any,
         badges: user.badges,
       }}
