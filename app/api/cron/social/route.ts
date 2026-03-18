@@ -130,7 +130,11 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
   throw new Error("No suitable market found")
 }
 
-const UNSPLASH_FALLBACKS = ["world news", "technology", "global", "future", "finance"]
+const UNSPLASH_FALLBACKS = [
+  "politics", "government", "world leaders", "diplomacy",
+  "economy", "finance", "stock market",
+  "technology", "global news",
+]
 
 async function fetchUnsplashImage(query: string): Promise<{ url: string; author: string }> {
   const key = process.env.UNSPLASH_ACCESS_KEY
@@ -138,7 +142,11 @@ async function fetchUnsplashImage(query: string): Promise<{ url: string; author:
     console.error("[cron/social] UNSPLASH_ACCESS_KEY not set")
     return { url: "", author: "" }
   }
-  const queries = [query, ...UNSPLASH_FALLBACKS]
+
+  // Try full query, then each individual word, then generic fallbacks
+  const words = query.split(" ").filter((w) => w.length > 3)
+  const queries = [query, ...words, ...UNSPLASH_FALLBACKS]
+
   for (const q of queries) {
     try {
       const res = await fetch(
@@ -146,15 +154,12 @@ async function fetchUnsplashImage(query: string): Promise<{ url: string; author:
         { headers: { Authorization: `Client-ID ${key}` }, next: { revalidate: 0 } }
       )
       if (res.status === 404) continue
-      if (!res.ok) {
-        console.error(`[cron/social] Unsplash API error ${res.status} for query "${q}"`)
-        continue
-      }
+      if (!res.ok) continue
       const data = await res.json()
       const url = data.urls?.regular ?? ""
       if (url) return { url, author: data.user?.name ?? "" }
-    } catch (e) {
-      console.error(`[cron/social] Unsplash fetch exception: ${String(e)}`)
+    } catch {
+      // continua para próxima query
     }
   }
   return { url: "", author: "" }
