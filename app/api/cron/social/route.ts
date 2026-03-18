@@ -259,11 +259,13 @@ export async function GET(req: NextRequest) {
 
     // Upload Unsplash image to Vercel Blob for reliable access in OG image route
     let unsplashUrl = ""
+    console.log(`[cron/social] unsplashApiUrl: ${unsplashApiUrl || "(empty)"}`)
     if (unsplashApiUrl) {
       try {
         const imgRes = await fetch(unsplashApiUrl, {
           headers: { "User-Agent": "Mozilla/5.0 (compatible; PredLab/1.0)" },
         })
+        console.log(`[cron/social] Unsplash fetch status: ${imgRes.status}`)
         if (imgRes.ok) {
           const imgBuf = await imgRes.arrayBuffer()
           const mime = imgRes.headers.get("content-type") ?? "image/jpeg"
@@ -274,9 +276,10 @@ export async function GET(req: NextRequest) {
             { access: "public", contentType: mime, addRandomSuffix: true }
           )
           unsplashUrl = blobResult.url
+          console.log(`[cron/social] Unsplash blob uploaded: ${unsplashUrl}`)
         }
-      } catch {
-        // sem imagem, continua sem fundo
+      } catch (e) {
+        console.error(`[cron/social] Unsplash upload failed: ${String(e)}`)
       }
     }
 
