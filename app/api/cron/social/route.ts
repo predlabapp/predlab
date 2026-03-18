@@ -255,7 +255,30 @@ export async function GET(req: NextRequest) {
   try {
     const market = await fetchTopMarket(excludeSlugs)
     const keyword = extractKeyword(market.question)
-    const { url: unsplashUrl, author: unsplashAuthor } = await fetchUnsplashImage(keyword)
+    const { url: unsplashApiUrl, author: unsplashAuthor } = await fetchUnsplashImage(keyword)
+
+    // Upload Unsplash image to Vercel Blob for reliable access in OG image route
+    let unsplashUrl = ""
+    if (unsplashApiUrl) {
+      try {
+        const imgRes = await fetch(unsplashApiUrl, {
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; PredLab/1.0)" },
+        })
+        if (imgRes.ok) {
+          const imgBuf = await imgRes.arrayBuffer()
+          const mime = imgRes.headers.get("content-type") ?? "image/jpeg"
+          const ext = mime.includes("png") ? "png" : "jpg"
+          const blobResult = await put(
+            `unsplash/${today}-${platform}-${slot}.${ext}`,
+            imgBuf,
+            { access: "public", contentType: mime, addRandomSuffix: true }
+          )
+          unsplashUrl = blobResult.url
+        }
+      } catch {
+        // sem imagem, continua sem fundo
+      }
+    }
 
     const caption =
       platform === "instagram"
