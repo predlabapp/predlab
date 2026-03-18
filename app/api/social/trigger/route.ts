@@ -7,7 +7,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const { password, platform = "instagram", slot = "1" } = body
 
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
+    const adminPwd = process.env.ADMIN_PASSWORD
+    if (!adminPwd) {
+      return NextResponse.json({ error: "ADMIN_PASSWORD not configured on server" }, { status: 500 })
+    }
+    if (!password || password !== adminPwd) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

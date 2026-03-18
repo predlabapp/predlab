@@ -31,20 +31,7 @@ export async function GET(
       : (title.length > 80 ? 40 : title.length > 60 ? 46 : 54)
     const probSize = isLandscape ? 84 : 112
 
-    // Pre-fetch Unsplash image so Satori can render it reliably
-    let bgDataUri: string | null = null
-    if (post.unsplashUrl) {
-      try {
-        const imgRes = await fetch(post.unsplashUrl)
-        if (imgRes.ok) {
-          const buf = await imgRes.arrayBuffer()
-          const mime = imgRes.headers.get("content-type") ?? "image/jpeg"
-          bgDataUri = `data:${mime};base64,${Buffer.from(buf).toString("base64")}`
-        }
-      } catch {
-        // fallback to gradient only
-      }
-    }
+    const bgUrl = post.unsplashUrl || null
 
     return new ImageResponse(
       (
@@ -59,11 +46,11 @@ export async function GET(
             background: "linear-gradient(135deg, #0a0a0f 0%, #12101e 40%, #0d0a1a 100%)",
           }}
         >
-          {/* Unsplash background photo (pre-fetched as data URI) */}
-          {bgDataUri && (
+          {/* Unsplash background photo */}
+          {bgUrl && (
             <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: W, height: H }}>
               <img
-                src={bgDataUri}
+                src={bgUrl}
                 width={W}
                 height={H}
                 style={{ objectFit: "cover" }}
