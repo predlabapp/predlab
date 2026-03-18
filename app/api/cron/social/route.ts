@@ -122,6 +122,7 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
             question,
             slug: e.slug as string,
             probability: prob,
+            eventImage: String(e.image ?? ""),
           }
         }
       }
@@ -282,33 +283,32 @@ export async function GET(req: NextRequest) {
   try {
     const market = await fetchTopMarket(excludeSlugs)
     const keyword = extractKeyword(market.question)
-    const { url: unsplashApiUrl, author: unsplashAuthor } = await fetchUnsplashImage(market.question, keyword)
+    // Use Polymarket event image first, fallback to Unsplash
+    const sourceImageUrl = market.eventImage || (await fetchUnsplashImage(market.question, keyword)).url
 
-    // Upload Unsplash image to Vercel Blob for reliable access in OG image route
+    // Upload to Vercel Blob for reliable access in OG image route
     let unsplashUrl = ""
-    console.log(`[cron/social] unsplashApiUrl: ${unsplashApiUrl || "(empty)"}`)
-    if (unsplashApiUrl) {
+    if (sourceImageUrl) {
       try {
-        const imgRes = await fetch(unsplashApiUrl, {
+        const imgRes = await fetch(sourceImageUrl, {
           headers: { "User-Agent": "Mozilla/5.0 (compatible; PredLab/1.0)" },
         })
-        console.log(`[cron/social] Unsplash fetch status: ${imgRes.status}`)
         if (imgRes.ok) {
           const imgBuf = await imgRes.arrayBuffer()
           const mime = imgRes.headers.get("content-type") ?? "image/jpeg"
           const ext = mime.includes("png") ? "png" : "jpg"
           const blobResult = await put(
-            `unsplash/${today}-${platform}-${slot}.${ext}`,
+            `social-bg/${today}-${platform}-${slot}.${ext}`,
             imgBuf,
             { access: "public", contentType: mime, addRandomSuffix: true }
           )
           unsplashUrl = blobResult.url
-          console.log(`[cron/social] Unsplash blob uploaded: ${unsplashUrl}`)
         }
-      } catch (e) {
-        console.error(`[cron/social] Unsplash upload failed: ${String(e)}`)
+      } catch {
+        // sem imagem, continua sem fundo
       }
     }
+    const unsplashAuthor = ""
 
     const caption =
       platform === "instagram"
