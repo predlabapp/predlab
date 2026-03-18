@@ -17,6 +17,9 @@ const dmMono = DM_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://predlab.app"),
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "PredLab | Your Predictions. Proven.",
     template: "%s | PredLab",
