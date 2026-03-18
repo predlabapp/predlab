@@ -130,24 +130,32 @@ async function fetchTopMarket(excludeSlugs: string[] = []) {
   throw new Error("No suitable market found")
 }
 
-const UNSPLASH_FALLBACKS = [
-  "politics", "government", "world leaders", "diplomacy",
-  "economy", "finance", "stock market",
-  "technology", "global news",
-]
-
-async function fetchUnsplashImage(query: string): Promise<{ url: string; author: string }> {
+async function fetchUnsplashImage(marketTitle: string, keyword: string): Promise<{ url: string; author: string }> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key) {
     console.error("[cron/social] UNSPLASH_ACCESS_KEY not set")
     return { url: "", author: "" }
   }
 
-  // Try full query, then each individual word, then generic fallbacks
-  const words = query.split(" ").filter((w) => w.length > 3)
-  const queries = [query, ...words, ...UNSPLASH_FALLBACKS]
+  // Clean full title for use as query (remove ?, numbers, short words)
+  const cleanTitle = marketTitle
+    .replace(/[^a-zA-Z\s]/g, " ")
+    .replace(/\b\w{1,2}\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 60)
+
+  const queries = [
+    keyword,          // extracted keyword (most specific)
+    cleanTitle,       // full clean title (Unsplash NLP handles it)
+    "election",       // good fallback for political content
+    "government",
+    "economy",
+    "world",
+  ]
 
   for (const q of queries) {
+    if (!q) continue
     try {
       const res = await fetch(
         `https://api.unsplash.com/photos/random?query=${encodeURIComponent(q)}&orientation=squarish&content_filter=high`,
@@ -274,7 +282,7 @@ export async function GET(req: NextRequest) {
   try {
     const market = await fetchTopMarket(excludeSlugs)
     const keyword = extractKeyword(market.question)
-    const { url: unsplashApiUrl, author: unsplashAuthor } = await fetchUnsplashImage(keyword)
+    const { url: unsplashApiUrl, author: unsplashAuthor } = await fetchUnsplashImage(market.question, keyword)
 
     // Upload Unsplash image to Vercel Blob for reliable access in OG image route
     let unsplashUrl = ""
