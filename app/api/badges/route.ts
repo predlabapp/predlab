@@ -12,8 +12,8 @@ export async function GET() {
 
   const userBadges = await prisma.userBadge.findMany({
     where: { userId: session.user.id },
-    select: { badgeKey: true, source: true, awardedAt: true },
-    orderBy: { awardedAt: "desc" },
+    select: { badgeKey: true, source: true, earnedAt: true },
+    orderBy: { earnedAt: "desc" },
   })
 
   const earned = new Set(userBadges.map((b) => b.badgeKey))
@@ -26,7 +26,7 @@ export async function GET() {
     purchasable: def.purchasable ?? false,
     cost: def.cost ?? null,
     earned: earned.has(key),
-    earnedAt: userBadges.find((b) => b.badgeKey === key)?.awardedAt ?? null,
+    earnedAt: userBadges.find((b) => b.badgeKey === key)?.earnedAt ?? null,
     source: userBadges.find((b) => b.badgeKey === key)?.source ?? null,
   }))
 

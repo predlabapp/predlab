@@ -12,8 +12,8 @@ export default async function BadgesPage() {
   const [userBadges, user] = await Promise.all([
     prisma.userBadge.findMany({
       where: { userId: session.user.id },
-      select: { badgeKey: true, source: true, awardedAt: true },
-      orderBy: { awardedAt: "desc" },
+      select: { badgeKey: true, source: true, earnedAt: true },
+      orderBy: { earnedAt: "desc" },
     }),
     prisma.user.findUnique({
       where: { id: session.user.id },
