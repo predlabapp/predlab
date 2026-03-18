@@ -4,6 +4,9 @@ import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { OrbReason } from "@prisma/client"
+import { awardOrbs } from "@/lib/orbs"
+import { updateStreak } from "@/lib/gamification"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -47,13 +50,34 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // Ensure emailVerified is set for OAuth users (Google already verifies emails)
-      if (account?.provider === "google" && user.id) {
+      if (!user.id) return true
+
+      // Ensure emailVerified is set for OAuth users
+      if (account?.provider === "google") {
         await prisma.user.update({
           where: { id: user.id },
           data: { emailVerified: new Date() },
         }).catch(() => {})
       }
+
+      // Daily login reward — só 1x por dia (updateStreak já verifica)
+      Promise.all([
+        updateStreak(user.id),
+        (async () => {
+          const u = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { lastActivityAt: true },
+          })
+          const lastActivity = u?.lastActivityAt
+          const diffDays = lastActivity
+            ? Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
+            : 1
+          if (diffDays >= 1) {
+            await awardOrbs(user.id, 10, OrbReason.DAILY_LOGIN, "📅 Login diário!")
+          }
+        })(),
+      ]).catch(() => {})
+
       return true
     },
     async jwt({ token, user }) {

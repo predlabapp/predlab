@@ -4,6 +4,9 @@ import { randomBytes } from "crypto"
 import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { sendVerificationEmail } from "@/lib/email"
+import { awardOrbs } from "@/lib/orbs"
+import { awardBadge } from "@/lib/badges"
+import { OrbReason } from "@prisma/client"
 
 const schema = z.object({
   name: z.string().min(1),
@@ -36,6 +39,12 @@ export async function POST(req: Request) {
     })
 
     await sendVerificationEmail(email, token).catch(() => {})
+
+    // Signup bonus — fire and forget
+    Promise.all([
+      awardOrbs(user.id, 500, OrbReason.SIGNUP_BONUS, "🔮 Bem-vindo ao PredLab! Aqui estão os teus primeiros Orbs."),
+      awardBadge(user.id, "newcomer"),
+    ]).catch(() => {})
 
     return NextResponse.json({ id: user.id }, { status: 201 })
   } catch (err) {
