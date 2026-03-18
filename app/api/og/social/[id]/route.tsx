@@ -31,7 +31,24 @@ export async function GET(
       : (title.length > 80 ? 40 : title.length > 60 ? 46 : 54)
     const probSize = isLandscape ? 84 : 112
 
-    const bgUrl = post.unsplashUrl || null
+    // Pre-fetch as data URI so Satori não depende de fetch externo
+    // Usa URL reduzida (w=600) para evitar timeout em funções Vercel
+    let bgDataUri: string | null = null
+    if (post.unsplashUrl) {
+      try {
+        const smallUrl = post.unsplashUrl
+          .replace(/&w=\d+/, "&w=600")
+          .replace(/&q=\d+/, "&q=60")
+        const imgRes = await fetch(smallUrl, { signal: AbortSignal.timeout(5000) })
+        if (imgRes.ok) {
+          const buf = await imgRes.arrayBuffer()
+          const mime = imgRes.headers.get("content-type") ?? "image/jpeg"
+          bgDataUri = `data:${mime};base64,${Buffer.from(buf).toString("base64")}`
+        }
+      } catch {
+        // sem imagem — usa gradiente
+      }
+    }
 
     return new ImageResponse(
       (
@@ -47,10 +64,10 @@ export async function GET(
           }}
         >
           {/* Unsplash background photo */}
-          {bgUrl && (
+          {bgDataUri && (
             <div style={{ display: "flex", position: "absolute", top: 0, left: 0, width: W, height: H }}>
               <img
-                src={bgUrl}
+                src={bgDataUri}
                 width={W}
                 height={H}
                 style={{ objectFit: "cover" }}
