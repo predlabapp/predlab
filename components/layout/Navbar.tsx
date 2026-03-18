@@ -2,12 +2,13 @@
 
 import { useSession, signOut } from "next-auth/react"
 import { useState } from "react"
-import { LogOut, BarChart2, ChevronDown, Trophy, Users, User, Brain } from "lucide-react"
+import { LogOut, BarChart2, ChevronDown, Trophy, Users, User, Brain, Award } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Link } from "@/navigation"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { NotificationBell } from "@/components/layout/NotificationBell"
+import { OrbBalance } from "@/components/orbs/OrbBalance"
 
 export function Navbar() {
   const { data: session } = useSession()
@@ -56,6 +57,7 @@ export function Navbar() {
             <span className="hidden md:inline">Grupos</span>
           </Link>
 
+          <OrbBalance />
           <div className="hidden sm:flex"><NotificationBell /></div>
           <div className="hidden sm:flex"><HowItWorksModal /></div>
           <div className="hidden sm:flex"><LocaleSwitcher /></div>
@@ -93,6 +95,14 @@ export function Navbar() {
                   >
                     <User size={14} />
                     Perfil
+                  </Link>
+                  <Link
+                    href="/dashboard/badges"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg)] transition-colors"
+                  >
+                    <Award size={14} />
+                    Badges
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}

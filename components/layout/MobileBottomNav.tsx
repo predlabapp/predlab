@@ -5,7 +5,7 @@ import { usePathname } from "@/navigation"
 import { Link } from "@/navigation"
 import { signOut } from "next-auth/react"
 import { useTranslations } from "next-intl"
-import { Home, BarChart2, Trophy, Users, Brain, MoreHorizontal, X, LogOut, UserCircle } from "lucide-react"
+import { Home, BarChart2, Trophy, Users, Brain, MoreHorizontal, X, LogOut, UserCircle, Award } from "lucide-react"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
 import { LocaleSwitcher } from "@/components/ui/LocaleSwitcher"
 
@@ -122,6 +122,28 @@ export function MobileBottomNav() {
 
             {/* Drawer items */}
             <div className="flex flex-col px-4 py-3 gap-1">
+              {/* Orbs */}
+              <Link
+                href="/dashboard/orbs"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-3 w-full px-2 py-3 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}
+              >
+                <span>🔮</span>
+                <span className="text-sm">Orbs</span>
+              </Link>
+
+              {/* Badges */}
+              <Link
+                href="/dashboard/badges"
+                onClick={() => setDrawerOpen(false)}
+                className="flex items-center gap-3 w-full px-2 py-3 rounded-lg transition-colors"
+                style={{ color: "var(--text-secondary)", borderBottom: "1px solid var(--border)" }}
+              >
+                <Award size={16} />
+                <span className="text-sm">Badges</span>
+              </Link>
+
               {/* Rankings */}
               <Link
                 href="/dashboard/rankings"
