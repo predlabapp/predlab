@@ -282,13 +282,13 @@ export function CreatePredictionModal({ onClose, onCreated, market }: Props) {
             <button
               type="button"
               onClick={() => setIsPublic(!isPublic)}
-              className={`w-9 h-5 rounded-full transition-colors relative ${
+              className={`w-10 h-6 rounded-full transition-colors relative overflow-hidden shrink-0 ${
                 isPublic ? "bg-[var(--accent)]" : "bg-[var(--border-bright)]"
               }`}
             >
               <span
-                className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
-                  isPublic ? "translate-x-4" : "translate-x-0.5"
+                className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                  isPublic ? "translate-x-4" : "translate-x-0"
                 }`}
               />
             </button>
