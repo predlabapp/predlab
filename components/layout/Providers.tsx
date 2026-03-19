@@ -16,7 +16,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           logo: "https://predlab.app/logo-horizontal.svg",
         },
         embeddedWallets: {
-          createOnLogin: "users-without-wallets",
+          ethereum: {
+            createOnLogin: "users-without-wallets",
+          },
         },
       }}
     >
