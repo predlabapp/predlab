@@ -1,11 +1,11 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import GoogleProvider from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { privyClient } from "@/lib/privy-server"
 import { OrbReason } from "@prisma/client"
 import { awardOrbs } from "@/lib/orbs"
+import { awardBadge } from "@/lib/badges"
 import { updateStreak } from "@/lib/gamification"
 
 export const authOptions: NextAuthOptions = {
@@ -13,73 +13,107 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
-    // next-intl middleware will prepend the locale prefix automatically
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
-    }),
     CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
+      id: "privy",
+      name: "Privy",
+      credentials: { token: { type: "text" } },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        if (!credentials?.token) return null
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        })
+        try {
+          // Verify Privy token server-side
+          const claims = await privyClient.verifyAuthToken(credentials.token)
+          const privyUser = await privyClient.getUser(claims.userId)
 
-        if (!user || !user.password) return null
+          // Extract email from any login method
+          const email =
+            privyUser.email?.address ??
+            privyUser.google?.email ??
+            null
 
-        const valid = await bcrypt.compare(credentials.password, user.password)
-        if (!valid) return null
+          const walletAddress =
+            privyUser.wallet?.address ?? null
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-          username: user.username,
+          const name =
+            privyUser.google?.name ??
+            privyUser.email?.address?.split("@")[0] ??
+            "Forecaster"
+
+          // Find existing user by privyUserId or email (migration)
+          let user = await prisma.user.findFirst({
+            where: {
+              OR: [
+                { privyUserId: claims.userId },
+                ...(email ? [{ email }] : []),
+              ],
+            },
+          })
+
+          if (user) {
+            // Update Privy fields if not yet set (migration of existing user)
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                privyUserId: user.privyUserId ?? claims.userId,
+                walletAddress: user.walletAddress ?? walletAddress,
+              },
+            })
+          } else {
+            // New user — create account
+            if (!email) return null
+
+            user = await prisma.user.create({
+              data: {
+                email,
+                name,
+                privyUserId: claims.userId,
+                walletAddress,
+                emailVerified: new Date(),
+              },
+            })
+
+            // Welcome bonuses
+            await Promise.all([
+              awardOrbs(user.id, 500, OrbReason.SIGNUP_BONUS,
+                "🔮 Bem-vindo ao PredLab! Aqui estão os teus primeiros Orbs."),
+              awardBadge(user.id, "newcomer"),
+            ])
+          }
+
+          // Daily login + streak
+          Promise.all([
+            updateStreak(user.id),
+            (async () => {
+              const u = await prisma.user.findUnique({
+                where: { id: user!.id },
+                select: { lastActivityAt: true },
+              })
+              const diffDays = u?.lastActivityAt
+                ? Math.floor((Date.now() - u.lastActivityAt.getTime()) / 86400000)
+                : 1
+              if (diffDays >= 1) {
+                await awardOrbs(user!.id, 10, OrbReason.DAILY_LOGIN, "📅 Login diário!")
+              }
+            })(),
+          ]).catch(() => {})
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+            username: user.username,
+          }
+        } catch (err) {
+          console.error("Privy auth error:", err)
+          return null
         }
       },
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
-      if (!user.id) return true
-
-      // Ensure emailVerified is set for OAuth users
-      if (account?.provider === "google") {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { emailVerified: new Date() },
-        }).catch(() => {})
-      }
-
-      // Daily login reward — só 1x por dia (updateStreak já verifica)
-      Promise.all([
-        updateStreak(user.id),
-        (async () => {
-          const u = await prisma.user.findUnique({
-            where: { id: user.id },
-            select: { lastActivityAt: true },
-          })
-          const lastActivity = u?.lastActivityAt
-          const diffDays = lastActivity
-            ? Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24))
-            : 1
-          if (diffDays >= 1) {
-            await awardOrbs(user.id, 10, OrbReason.DAILY_LOGIN, "📅 Login diário!")
-          }
-        })(),
-      ]).catch(() => {})
-
-      return true
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
