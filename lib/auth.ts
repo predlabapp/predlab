@@ -71,6 +71,9 @@ export const authOptions: NextAuthOptions = {
                 privyUserId: claims.userId,
                 walletAddress,
                 emailVerified: new Date(),
+                orbs: 0,
+                totalOrbsEarned: 0,
+                xp: 0,
               },
             })
 
