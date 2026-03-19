@@ -4,6 +4,7 @@ import { useState } from "react"
 import { usePathname } from "@/navigation"
 import { Link } from "@/navigation"
 import { signOut } from "next-auth/react"
+import { usePrivy } from "@privy-io/react-auth"
 import { useTranslations } from "next-intl"
 import { Home, BarChart2, Trophy, Users, Brain, MoreHorizontal, X, LogOut, UserCircle, Award } from "lucide-react"
 import { HowItWorksModal } from "@/components/ui/HowItWorksModal"
@@ -13,6 +14,13 @@ export function MobileBottomNav() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const pathname = usePathname()
   const t = useTranslations("Nav")
+  const { logout: privyLogout } = usePrivy()
+
+  async function handleSignOut() {
+    setDrawerOpen(false)
+    await privyLogout()
+    signOut({ callbackUrl: "/" })
+  }
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -191,10 +199,7 @@ export function MobileBottomNav() {
 
               {/* Sign out */}
               <button
-                onClick={() => {
-                  setDrawerOpen(false)
-                  signOut({ callbackUrl: "/" })
-                }}
+                onClick={handleSignOut}
                 className="flex items-center gap-3 w-full px-2 py-3 rounded-lg transition-colors text-left"
                 style={{ color: "var(--text-secondary)" }}
                 onMouseOver={(e) => {

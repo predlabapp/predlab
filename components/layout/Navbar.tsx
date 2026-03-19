@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession, signOut } from "next-auth/react"
+import { usePrivy } from "@privy-io/react-auth"
 import { useState } from "react"
 import { LogOut, BarChart2, ChevronDown, Trophy, Users, User, Brain, Award } from "lucide-react"
 import { useTranslations } from "next-intl"
@@ -12,7 +13,13 @@ import { OrbBalance } from "@/components/orbs/OrbBalance"
 
 export function Navbar() {
   const { data: session } = useSession()
+  const { logout: privyLogout } = usePrivy()
   const [open, setOpen] = useState(false)
+
+  async function handleSignOut() {
+    await privyLogout()
+    signOut({ callbackUrl: "/" })
+  }
   const t = useTranslations("Nav")
 
   return (
@@ -105,7 +112,7 @@ export function Navbar() {
                     Badges
                   </Link>
                   <button
-                    onClick={() => signOut({ callbackUrl: "/" })}
+                    onClick={handleSignOut}
                     className="flex items-center gap-2 w-full px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--red)] hover:bg-[rgba(248,113,113,0.05)] transition-colors"
                   >
                     <LogOut size={14} />
