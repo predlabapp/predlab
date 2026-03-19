@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { Category } from "@prisma/client"
 
 export type MarketResult = {
   id: string
-  source: "polymarket"
+  source: "polymarket" | "custom"
   question: string
   slug: string
   probability: number
@@ -111,8 +112,31 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "30"), 50)
 
   try {
-    const markets = await fetchPolymarkets(q, limit)
-    return NextResponse.json(markets)
+    const [polyMarkets, customMarkets] = await Promise.all([
+      fetchPolymarkets(q, limit),
+      prisma.customMarket.findMany({
+        where: {
+          active: true,
+          ...(q ? { question: { contains: q, mode: "insensitive" } } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+    ])
+
+    const custom: MarketResult[] = customMarkets.map((m) => ({
+      id: `custom-${m.id}`,
+      source: "custom",
+      question: m.question,
+      slug: `custom-${m.id}`,
+      probability: m.probability,
+      volume: 0,
+      endDate: m.endDate ? m.endDate.toISOString() : null,
+      url: m.url ?? "",
+      suggestedCategory: m.category,
+    }))
+
+    // Custom markets appear first
+    return NextResponse.json([...custom, ...polyMarkets])
   } catch (err) {
     console.error("Markets fetch error:", err)
     return NextResponse.json({ error: "Erro ao buscar mercados" }, { status: 500 })

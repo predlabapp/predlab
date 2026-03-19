@@ -496,3 +496,17 @@ model SocialPost {
 
   @@map("social_posts")
 }
+
+model CustomMarket {
+  id          String    @id @default(cuid())
+  question    String
+  probability Int       // 1-99, probabilidade actual estimada
+  category    Category
+  endDate     DateTime?
+  url         String?   // link externo opcional
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("custom_markets")
+}
