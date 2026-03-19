@@ -24,6 +24,7 @@ export async function GET() {
         emailVerified: true,
         notifEmailDigest: true,
         notifExpiringPredictions: true,
+        isPublic: true,
         createdAt: true,
       },
     }),
@@ -44,6 +45,7 @@ const updateSchema = z.object({
   country: z.string().max(100).optional().nullable(),
   notifEmailDigest: z.boolean().optional(),
   notifExpiringPredictions: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
 })
 
 export async function PATCH(req: NextRequest) {

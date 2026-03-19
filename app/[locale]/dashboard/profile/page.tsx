@@ -18,6 +18,7 @@ interface Profile {
   emailVerified: string | null
   notifEmailDigest: boolean
   notifExpiringPredictions: boolean
+  isPublic: boolean
   isGoogleUser: boolean
 }
 
@@ -47,6 +48,7 @@ export default function ProfilePage() {
   const [country, setCountry] = useState("")
   const [notifDigest, setNotifDigest] = useState(true)
   const [notifExpiring, setNotifExpiring] = useState(true)
+  const [isPublic, setIsPublic] = useState(false)
 
   const [currentPwd, setCurrentPwd] = useState("")
   const [newPwd, setNewPwd] = useState("")
@@ -66,6 +68,7 @@ export default function ProfilePage() {
       setCountry(p.country ?? "")
       setNotifDigest(p.notifEmailDigest)
       setNotifExpiring(p.notifExpiringPredictions)
+      setIsPublic(p.isPublic)
       setLoading(false)
     })
   }, [])
@@ -77,7 +80,7 @@ export default function ProfilePage() {
     const res = await fetch("/api/user/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: username || undefined, bio: bio || null, city: city || null, state: state || null, country: country || null, notifEmailDigest: notifDigest, notifExpiringPredictions: notifExpiring }),
+      body: JSON.stringify({ username: username || undefined, bio: bio || null, city: city || null, state: state || null, country: country || null, notifEmailDigest: notifDigest, notifExpiringPredictions: notifExpiring, isPublic }),
     })
     const data = await res.json()
     setSaving(false)
@@ -175,6 +178,30 @@ export default function ProfilePage() {
               maxLength={200}
               placeholder="Apresente-se em poucas palavras..."
             />
+          </div>
+
+          <div className="flex items-center justify-between py-2">
+            <div>
+              <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Perfil público</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {isPublic
+                  ? `predlab.app/p/${username || "username"} — visível para todos`
+                  : "O teu perfil só é visível para ti"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsPublic(!isPublic)}
+              className={`w-10 h-6 rounded-full transition-colors relative overflow-hidden shrink-0 ml-4 ${
+                isPublic ? "bg-[var(--accent)]" : "bg-[var(--border-bright)]"
+              }`}
+            >
+              <span
+                className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+                  isPublic ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
           </div>
         </Section>
 
