@@ -1,34 +1,53 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { usePrivy } from "@privy-io/react-auth"
 import { signIn, useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/navigation"
 import { Link } from "@/navigation"
 import { Loader2 } from "lucide-react"
 
 export default function SignInPage() {
   const { login, authenticated, getAccessToken, ready } = usePrivy()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
+  const [authError, setAuthError] = useState("")
+  const [loading, setLoading] = useState(false)
 
   // Already has NextAuth session → go to dashboard
   useEffect(() => {
-    if (session) router.replace("/dashboard")
-  }, [session])
+    if (status === "authenticated") router.replace("/dashboard")
+  }, [status])
 
   // Privy authenticated → create NextAuth session
   useEffect(() => {
     if (!authenticated) return
 
+    setLoading(true)
+    setAuthError("")
+
     getAccessToken().then(async (token) => {
-      if (!token) return
+      if (!token) {
+        setAuthError("Não foi possível obter o token. Tenta novamente.")
+        setLoading(false)
+        return
+      }
+
       const result = await signIn("privy", { token, redirect: false })
-      if (result?.ok) router.replace("/dashboard")
+
+      if (result?.ok) {
+        router.replace("/dashboard")
+      } else {
+        setAuthError(`Erro ao criar sessão: ${result?.error ?? "desconhecido"}`)
+        setLoading(false)
+      }
+    }).catch((err) => {
+      setAuthError(`Erro: ${err?.message ?? "desconhecido"}`)
+      setLoading(false)
     })
   }, [authenticated])
 
-  if (!ready) {
+  if (!ready || status === "loading") {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <Loader2 size={28} className="animate-spin" style={{ color: "var(--text-muted)" }} />
@@ -49,20 +68,32 @@ export default function SignInPage() {
         </div>
 
         <div className="card text-center py-8 space-y-4">
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Entra com Google, email ou carteira
-          </p>
+          {loading ? (
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 size={24} className="animate-spin" style={{ color: "var(--accent)" }} />
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>A criar sessão...</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Entra com Google, email ou carteira
+              </p>
 
-          <button
-            onClick={login}
-            className="btn-primary w-full text-base py-3"
-          >
-            🔮 Entrar no PredLab
-          </button>
+              <button onClick={login} className="btn-primary w-full text-base py-3">
+                🔮 Entrar no PredLab
+              </button>
 
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Ao entrar, uma wallet Base é criada automaticamente para ti.
-          </p>
+              {authError && (
+                <p className="text-xs px-3 py-2 rounded-lg" style={{ background: "rgba(248,113,113,0.1)", color: "var(--red)" }}>
+                  {authError}
+                </p>
+              )}
+
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Ao entrar, uma wallet Base é criada automaticamente para ti.
+              </p>
+            </>
+          )}
         </div>
       </div>
     </main>
