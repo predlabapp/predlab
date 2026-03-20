@@ -8,10 +8,12 @@ import {
   getProbabilityColor,
   isExpired,
 } from "@/lib/utils"
-import { Calendar, Trash2, RefreshCw } from "lucide-react"
+import { Calendar, Trash2, RefreshCw, Share2 } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { useToast } from "@/components/ui/Toast"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { ShareModal } from "@/components/predictions/ShareModal"
 import { Link } from "@/navigation"
 import { useTranslations, useLocale } from "next-intl"
 
@@ -58,6 +60,8 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [matchLoading, setMatchLoading] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const { data: session } = useSession()
   const { toast } = useToast()
   const t = useTranslations("PredictionCard")
   const tCat = useTranslations("Categories")
@@ -287,9 +291,24 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
 
           {/* Footer */}
           <div className="flex items-center justify-between pt-1 border-t border-[var(--border)]">
-            <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-              <Calendar size={12} />
-              <span>{formatDate(prediction.expiresAt, locale)}</span>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+                <Calendar size={12} />
+                <span>{formatDate(prediction.expiresAt, locale)}</span>
+              </div>
+              {prediction.shareToken && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    setShareOpen(true)
+                  }}
+                  className="flex items-center gap-1 text-xs text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors"
+                  title="Partilhar"
+                >
+                  <Share2 size={12} />
+                </button>
+              )}
             </div>
             <div className="font-mono text-lg font-bold" style={{ color: probColor }}>
               {prediction.probability}%
@@ -297,6 +316,14 @@ export function PredictionCard({ prediction, onDelete, onMarketUpdate }: Props) 
           </div>
         </div>
       </Link>
+
+      {shareOpen && (
+        <ShareModal
+          prediction={prediction}
+          username={session?.user?.username ?? null}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
 
       <ConfirmDialog
         open={confirmOpen}
