@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma"
 import { z } from "zod"
 import { Category } from "@prisma/client"
 import { onPredictionCreated } from "@/lib/gamification"
+import { randomBytes } from "crypto"
 
 const createSchema = z.object({
   title: z.string().min(1).max(300),
@@ -63,6 +64,7 @@ export async function POST(req: Request) {
         expiresAt: new Date(data.expiresAt),
         tags: data.tags ?? [],
         isPublic: data.isPublic ?? false,
+        shareToken: randomBytes(16).toString("hex"),
         ...(polymarketSlug ? {
           polymarketSlug,
           polymarketQuestion,
