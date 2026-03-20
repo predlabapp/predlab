@@ -88,7 +88,7 @@ async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[
     ascending: "false",
   })
 
-  if (q) params.set("search", q)
+  if (q) params.set("q", q)
 
   const res = await fetch(`${base}?${params}`, {
     headers: { Accept: "application/json" },
