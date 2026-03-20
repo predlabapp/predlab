@@ -77,9 +77,38 @@ function normalizeMarket(m: any): MarketResult | null {
 }
 
 async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[]> {
-  const base = "https://gamma-api.polymarket.com/markets"
+  // When searching, use /events endpoint which supports text search
+  // When browsing top markets, use /markets ordered by volume
+  if (q) {
+    const params = new URLSearchParams({
+      q,
+      limit: String(limit),
+      active: "true",
+      closed: "false",
+      order: "volume",
+      ascending: "false",
+    })
+    const res = await fetch(`https://gamma-api.polymarket.com/events?${params}`, {
+      headers: { Accept: "application/json" },
+      next: { revalidate: 0 },
+    })
+    if (!res.ok) return []
+    const events = await res.json()
+    // Each event has a markets array — pick the highest-volume market per event
+    const results: MarketResult[] = []
+    for (const event of events ?? []) {
+      const mkt = (event.markets ?? []).sort(
+        (a: any, b: any) =>
+          (parseFloat(b.volume ?? "0") || 0) - (parseFloat(a.volume ?? "0") || 0)
+      )[0]
+      if (!mkt) continue
+      const normalized = normalizeMarket({ ...mkt, tags: event.tags ?? [] })
+      if (normalized) results.push(normalized)
+    }
+    return results
+  }
 
-  // Always sort by volume descending so most liquid (= most relevant) come first
+  // No query — top markets by volume
   const params = new URLSearchParams({
     limit: String(limit),
     active: "true",
@@ -87,16 +116,11 @@ async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[
     order: "volume",
     ascending: "false",
   })
-
-  if (q) params.set("q", q)
-
-  const res = await fetch(`${base}?${params}`, {
+  const res = await fetch(`https://gamma-api.polymarket.com/markets?${params}`, {
     headers: { Accept: "application/json" },
     next: { revalidate: 0 },
   })
-
   if (!res.ok) return []
-
   const data = await res.json()
   return (data ?? [])
     .map(normalizeMarket)

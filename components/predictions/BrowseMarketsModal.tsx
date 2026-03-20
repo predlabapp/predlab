@@ -40,7 +40,6 @@ function ProbBar({ prob }: { prob: number }) {
 
 export function BrowseMarketsModal({ onClose, onSelect }: Props) {
   const [query, setQuery] = useState("")
-  const [allMarkets, setAllMarkets] = useState<MarketResult[]>([])
   const [markets, setMarkets] = useState<MarketResult[]>([])
   const [loading, setLoading] = useState(true)
   const debounceRef = useRef<NodeJS.Timeout>()
@@ -48,37 +47,20 @@ export function BrowseMarketsModal({ onClose, onSelect }: Props) {
   const tCat = useTranslations("Categories")
   const locale = useLocale()
 
-  // Load once on open — top 50 markets by volume
-  useEffect(() => {
-    async function load() {
-      setLoading(true)
-      const res = await fetch(`/api/markets?q=&limit=50`)
-      if (res.ok) {
-        const data = await res.json()
-        setAllMarkets(data)
-        setMarkets(data)
-      }
-      setLoading(false)
-    }
-    load()
-  }, [])
+  async function load(q: string) {
+    setLoading(true)
+    const res = await fetch(`/api/markets?q=${encodeURIComponent(q)}&limit=30`)
+    if (res.ok) setMarkets(await res.json())
+    setLoading(false)
+  }
 
-  // Filter client-side when user types
+  // Initial load — top markets by volume
+  useEffect(() => { load("") }, [])
+
   function handleSearch(value: string) {
     setQuery(value)
     clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      const q = value.trim().toLowerCase()
-      if (!q) {
-        setMarkets(allMarkets)
-      } else {
-        setMarkets(
-          allMarkets.filter((m) =>
-            (m.question ?? "").toLowerCase().includes(q)
-          )
-        )
-      }
-    }, 200)
+    debounceRef.current = setTimeout(() => load(value), 450)
   }
 
   return (
