@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { X, Search, TrendingUp, ExternalLink, Loader2 } from "lucide-react"
 import type { MarketResult } from "@/app/api/markets/route"
 import { CATEGORIES } from "@/lib/utils"
@@ -40,27 +40,31 @@ function ProbBar({ prob }: { prob: number }) {
 
 export function BrowseMarketsModal({ onClose, onSelect }: Props) {
   const [query, setQuery] = useState("")
-  const [markets, setMarkets] = useState<MarketResult[]>([])
+  const [allMarkets, setAllMarkets] = useState<MarketResult[]>([])
   const [loading, setLoading] = useState(true)
-  const debounceRef = useRef<NodeJS.Timeout>()
   const t = useTranslations("BrowseMarketsModal")
   const tCat = useTranslations("Categories")
   const locale = useLocale()
 
-  async function load(q: string) {
-    setLoading(true)
-    const res = await fetch(`/api/markets?q=${encodeURIComponent(q)}&limit=30`)
-    if (res.ok) setMarkets(await res.json())
-    setLoading(false)
-  }
+  // Load once on open — fetch a large batch and filter client-side
+  useEffect(() => {
+    async function load() {
+      setLoading(true)
+      const res = await fetch(`/api/markets?q=&limit=100`)
+      if (res.ok) setAllMarkets(await res.json())
+      setLoading(false)
+    }
+    load()
+  }, [])
 
-  // Initial load — top markets by volume
-  useEffect(() => { load("") }, [])
+  const markets = query.trim()
+    ? allMarkets.filter((m) =>
+        m.question.toLowerCase().includes(query.toLowerCase())
+      )
+    : allMarkets
 
   function handleSearch(value: string) {
     setQuery(value)
-    clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => load(value), 450)
   }
 
   return (
