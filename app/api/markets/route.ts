@@ -94,6 +94,8 @@ async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[
     })
     if (!res.ok) return []
     const events = await res.json()
+    const qLower = q.toLowerCase()
+
     // Each event has a markets array — pick the highest-volume market per event
     const results: MarketResult[] = []
     for (const event of events ?? []) {
@@ -103,8 +105,18 @@ async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[
       )[0]
       if (!mkt) continue
       const normalized = normalizeMarket({ ...mkt, tags: event.tags ?? [] })
-      if (normalized) results.push(normalized)
+      if (!normalized) continue
+
+      // Score: 2 = question contains query, 1 = event title contains query, 0 = other
+      const questionMatch = normalized.question.toLowerCase().includes(qLower)
+      const titleMatch = (event.title ?? "").toLowerCase().includes(qLower)
+      ;(normalized as any)._score = questionMatch ? 2 : titleMatch ? 1 : 0
+
+      results.push(normalized)
     }
+
+    // Sort: exact matches first, then by volume (already sorted by Polymarket)
+    results.sort((a, b) => (b as any)._score - (a as any)._score)
     return results
   }
 
