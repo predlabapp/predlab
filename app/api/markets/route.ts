@@ -115,9 +115,11 @@ async function fetchPolymarkets(q: string, limit: number): Promise<MarketResult[
       results.push(normalized)
     }
 
-    // Sort: exact matches first, then by volume (already sorted by Polymarket)
-    results.sort((a, b) => (b as any)._score - (a as any)._score)
+    // Keep only markets where question or event title contains the query
+    // Sort: question matches first, then title matches
     return results
+      .filter((m) => (m as any)._score > 0)
+      .sort((a, b) => (b as any)._score - (a as any)._score)
   }
 
   // No query — top markets by volume
