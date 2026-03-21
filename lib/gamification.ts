@@ -29,28 +29,59 @@ export { getLevelProgress }
 // Streak
 // ---------------------------------------------------------------------------
 
+// Spec: 7d=25, 30d=100, 100d=300 — sem bónus a cada 3 dias
 const STREAK_MILESTONES: Record<number, { orbs: number; badge?: string }> = {
-  3:   { orbs: 30 },
-  7:   { orbs: 100, badge: "streak_7" },
-  30:  { orbs: 500, badge: "streak_30" },
-  100: { orbs: 2000, badge: "streak_100" },
+  7:   { orbs: 25,  badge: "streak_7" },
+  30:  { orbs: 100, badge: "streak_30" },
+  100: { orbs: 300, badge: "streak_100" },
 }
 
 export async function updateStreak(userId: string): Promise<void> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { currentStreak: true, longestStreak: true, lastActivityAt: true },
-  })
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
+  const [user, resolvedCount, correctCount, todayPredictions] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { currentStreak: true, longestStreak: true, lastActivityAt: true },
+    }),
+    prisma.prediction.count({ where: { userId, resolution: { not: null } } }),
+    prisma.prediction.count({ where: { userId, resolution: "CORRECT" } }),
+    prisma.prediction.count({ where: { userId, createdAt: { gte: todayStart } } }),
+  ])
+
   if (!user) return
+
+  // Streak só conta se fez ≥1 previsão hoje
+  if (todayPredictions < 1) return
 
   const now = new Date()
   const last = user.lastActivityAt
 
-  let newStreak = 1
+  // Já contou hoje — não duplicar
   if (last) {
-    const diffDays = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24))
+    const diffMs = now.getTime() - last.getTime()
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
     if (diffDays === 0) return
-    if (diffDays === 1) newStreak = user.currentStreak + 1
+  }
+
+  // Critérios de qualidade: ≥5 resolvidas + ≥40% acerto
+  const accuracy = resolvedCount > 0 ? correctCount / resolvedCount : 0
+  const meetsQuality = resolvedCount >= 5 && accuracy >= 0.4
+
+  // Calcular novo streak
+  let newStreak: number
+  if (!last) {
+    newStreak = meetsQuality ? 1 : 0
+  } else {
+    const diffDays = Math.floor((now.getTime() - last.getTime()) / (1000 * 60 * 60 * 24))
+    if (diffDays === 1 && meetsQuality) {
+      newStreak = user.currentStreak + 1  // continua streak
+    } else if (diffDays === 1 && !meetsQuality) {
+      newStreak = 0  // voltou mas não cumpre critérios → quebra
+    } else {
+      newStreak = meetsQuality ? 1 : 0  // gap de 2+ dias → reset
+    }
   }
 
   const newLongest = Math.max(newStreak, user.longestStreak)
@@ -62,15 +93,8 @@ export async function updateStreak(userId: string): Promise<void> {
 
   const milestone = STREAK_MILESTONES[newStreak]
   if (milestone) {
-    await awardOrbs(
-      userId,
-      milestone.orbs,
-      OrbReason.STREAK_MILESTONE,
-      `🔥 Streak de ${newStreak} dias!`
-    )
+    await awardOrbs(userId, milestone.orbs, OrbReason.STREAK_MILESTONE, `🔥 Streak de ${newStreak} dias!`)
     if (milestone.badge) await awardBadge(userId, milestone.badge)
-  } else if (newStreak > 0 && newStreak % 3 === 0) {
-    await awardOrbs(userId, 30, OrbReason.STREAK_BONUS, `🔥 ${newStreak} dias seguidos!`)
   }
 }
 
@@ -104,8 +128,6 @@ export async function onPredictionResolved(
   probability: number,
   _coinsAllocated: number | null
 ): Promise<void> {
-  await updateStreak(userId)
-
   // Fetch prediction details and user data in parallel
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
