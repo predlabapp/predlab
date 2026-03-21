@@ -6,7 +6,6 @@ import { privyClient } from "@/lib/privy-server"
 import { OrbReason } from "@prisma/client"
 import { awardOrbs } from "@/lib/orbs"
 import { awardBadge } from "@/lib/badges"
-import { updateStreak } from "@/lib/gamification"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -77,30 +76,13 @@ export const authOptions: NextAuthOptions = {
               },
             })
 
-            // Welcome bonuses
+            // Welcome bonus — 100 ORBS (spec)
             await Promise.all([
-              awardOrbs(user.id, 500, OrbReason.SIGNUP_BONUS,
+              awardOrbs(user.id, 100, OrbReason.SIGNUP_BONUS,
                 "🔮 Bem-vindo ao PredLab! Aqui estão os teus primeiros Orbs."),
               awardBadge(user.id, "newcomer"),
             ])
           }
-
-          // Daily login + streak
-          Promise.all([
-            updateStreak(user.id),
-            (async () => {
-              const u = await prisma.user.findUnique({
-                where: { id: user!.id },
-                select: { lastActivityAt: true },
-              })
-              const diffDays = u?.lastActivityAt
-                ? Math.floor((Date.now() - u.lastActivityAt.getTime()) / 86400000)
-                : 1
-              if (diffDays >= 1) {
-                await awardOrbs(user!.id, 10, OrbReason.DAILY_LOGIN, "📅 Login diário!")
-              }
-            })(),
-          ]).catch(() => {})
 
           return {
             id: user.id,
