@@ -82,10 +82,7 @@ export async function onPredictionCreated(
   userId: string,
   predictionId: string
 ): Promise<void> {
-  await Promise.all([
-    updateStreak(userId),
-    awardOrbs(userId, 5, OrbReason.PREDICTION_CORRECT, "📝 Previsão criada", predictionId),
-  ])
+  await updateStreak(userId)
 
   const count = await prisma.prediction.count({ where: { userId } })
   if (count === 1) {
@@ -109,17 +106,114 @@ export async function onPredictionResolved(
 ): Promise<void> {
   await updateStreak(userId)
 
-  if (resolution === "CORRECT") {
-    await awardOrbs(userId, 50, OrbReason.PREDICTION_CORRECT, "✅ Previsão correcta!", predictionId)
+  // Fetch prediction details and user data in parallel
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
 
-    // Bónus de precisão (prob muito próxima do resultado = chutou alto e acertou)
-    const error = Math.abs(probability / 100 - 1)
-    if (error < 0.10) {
-      await awardOrbs(userId, 100, OrbReason.PREDICTION_EXACT, "🎯 Previsão muito precisa!", predictionId)
-      await awardBadge(userId, "sharp_shooter")
-    }
-  } else if (resolution === "INCORRECT") {
-    await awardOrbs(userId, -10, OrbReason.PREDICTION_INCORRECT, "❌ Previsão incorrecta", predictionId)
+  const [prediction, user, resolvedCount, correctCount, todayRewardCount] = await Promise.all([
+    prisma.prediction.findUnique({
+      where: { id: predictionId },
+      select: { polymarketProbability: true, createdAt: true, expiresAt: true },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { createdAt: true, level: true },
+    }),
+    prisma.prediction.count({ where: { userId, resolution: { not: null } } }),
+    prisma.prediction.count({ where: { userId, resolution: "CORRECT" } }),
+    prisma.orbTransaction.count({
+      where: {
+        userId,
+        reason: { in: [OrbReason.PREDICTION_CORRECT, OrbReason.PREDICTION_INCORRECT] },
+        createdAt: { gte: todayStart },
+      },
+    }),
+  ])
+
+  if (!prediction || !user) return
+
+  // --- Eligibility checks ---
+
+  // 1. Account must be ≥30 days old
+  const accountAgeDays = Math.floor(
+    (Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+  )
+  if (accountAgeDays < 30) return
+
+  // 2. Must have ≥5 resolved predictions total
+  if (resolvedCount < 5) return
+
+  // 3. Accuracy ≥40%
+  const accuracy = resolvedCount > 0 ? correctCount / resolvedCount : 0
+  if (accuracy < 0.4) return
+
+  // 4. No conviction zone: 45-55% probability
+  if (probability >= 45 && probability <= 55) return
+
+  // 5. Max 5 reward-eligible predictions per day
+  if (todayRewardCount >= 5) return
+
+  // --- Divergence and direction ---
+  const polyProb = prediction.polymarketProbability
+
+  let divergence = 0
+  // Default: no market → treat as correct/incorrect directly
+  let correctDirection = resolution === "CORRECT"
+
+  if (polyProb !== null && polyProb !== undefined) {
+    divergence = Math.abs(probability - polyProb)
+    // Predicted above market → correct if event happened (CORRECT)
+    // Predicted below market → correct if event didn't happen (INCORRECT)
+    correctDirection = probability > polyProb
+      ? resolution === "CORRECT"
+      : resolution === "INCORRECT"
+  }
+
+  // --- Tier ---
+  let baseReward: number
+  let penalty: number
+  let tierLabel: string
+
+  if (divergence >= 20) {
+    baseReward = 10; penalty = -3; tierLabel = "ousada"
+  } else if (divergence >= 5) {
+    baseReward = 3; penalty = -1; tierLabel = "neutra"
+  } else {
+    baseReward = 1; penalty = -1; tierLabel = "segura"
+  }
+
+  // --- Multipliers ---
+  const levelMultiplier = user.level <= 2 ? 1.0 : user.level <= 4 ? 1.2 : 1.5
+
+  const daysUntilExpiry = Math.floor(
+    (prediction.expiresAt.getTime() - prediction.createdAt.getTime()) / (1000 * 60 * 60 * 24)
+  )
+  const anticipationMultiplier =
+    daysUntilExpiry > 180 ? 1.5 :
+    daysUntilExpiry > 90  ? 1.25 :
+    daysUntilExpiry > 30  ? 1.0 : 0.5
+
+  // --- Award or penalize ---
+  const marketLabel = polyProb != null ? `mercado ${Math.round(polyProb)}%` : "sem mercado"
+
+  if (correctDirection) {
+    const probMultiplier = probability / 100
+    const finalReward = Math.max(1, Math.round(baseReward * probMultiplier * levelMultiplier * anticipationMultiplier))
+    await awardOrbs(
+      userId,
+      finalReward,
+      OrbReason.PREDICTION_CORRECT,
+      `✅ Previsão ${tierLabel} correcta! (tu: ${probability}% vs ${marketLabel})`,
+      predictionId
+    )
+  } else {
+    await awardOrbs(
+      userId,
+      penalty,
+      OrbReason.PREDICTION_INCORRECT,
+      `❌ Previsão ${tierLabel} incorrecta (tu: ${probability}% vs ${marketLabel})`,
+      predictionId
+    )
   }
 
   await checkAndAwardBadges(userId)
