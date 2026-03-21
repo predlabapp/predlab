@@ -84,7 +84,7 @@ export function HeroSection() {
         </Link>
       </p>
 
-      {/* Stats strip */}
+      {/* Stats strip — temporariamente ocultado até ter volume de utilizadores
       {stats && (
         <div className="flex flex-wrap justify-center gap-6 sm:gap-8 mt-8 sm:mt-12 animate-fade-in">
           {[
@@ -99,6 +99,7 @@ export function HeroSection() {
           ))}
         </div>
       )}
+      */}
     </section>
   )
 }
